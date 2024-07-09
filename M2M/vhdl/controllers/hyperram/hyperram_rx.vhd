@@ -34,12 +34,13 @@ end entity hyperram_rx;
 
 architecture synthesis of hyperram_rx is
 
-   signal rwds_dq_in    : std_logic_vector(15 downto 0);
-   signal rwds_in_delay : std_logic;
+   signal rwds_dq_in           : std_logic_vector(15 downto 0);
+   signal rwds_in_delay        : std_logic;
    signal rwds_in_delay_idelay : std_logic;
 
-   signal ctrl_dq_ie   : std_logic;
-   signal ctrl_dq_ie_d : std_logic;
+   signal ctrl_dq_ie    : std_logic;
+   signal ctrl_dq_ie_d  : std_logic;
+   signal ctrl_dq_ie_d2 : std_logic;
 
 begin
 
@@ -149,11 +150,15 @@ begin
    ctrl_dq_ie_d_proc : process (clk_i)
    begin
       if rising_edge(clk_i) then
-         ctrl_dq_ie_d <= ctrl_dq_ie;
+         ctrl_dq_ie_d  <= ctrl_dq_ie;   -- delayed version of data valid
+         ctrl_dq_ie_d2 <= ctrl_dq_ie_d; -- we need past-2 time also
       end if;
    end process ctrl_dq_ie_d_proc;
 
-   ctrl_dq_ie_o <= ctrl_dq_ie_d and ctrl_dq_ie;
+   -- if it was low for 2 clock cycles then we cut out the valid signal
+   -- it works as long as there is never 2 clocks without fifo valid
+   -- but this is so by design, there is max 1 clock cycle where fifo data is not available
+   ctrl_dq_ie_o <= (ctrl_dq_ie_d or ctrl_dq_ie_d2) and ctrl_dq_ie;
 
 end architecture synthesis;
 
