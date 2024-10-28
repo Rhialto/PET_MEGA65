@@ -1,3 +1,6 @@
 [submodule "QNICE"]
 	path = M2M/QNICE
 	url = https://github.com/sy2002/QNICE-FPGA
+[submodule "CORE/PET2001_MiSTer"]
+	path = CORE/PET2001_MiSTer
+	url = git@github.com:Rhialto/PET2001_MiSTer.git
