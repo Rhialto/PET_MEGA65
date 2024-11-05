@@ -18,7 +18,7 @@ entity main is
       G_VDNUM                 : natural                     -- amount of virtual drives
    );
    port (
-      clk_main_i              : in  std_logic;
+      clk_main_i              : in  std_logic;  -- 54 MHz
       reset_soft_i            : in  std_logic;
       reset_hard_i            : in  std_logic;
       pause_i                 : in  std_logic;
@@ -68,43 +68,307 @@ end entity main;
 
 architecture synthesis of main is
 
--- @TODO: Remove these demo core signals
-signal keyboard_n          : std_logic_vector(79 downto 0);
+signal reset : STD_LOGIC := '1';
+signal initRESET : INTEGER := 10000000;
+signal reset_cnt : INTEGER := 0;
+signal div : std_logic_vector(2 downto 0); -- range 0 to 7 := 0;		-- 3 bits
+signal cpu_div : INTEGER range 0 to 127 := 0;		-- 7 bits
+signal cpu_rate : INTEGER range 0 to 127 := 55;		-- 7 bits
+type cpu_rates_array is array (0 to 3) of INTEGER range 0 to 127 ;	-- 7 bits each
+constant cpu_rates : cpu_rates_array := (55, 27, 13, 6);
+signal ce_7mp : STD_LOGIC;
+signal ce_7mn : STD_LOGIC;
+signal ce_1m : STD_LOGIC;
+
+signal addr : std_logic_vector(15 downto 0);
+signal cpu_data_out : std_logic_vector(7 downto 0);
+signal cpu_data_in : std_logic_vector(7 downto 0);
+signal rnw : std_logic;
+signal irq : std_logic;
+
+signal pix : std_logic;
+signal HSync : std_logic;
+signal VSync : std_logic;
+signal audioDat : std_logic ;
+signal tape_audio : std_logic;
 
 begin
 
    -- @TODO: Add the actual MiSTer core here
+-- library IEEE;
+-- use IEEE.STD_LOGIC_1164.ALL;
+-- use IEEE.STD_LOGIC_ARITH.ALL;  -- For arithmetic operations
+-- use IEEE.STD_LOGIC_UNSIGNED.ALL; -- For unsigned operations
+-- 
+-- entity video_freak_wrapper is
+--     Port (
+--         status : in STD_LOGIC_VECTOR(15 downto 0);
+--         VGA_DE : in STD_LOGIC;
+--         VGA_DE_OUT : out STD_LOGIC;
+--         ARX : out STD_LOGIC_VECTOR(11 downto 0);
+--         ARY : out STD_LOGIC_VECTOR(11 downto 0);
+--         CROP_SIZE : out INTEGER;
+--         CROP_OFF : out INTEGER;
+--         SCALE : out STD_LOGIC_VECTOR(1 downto 0)
+--     );
+-- end video_freak_wrapper;
+-- 
+-- architecture Behavioral of video_freak_wrapper is
+-- 
+--     signal ar : STD_LOGIC_VECTOR(1 downto 0);
+--     
+-- begin
+-- 
+--     -- Assign ar from status
+--     ar <= status(12 downto 11);
+-- 
+--     -- Instantiate the video_freak component
+--     video_freak_inst : entity work.video_freak
+--     port map (
+--         VGA_DE_IN => VGA_DE,
+--         VGA_DE => VGA_DE_OUT,
+--         ARX => (others => '0'),  -- Placeholder, will be assigned below
+--         ARY => (others => '0'),  -- Placeholder, will be assigned below
+--         CROP_SIZE => 0,
+--         CROP_OFF => 0,
+--         SCALE => status(14 downto 13)
+--     );
+-- 
+--     -- Logic for ARX
+--     process(ar)
+--     begin
+--         if ar = "00" then
+--             ARX <= "000000000100"; -- 12'd4 in binary
+--         else
+--             ARX <= std_logic_vector(to_unsigned(to_integer(unsigned(ar)) - 1, 12));
+--         end if;
+--     end process;
+-- 
+--     -- Logic for ARY
+--     process(ar)
+--     begin
+--         if ar = "00" then
+--             ARY <= "000000000011"; -- 12'd3 in binary
+--         else
+--             ARY <= "000000000000"; -- 12'd0 in binary
+--         end if;
+--     end process;
+-- 
+-- end Behavioral;
+
+------------------------------------------------------------
+
+-- library IEEE;
+-- use IEEE.STD_LOGIC_1164.ALL;
+-- use IEEE.STD_LOGIC_ARITH.ALL;
+-- use IEEE.STD_LOGIC_UNSIGNED.ALL;
+-- 
+-- entity ClockManagement is
+--     Port (
+--         CLK_50M : in STD_LOGIC;
+--         RESET : in STD_LOGIC;
+--         status : in STD_LOGIC_VECTOR(10 downto 0);
+--         buttons : in STD_LOGIC_VECTOR(1 downto 0);
+--         ioctl_download : in STD_LOGIC;
+--         ioctl_index : in INTEGER;
+--         tape_active : in STD_LOGIC;
+--         ram_ready : in STD_LOGIC;
+--         clk_sys : out STD_LOGIC;
+--         pll_locked : out STD_LOGIC;
+--         ce_7mp : out STD_LOGIC;
+--         ce_7mn : out STD_LOGIC;
+--         ce_1m : out STD_LOGIC
+--     );
+-- end ClockManagement;
+-- 
+-- architecture Behavioral of ClockManagement is
+-- 
+--     signal reset : STD_LOGIC := '1';
+--     signal initRESET : INTEGER := 10000000;
+--     signal reset_cnt : INTEGER := 0;
+--     signal div : INTEGER range 0 to 7 := 0;		-- 3 bits
+--     signal cpu_div : INTEGER range 0 to 127 := 0;		-- 7 bits
+--     signal cpu_rate : INTEGER range 0 to 127 := 55;		-- 7 bits
+--     type cpu_rates_array is array (0 to 3) of INTEGERrange 0 to 127 ;	-- 7 bits each
+--     constant cpu_rates : cpu_rates_array := (55, 27, 13, 6);
+-- 
+--     -- PLL component declaration
+--     component pll
+--         Port (
+--             refclk : in STD_LOGIC;
+--             rst : in STD_LOGIC;
+--             outclk_0 : out STD_LOGIC;
+--             locked : out STD_LOGIC
+--         );
+--     end component;
+-- 
+-- begin
+-- 
+--     -- PLL instantiation
+--     pll_inst : pll
+--         Port map (
+--             refclk => CLK_50M,
+--             rst => '0',
+--             outclk_0 => clk_sys,
+--             locked => pll_locked
+--         );
+-- 
+--     -- Reset logic process
+--     process(clk_sys)
+--     begin
+--         if rising_edge(clk_sys) then
+--             if (RESET = '0' or status(0) = '1' or buttons(1) = '1' or (ioctl_download = '1' and ioctl_index = 2) and reset_cnt = 14) and initRESET = 0 then
+--                 reset <= '0';
+--             else
+--                 if initRESET > 0 then
+--                     initRESET <= initRESET - 1;
+--                 end if;
+--                 reset <= '1';
+--                 reset_cnt <= reset_cnt + 1;
+--             end if;
+--         end if;
+--     end process;
+-- 
+     -- Clock enable signals process
+     process(clk_main_i)
+     begin
+         if rising_edge(clk_main_i) then
+             div <= std_logic_vector(unsigned(div) + 1);
+             ce_7mp <= not div(2) and not div(1) and not div(0);
+             ce_7mn <=     div(2) and not div(1) and not div(0);
+             
+             cpu_div <= cpu_div + 1;
+             if cpu_div = cpu_rate then
+                 cpu_div <= 0;
+                 --if tape_active = '1' and status(8 downto 7) = "00" then
+                 --    cpu_rate <= 2;
+                 --else
+                     -- cpu_rate <= cpu_rates(to_integer(unsigned(status(10 downto 9))));
+                     cpu_rate <= cpu_rates(0);
+                 --end if;
+             end if;
+             -- ce_1m <= not (tape_active = '1' and ram_ready = '0') and (cpu_div = 0);
+             ce_1m <= '1' when (cpu_div = 0) else '0';
+         end if;
+     end process;
+-- 
+-- end Behavioral;
+
+----------------------------------------------------
+-- RAM
+-- we don't need this, all RAM and ROM is included in pet2001hw.
+----------------------------------------------------
+
+   -- PET's RAM modelled as dual clock & dual port RAM so that the PET core
+   -- as well as QNICE can access it.
+   -- XXX would that also work as dual ported video RAM? Or do we need triple-port?
+--   pet_ram : entity work.dualport_2clk_ram
+--      generic map (
+--         ADDR_WIDTH        => 15,       -- 32 KB
+--         DATA_WIDTH        => 8,
+--         FALLING_A         => false,      -- C64 expects read/write to happen at the rising clock edge
+--         FALLING_B         => true        -- QNICE expects read/write to happen at the falling clock edge
+--      )
+--      port map (
+--         -- PET MiSTer core
+--         clock_a           => clk_main_i,
+--         address_a         => std_logic_vector(main_ram_addr),
+--         data_a            => std_logic_vector(main_ram_data_from_c64),
+--         wren_a            => main_ram_we,
+--         q_a               => main_ram_data_to_c64,
+
+--         -- QNICE
+--         clock_b           => qnice_clk_i,
+--         address_b         => qnice_c64_ramx_addr,
+--         data_b            => qnice_c64_ramx_d_to,
+--         wren_b            => qnice_c64_ramx_we,
+--         q_b               => qnice_c64_ramx_d_from
+--      ); -- pet_ram
+
+-- library IEEE;
+-- use IEEE.STD_LOGIC_1164.ALL;
+-- use IEEE.STD_LOGIC_ARITH.ALL;
+-- use IEEE.STD_LOGIC_UNSIGNED.ALL;
+-- 
+-- entity CPU is
+--     Port (
+--         clk_sys       : in  STD_LOGIC;
+--         reset         : in  STD_LOGIC;
+--         ce_1m        : in  STD_LOGIC;
+--         addr          : out STD_LOGIC_VECTOR(15 downto 0);
+--         cpu_data_out  : out STD_LOGIC_VECTOR(7 downto 0);
+--         cpu_data_in   : in  STD_LOGIC_VECTOR(7 downto 0);
+--         rnw           : in  STD_LOGIC;
+--         irq           : in  STD_LOGIC
+--     );
+-- end CPU;
+-- 
+-- architecture Behavioral of CPU is
+-- 
+--     signal we : STD_LOGIC;
+--     signal cpu : T65; -- Assuming T65 is a component defined elsewhere
+-- 
+-- begin
+-- 
+--     we <= not rnw;
+-- 
+     cpu_inst : entity work.T65
+         port map (
+             Mode => "00", -- Assuming Mode is a 2-bit signal
+             Res_n => not reset,
+             Enable => ce_1m,
+             Clk => clk_main_i,
+             Rdy => '1',
+             Abort_n => '1',
+             IRQ_n => not irq,
+             NMI_n => '1',
+             SO_n => '1',
+             R_W_n => rnw,
+             A => addr,
+             DI => cpu_data_in,
+             DO => cpu_data_out
+         );
+ 
+-- end Behavioral;
+
+    pet2001hw_inst : entity work.pet2001hw
+    port map (
+	addr        => addr,
+	data_out	=> cpu_data_in,
+	data_in		=> cpu_data_out,
+	we          => not rnw,
+	irq         => irq,
+	
+	keyrow      => (), -- TODO keyboard scanning (row select)
+	keyin       => 255,  -- "11111111", -- TODO keyboard scanning (pressed keys)
+
+	cass_motor_n	=> (),	-- output? not connected?
+	cass_write	=> (), -- tape_write,
+	audio		=> audioDat,
+	cass_sense_n	=> 0,
+	cass_read	=> tape_audio,
+
+	dma_addr	=> 0, -- dl_addr,
+	dma_din		=> 0, -- dl_data,
+	dma_dout	=> (),
+	dma_we		=> 0, -- dl_wr,
+
+	clk_speed	=> 0,
+	clk_stop	=> 0,
+	diag_l		=> 0, -- !status[3],
+	clk		    => clk_main_i,
+	ce_7mp      => ce_7mp,
+	ce_7mn      => ce_7mn,
+	ce_1m       => ce_1m,
+    reset       => reset
+     ); -- hw_inst
+
+    -- port map (
+    -- core_name => our name or expression
+    -- ...
+    -- ); -- i_petcore
    -- The demo core's purpose is to show a test image and to make sure, that the MiSTer2MEGA65 framework
    -- can be synthesized and run stand-alone without an actual MiSTer core being there, yet
-   i_democore : entity work.democore
-      port map (
-         clk_main_i           => clk_main_i,
-
-         reset_i              => reset_soft_i or reset_hard_i,       -- long and short press of reset button mean the same
-         pause_i              => pause_i,
-
-         ball_col_rgb_i       => x"EE4020",                          -- ball color (RGB): orange
-         paddle_speed_i       => x"1",                               -- paddle speed is about 50 pixels / sec (due to 50 Hz)
-
-         keyboard_n_i         => keyboard_n,                         -- move the paddle with the cursor left/right keys...
-         joy_up_n_i           => joy_1_up_n_i,                       -- ... or move the paddle with a joystick in port #1
-         joy_down_n_i         => joy_1_down_n_i,
-         joy_left_n_i         => joy_1_left_n_i,
-         joy_right_n_i        => joy_1_right_n_i,
-         joy_fire_n_i         => joy_1_fire_n_i,
-
-         vga_ce_o             => video_ce_o,
-         vga_red_o            => video_red_o,
-         vga_green_o          => video_green_o,
-         vga_blue_o           => video_blue_o,
-         vga_vs_o             => video_vs_o,
-         vga_hs_o             => video_hs_o,
-         vga_hblank_o         => video_hblank_o,
-         vga_vblank_o         => video_vblank_o,
-
-         audio_left_o         => audio_left_o,
-         audio_right_o        => audio_right_o
-      ); -- i_democore
 
    -- On video_ce_o and video_ce_ovl_o: You have an important @TODO when porting a core:
    -- video_ce_o: You need to make sure that video_ce_o divides clk_main_i such that it transforms clk_main_i
@@ -128,14 +392,13 @@ begin
 
          -- Interface to the MEGA65 keyboard
          key_num_i            => kb_key_num_i,
-         key_pressed_n_i      => kb_key_pressed_n_i,
+         key_pressed_n_i      => kb_key_pressed_n_i
 
          -- @TODO: Create the kind of keyboard output that your core needs
          -- "example_n_o" is a low active register and used by the demo core:
          --    bit 0: Space
          --    bit 1: Return
          --    bit 2: Run/Stop
-         example_n_o          => keyboard_n
       ); -- i_keyboard
 
 end architecture synthesis;

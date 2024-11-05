@@ -3,7 +3,7 @@
 --
 -- Clock Generator using the Xilinx specific MMCME2_ADV:
 --
---   @TODO YOURCORE expects 54 MHz
+--   PET 2001 core expects 54 MHz
 --
 -- MiSTer2MEGA65 done by sy2002 and MJoergen in 2022 and licensed under GPL v3
 -------------------------------------------------------------------------------------------------------------
