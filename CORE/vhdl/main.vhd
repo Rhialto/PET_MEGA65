@@ -339,6 +339,14 @@ begin
 	we          => not rnw,
 	irq         => irq,
 	
+	-- TODO wire up video output from pet2001hw to outside
+	--video_ce_o => ce_7mp, -- or ce_7mn? 
+	pix         => pix,
+	HSync       => video_hs_o,
+	VSync       => video_vs_o,
+	HBlank      => video_hblank_o,
+	VBlank      => video_vblank_o,
+	
 	keyrow      => (), -- TODO keyboard scanning (row select)
 	keyin       => 255,  -- "11111111", -- TODO keyboard scanning (pressed keys)
 
@@ -362,6 +370,18 @@ begin
 	ce_1m       => ce_1m,
     reset       => reset
      ); -- hw_inst
+     
+     process (clk_main_i)
+     begin
+         if rising_edge(clk_main_i) then
+            if ce_7mn then
+                video_red_o <= "00000000";
+                video_green_o <= "11111111" when pix = '1' else "00000000";
+                video_blue_o <= "00000000";
+            end if;
+            video_ce_o <= ce_7mn;
+        end if;
+     end process;
 
     -- port map (
     -- core_name => our name or expression

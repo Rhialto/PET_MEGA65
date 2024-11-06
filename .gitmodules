@@ -4,3 +4,4 @@
 [submodule "CORE/PET2001_MiSTer"]
 	path = CORE/PET2001_MiSTer
 	url = git@github.com:Rhialto/PET2001_MiSTer.git
+        branch = rhialto
