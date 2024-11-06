@@ -81,6 +81,7 @@ signal ce_7mn : STD_LOGIC;
 signal ce_1m : STD_LOGIC;
 
 signal addr : std_logic_vector(15 downto 0);
+signal addr_unused : std_logic_vector(23 downto 16);
 signal cpu_data_out : std_logic_vector(7 downto 0);
 signal cpu_data_in : std_logic_vector(7 downto 0);
 signal rnw : std_logic;
@@ -324,7 +325,8 @@ begin
              NMI_n => '1',
              SO_n => '1',
              R_W_n => rnw,
-             A => addr,
+             A(23 downto 16) => addr_unused,
+             A(15 downto 0) => addr,
              DI => cpu_data_in,
              DO => cpu_data_out
          );
@@ -347,18 +349,18 @@ begin
 	HBlank      => video_hblank_o,
 	VBlank      => video_vblank_o,
 	
-	keyrow      => (), -- TODO keyboard scanning (row select)
+	keyrow      => open, -- TODO keyboard scanning (row select)
 	keyin       => 255,  -- "11111111", -- TODO keyboard scanning (pressed keys)
 
-	cass_motor_n	=> (),	-- output? not connected?
-	cass_write	=> (), -- tape_write,
+	cass_motor_n	=> open,	-- output? not connected?
+	cass_write	=> open, -- tape_write,
 	audio		=> audioDat,
 	cass_sense_n	=> 0,
 	cass_read	=> tape_audio,
 
 	dma_addr	=> 0, -- dl_addr,
 	dma_din		=> 0, -- dl_data,
-	dma_dout	=> (),
+	dma_dout	=> open,
 	dma_we		=> 0, -- dl_wr,
 
 	clk_speed	=> 0,
