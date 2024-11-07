@@ -15,10 +15,10 @@ use work.video_modes_pkg.all;
 
 entity main is
    generic (
-      G_VDNUM                 : natural                     -- amount of virtual drives
+      G_VDNUM                 : natural         -- amount of virtual drives
    );
    port (
-      clk_main_i              : in  std_logic;  -- 54 MHz
+      clk_main_i              : in  std_logic;  -- 56 MHz
       reset_soft_i            : in  std_logic;
       reset_hard_i            : in  std_logic;
       pause_i                 : in  std_logic;
@@ -230,6 +230,21 @@ begin
 --         end if;
 --     end process;
 -- 
+--     process(clk_main_i)
+--     begin
+--         if rising_edge(clk_main_i) then
+--             if (RESET = '0') and reset_cnt = 14) and initRESET = 0 then
+--                 reset <= '0';
+--             else
+--                 if initRESET > 0 then
+--                     initRESET <= initRESET - 1;
+--                 end if;
+--                 reset <= '1';
+--                 reset_cnt <= reset_cnt + 1;
+--             end if;
+--         end if;
+--     end process;
+ 
      -- Clock enable signals process
      process(clk_main_i)
      begin
@@ -316,7 +331,7 @@ begin
      cpu_inst : entity work.T65
          port map (
              Mode => "00", -- Assuming Mode is a 2-bit signal
-             Res_n => not reset,
+             Res_n => not (reset_soft_i or reset_hard_i),
              Enable => ce_1m,
              Clk => clk_main_i,
              Rdy => '1',
@@ -336,13 +351,11 @@ begin
     pet2001hw_inst : entity work.pet2001hw
     port map (
 	addr        => addr,
-	data_out	=> cpu_data_in,
-	data_in		=> cpu_data_out,
+	data_out    => cpu_data_in,
+	data_in	    => cpu_data_out,
 	we          => not rnw,
 	irq         => irq,
 	
-	-- TODO wire up video output from pet2001hw to outside
-	--video_ce_o => ce_7mp, -- or ce_7mn? 
 	pix         => pix,
 	HSync       => video_hs_o,
 	VSync       => video_vs_o,
@@ -366,18 +379,18 @@ begin
 	clk_speed	=> 0,
 	clk_stop	=> 0,
 	diag_l		=> 0, -- !status[3],
-	clk		    => clk_main_i,
-	ce_7mp      => ce_7mp,
-	ce_7mn      => ce_7mn,
-	ce_1m       => ce_1m,
-    reset       => reset
+	clk		=> clk_main_i,
+	ce_7mp          => ce_7mp,
+	ce_7mn          => ce_7mn,
+	ce_1m           => ce_1m,
+        reset           => reset
      ); -- hw_inst
      
      process (clk_main_i)
      begin
          if rising_edge(clk_main_i) then
             if ce_7mn then
-                video_red_o <= "00000000";
+                video_red_o <= "00001111"; -- test signal
                 video_green_o <= "11111111" when pix = '1' else "00000000";
                 video_blue_o <= "00000000";
             end if;

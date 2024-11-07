@@ -406,7 +406,7 @@ begin
    -- Use On-Screen-Menu selections to configure several audio and video settings
    -- Video and audio mode control
    qnice_dvi_o                <= '0';                                         -- 0=HDMI (with sound), 1=DVI (no sound)
-   qnice_scandoubler_o        <= '0';                                         -- no scandoubler
+   qnice_scandoubler_o        <= '1';                                         -- have a scandoubler
    qnice_audio_mute_o         <= '0';                                         -- audio is not muted
    qnice_audio_filter_o       <= qnice_osm_control_i(C_MENU_IMPROVE_AUDIO);   -- 0 = raw audio, 1 = use filters from globals.vhd
    qnice_zoom_crop_o          <= qnice_osm_control_i(C_MENU_HDMI_ZOOM);       -- 0 = no zoom/crop
@@ -426,7 +426,7 @@ begin
    -- 01 : Bilinear
    -- 10 : Sharp Bilinear
    -- 11 : Bicubic
-   qnice_ascal_mode_o         <= "00";
+   qnice_ascal_mode_o         <= "01";
 
    -- If polyphase is '1' then the ascal filter mode is ignored and polyphase filters are used instead
    -- @TODO: Right now, the filters are hardcoded in the M2M framework, we need to make them changeable inside m2m-rom.asm
