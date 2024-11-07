@@ -383,14 +383,14 @@ begin
 	ce_7mp          => ce_7mp,
 	ce_7mn          => ce_7mn,
 	ce_1m           => ce_1m,
-        reset           => reset
+        reset           => (reset_soft_i or reset_hard_i)
      ); -- hw_inst
      
      process (clk_main_i)
      begin
          if rising_edge(clk_main_i) then
             if ce_7mn then
-                video_red_o <= "00001111"; -- test signal
+                video_red_o <= "00011111"; -- test signal
                 video_green_o <= "11111111" when pix = '1' else "00000000";
                 video_blue_o <= "00000000";
             end if;
