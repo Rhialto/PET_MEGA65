@@ -68,95 +68,37 @@ end entity main;
 
 architecture synthesis of main is
 
-signal reset : STD_LOGIC := '1';
-signal initRESET : INTEGER := 10000000;
-signal reset_cnt : INTEGER := 0;
-signal div : std_logic_vector(2 downto 0); -- range 0 to 7 := 0;		-- 3 bits
-signal cpu_div : INTEGER range 0 to 127 := 0;		-- 7 bits
-signal cpu_rate : INTEGER range 0 to 127 := 55;		-- 7 bits
-type cpu_rates_array is array (0 to 3) of INTEGER range 0 to 127 ;	-- 7 bits each
-constant cpu_rates : cpu_rates_array := (55, 27, 13, 6);
-signal ce_7mp : STD_LOGIC;
-signal ce_7mn : STD_LOGIC;
-signal ce_1m : STD_LOGIC;
+	signal reset : STD_LOGIC := '1';
+	signal initRESET : INTEGER := 10000000;
+	signal reset_cnt : INTEGER := 0;
+	signal div : std_logic_vector(2 downto 0); -- range 0 to 7 := 0;		-- 3 bits
+	signal cpu_div : INTEGER range 0 to 127 := 0;		-- 7 bits
+	signal cpu_rate : INTEGER range 0 to 127 := 55;		-- 7 bits
+	type cpu_rates_array is array (0 to 3) of INTEGER range 0 to 127 ;	-- 7 bits each
+	constant cpu_rates : cpu_rates_array := (55, 27, 13, 6);
+	signal ce_7mp : STD_LOGIC;
+	signal ce_7mn : STD_LOGIC;
+	signal ce_1m : STD_LOGIC;
 
-signal addr : std_logic_vector(15 downto 0);
-signal addr_unused : std_logic_vector(23 downto 16);
-signal cpu_data_out : std_logic_vector(7 downto 0);
-signal cpu_data_in : std_logic_vector(7 downto 0);
-signal rnw : std_logic;
-signal irq : std_logic;
+	signal addr : std_logic_vector(15 downto 0);
+	signal addr_unused : std_logic_vector(23 downto 16);
+	signal cpu_data_out : std_logic_vector(7 downto 0);
+	signal cpu_data_in : std_logic_vector(7 downto 0);
+	signal rnw : std_logic;
+	signal irq : std_logic;
 
-signal pix : std_logic;
-signal HSync : std_logic;
-signal VSync : std_logic;
-signal audioDat : std_logic ;
-signal tape_audio : std_logic;
+	signal pix : std_logic;
+	signal HSync : std_logic;
+	signal VSync : std_logic;
+	signal audioDat : std_logic ;
+	signal tape_audio : std_logic;
 
+	-- Directly connect the PET's PIA1 to the emulated keyboard matrix within keyboard.vhd
+	signal keyb_row_select : std_logic_vector(3 downto 0);
+	signal keyb_column_selected : std_logic_vector(7 downto 0);
 begin
 
    -- @TODO: Add the actual MiSTer core here
--- library IEEE;
--- use IEEE.STD_LOGIC_1164.ALL;
--- use IEEE.STD_LOGIC_ARITH.ALL;  -- For arithmetic operations
--- use IEEE.STD_LOGIC_UNSIGNED.ALL; -- For unsigned operations
--- 
--- entity video_freak_wrapper is
---     Port (
---         status : in STD_LOGIC_VECTOR(15 downto 0);
---         VGA_DE : in STD_LOGIC;
---         VGA_DE_OUT : out STD_LOGIC;
---         ARX : out STD_LOGIC_VECTOR(11 downto 0);
---         ARY : out STD_LOGIC_VECTOR(11 downto 0);
---         CROP_SIZE : out INTEGER;
---         CROP_OFF : out INTEGER;
---         SCALE : out STD_LOGIC_VECTOR(1 downto 0)
---     );
--- end video_freak_wrapper;
--- 
--- architecture Behavioral of video_freak_wrapper is
--- 
---     signal ar : STD_LOGIC_VECTOR(1 downto 0);
---     
--- begin
--- 
---     -- Assign ar from status
---     ar <= status(12 downto 11);
--- 
---     -- Instantiate the video_freak component
---     video_freak_inst : entity work.video_freak
---     port map (
---         VGA_DE_IN => VGA_DE,
---         VGA_DE => VGA_DE_OUT,
---         ARX => (others => '0'),  -- Placeholder, will be assigned below
---         ARY => (others => '0'),  -- Placeholder, will be assigned below
---         CROP_SIZE => 0,
---         CROP_OFF => 0,
---         SCALE => status(14 downto 13)
---     );
--- 
---     -- Logic for ARX
---     process(ar)
---     begin
---         if ar = "00" then
---             ARX <= "000000000100"; -- 12'd4 in binary
---         else
---             ARX <= std_logic_vector(to_unsigned(to_integer(unsigned(ar)) - 1, 12));
---         end if;
---     end process;
--- 
---     -- Logic for ARY
---     process(ar)
---     begin
---         if ar = "00" then
---             ARY <= "000000000011"; -- 12'd3 in binary
---         else
---             ARY <= "000000000000"; -- 12'd0 in binary
---         end if;
---     end process;
--- 
--- end Behavioral;
-
 ------------------------------------------------------------
 
 -- library IEEE;
@@ -275,59 +217,6 @@ begin
 -- we don't need this, all RAM and ROM is included in pet2001hw.
 ----------------------------------------------------
 
-   -- PET's RAM modelled as dual clock & dual port RAM so that the PET core
-   -- as well as QNICE can access it.
-   -- XXX would that also work as dual ported video RAM? Or do we need triple-port?
---   pet_ram : entity work.dualport_2clk_ram
---      generic map (
---         ADDR_WIDTH        => 15,       -- 32 KB
---         DATA_WIDTH        => 8,
---         FALLING_A         => false,      -- C64 expects read/write to happen at the rising clock edge
---         FALLING_B         => true        -- QNICE expects read/write to happen at the falling clock edge
---      )
---      port map (
---         -- PET MiSTer core
---         clock_a           => clk_main_i,
---         address_a         => std_logic_vector(main_ram_addr),
---         data_a            => std_logic_vector(main_ram_data_from_c64),
---         wren_a            => main_ram_we,
---         q_a               => main_ram_data_to_c64,
-
---         -- QNICE
---         clock_b           => qnice_clk_i,
---         address_b         => qnice_c64_ramx_addr,
---         data_b            => qnice_c64_ramx_d_to,
---         wren_b            => qnice_c64_ramx_we,
---         q_b               => qnice_c64_ramx_d_from
---      ); -- pet_ram
-
--- library IEEE;
--- use IEEE.STD_LOGIC_1164.ALL;
--- use IEEE.STD_LOGIC_ARITH.ALL;
--- use IEEE.STD_LOGIC_UNSIGNED.ALL;
--- 
--- entity CPU is
---     Port (
---         clk_sys       : in  STD_LOGIC;
---         reset         : in  STD_LOGIC;
---         ce_1m        : in  STD_LOGIC;
---         addr          : out STD_LOGIC_VECTOR(15 downto 0);
---         cpu_data_out  : out STD_LOGIC_VECTOR(7 downto 0);
---         cpu_data_in   : in  STD_LOGIC_VECTOR(7 downto 0);
---         rnw           : in  STD_LOGIC;
---         irq           : in  STD_LOGIC
---     );
--- end CPU;
--- 
--- architecture Behavioral of CPU is
--- 
---     signal we : STD_LOGIC;
---     signal cpu : T65; -- Assuming T65 is a component defined elsewhere
--- 
--- begin
--- 
---     we <= not rnw;
--- 
      cpu_inst : entity work.T65
          port map (
              Mode => "00", -- Assuming Mode is a 2-bit signal
@@ -362,11 +251,11 @@ begin
 	HBlank      => video_hblank_o,
 	VBlank      => video_vblank_o,
 	
-	keyrow      => open, -- TODO keyboard scanning (row select)
-	keyin       => 255,  -- "11111111", -- TODO keyboard scanning (pressed keys)
+	keyrow      => keyb_row_select,       -- keyboard scanning (row select)
+	keyin       => keyb_column_selected,  -- keyboard scanning (pressed keys)
 
-	cass_motor_n	=> open,	-- output? not connected?
-	cass_write	=> open, -- tape_write,
+	cass_motor_n	=> open,	      -- output? not connected?
+	cass_write	=> open,              -- tape_write,
 	audio		=> audioDat,
 	cass_sense_n	=> 0,
 	cass_read	=> tape_audio,
@@ -378,7 +267,7 @@ begin
 
 	clk_speed	=> 0,
 	clk_stop	=> 0,
-	diag_l		=> 0, -- !status[3],
+	diag_l		=> 1, -- !status[3],
 	clk		=> clk_main_i,
 	ce_7mp          => ce_7mp,
 	ce_7mn          => ce_7mn,
@@ -427,13 +316,10 @@ begin
 
          -- Interface to the MEGA65 keyboard
          key_num_i            => kb_key_num_i,
-         key_pressed_n_i      => kb_key_pressed_n_i
+         key_pressed_n_i      => kb_key_pressed_n_i,
 
-         -- @TODO: Create the kind of keyboard output that your core needs
-         -- "example_n_o" is a low active register and used by the demo core:
-         --    bit 0: Space
-         --    bit 1: Return
-         --    bit 2: Run/Stop
+	 row_select_i         => keyb_row_select,
+	 column_selected_o    => keyb_column_selected
       ); -- i_keyboard
 
 end architecture synthesis;
