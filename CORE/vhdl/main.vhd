@@ -96,6 +96,21 @@ architecture synthesis of main is
 	-- Directly connect the PET's PIA1 to the emulated keyboard matrix within keyboard.vhd
 	signal keyb_row_select : std_logic_vector(3 downto 0);
 	signal keyb_column_selected : std_logic_vector(7 downto 0);
+
+        signal pet_ieee488_data_i  : std_logic_vector(7 downto 0);
+        signal pet_ieee488_data_o  : std_logic_vector(7 downto 0);
+        signal pet_ieee488_atn_i   : std_logic;
+        signal pet_ieee488_atn_o   : std_logic;
+        signal pet_ieee488_ifc_o   : std_logic;
+        signal pet_ieee488_srq_i   : std_logic;
+        signal pet_ieee488_dav_i   : std_logic;
+        signal pet_ieee488_dav_o   : std_logic;
+        signal pet_ieee488_eoi_i   : std_logic;
+        signal pet_ieee488_eoi_o   : std_logic;
+        signal pet_ieee488_nrfd_i  : std_logic;
+        signal pet_ieee488_nrfd_o  : std_logic;
+        signal pet_ieee488_ndac_i  : std_logic;
+        signal pet_ieee488_ndac_o  : std_logic;
 begin
 
    -- @TODO: Add the actual MiSTer core here
@@ -194,7 +209,7 @@ begin
              div <= std_logic_vector(unsigned(div) + 1);
              ce_7mp <= not div(2) and not div(1) and not div(0);
              ce_7mn <=     div(2) and not div(1) and not div(0);
-             
+
              cpu_div <= cpu_div + 1;
              if cpu_div = cpu_rate then
                  cpu_div <= 0;
@@ -239,42 +254,92 @@ begin
 
     pet2001hw_inst : entity work.pet2001hw
     port map (
-	addr        => addr,
-	data_out    => cpu_data_in,
-	data_in	    => cpu_data_out,
-	we          => not rnw,
-	irq         => irq,
-	
-	pix         => pix,
-	HSync       => video_hs_o,
-	VSync       => video_vs_o,
-	HBlank      => video_hblank_o,
-	VBlank      => video_vblank_o,
-	
-	keyrow      => keyb_row_select,       -- keyboard scanning (row select)
-	keyin       => keyb_column_selected,  -- keyboard scanning (pressed keys)
+        addr        => addr,
+        data_out    => cpu_data_in,
+        data_in     => cpu_data_out,
+        we          => not rnw,
+        irq         => irq,
 
-	cass_motor_n	=> open,	      -- output? not connected?
-	cass_write	=> open,              -- tape_write,
-	audio		=> audioDat,
-	cass_sense_n	=> 0,
-	cass_read	=> tape_audio,
+        pix         => pix,
+        HSync       => video_hs_o,
+        VSync       => video_vs_o,
+        HBlank      => video_hblank_o,
+        VBlank      => video_vblank_o,
 
-	dma_addr	=> 0, -- dl_addr,
-	dma_din		=> 0, -- dl_data,
-	dma_dout	=> open,
-	dma_we		=> 0, -- dl_wr,
+        keyrow      => keyb_row_select,       -- keyboard scanning (row select)
+        keyin       => keyb_column_selected,  -- keyboard scanning (pressed keys)
 
-	clk_speed	=> 0,
-	clk_stop	=> 0,
-	diag_l		=> 1, -- !status[3],
-	clk		=> clk_main_i,
-	ce_7mp          => ce_7mp,
-	ce_7mn          => ce_7mn,
-	ce_1m           => ce_1m,
+        cass_motor_n    => open,              -- output? not connected?
+        cass_write      => open,              -- tape_write,
+        audio           => audioDat,
+        cass_sense_n    => 0,
+        cass_read       => tape_audio,
+
+        -- IEEE-488 bus
+        ieee488_data_i  => pet_ieee488_data_i,
+        ieee488_data_o  => pet_ieee488_data_o,
+        ieee488_atn_i   => pet_ieee488_atn_i,
+        ieee488_atn_o   => pet_ieee488_atn_o,
+        ieee488_ifc_o   => pet_ieee488_ifc_o,
+        ieee488_srq_i   => pet_ieee488_srq_i,
+        ieee488_dav_i   => pet_ieee488_dav_i,
+        ieee488_dav_o   => pet_ieee488_dav_o,
+        ieee488_eoi_i   => pet_ieee488_eoi_i,
+        ieee488_eoi_o   => pet_ieee488_eoi_o,
+        ieee488_nrfd_i  => pet_ieee488_nrfd_i,
+        ieee488_nrfd_o  => pet_ieee488_nrfd_o,
+        ieee488_ndac_i  => pet_ieee488_ndac_i,
+        ieee488_ndac_o  => pet_ieee488_ndac_o,
+
+        dma_addr        => 0, -- dl_addr,
+        dma_din         => 0, -- dl_data,
+        dma_dout        => open,
+        dma_we          => 0, -- dl_wr,
+
+        clk_speed       => 0,
+        clk_stop        => 0,
+        diag_l          => 1, -- !status[3],
+        clk             => clk_main_i,
+        ce_7mp          => ce_7mp,
+        ce_7mn          => ce_7mn,
+        ce_1m           => ce_1m,
         reset           => (reset_soft_i or reset_hard_i)
      ); -- hw_inst
-     
+
+    ieee488_bus : entity work.ieee488_bus_1
+    port map (
+        pet_data_o => pet_ieee488_data_i,
+        pet_data_i => pet_ieee488_data_o,
+        pet_atn_o  => pet_ieee488_atn_i,
+        pet_atn_i  => pet_ieee488_atn_o,
+        pet_ifc_i  => pet_ieee488_ifc_o,
+        pet_srq_o  => pet_ieee488_srq_i,
+        pet_dav_o  => pet_ieee488_dav_i,
+        pet_dav_i  => pet_ieee488_dav_o,
+        pet_eoi_o  => pet_ieee488_eoi_i,
+        pet_eoi_i  => pet_ieee488_eoi_o,
+        pet_nrfd_o => pet_ieee488_nrfd_i,
+        pet_nrfd_i => pet_ieee488_nrfd_o,
+        pet_ndac_o => pet_ieee488_ndac_i,
+        pet_ndac_i => pet_ieee488_ndac_o,
+
+        d01_data_i => (others => 'H'),
+        d01_data_o => open,
+        d01_atn_i  => 'H',
+        d01_atn_o  => open,
+        d01_ifc_o  => open,
+        d01_srq_i  => 'H',
+        d01_dav_i  => 'H',
+        d01_dav_o  => open,
+        d01_eoi_i  => 'H',
+        d01_eoi_o  => open,
+        d01_nrfd_i => 'H',
+        d01_nrfd_o => open,
+        d01_ndac_i => 'H',
+        d01_ndac_o => open
+
+    ); -- ieee488_bus
+
      process (clk_main_i)
      begin
          if rising_edge(clk_main_i) then
