@@ -35,6 +35,8 @@ constant CHR_LINE_5  : string := CHR_LINE_1 & CHR_LINE_1 & CHR_LINE_1 & CHR_LINE
 constant CHR_LINE_10 : string := CHR_LINE_5 & CHR_LINE_5;
 constant CHR_LINE_50 : string := CHR_LINE_10 & CHR_LINE_10 & CHR_LINE_10 & CHR_LINE_10 & CHR_LINE_10;
 
+constant CHR_QUOTE   : character := character'val(34);
+
 --------------------------------------------------------------------------------------------------------------------
 -- Welcome and Help Screens (Selectors 0x1000 .. 0x1FFF)
 --------------------------------------------------------------------------------------------------------------------
@@ -76,23 +78,22 @@ type WHS_RECORD_ARRAY_TYPE is array (0 to WHS_RECORDS - 1) of WHS_RECORD_TYPE;
 
 constant SCR_WELCOME : string :=
 
-   "Name of the Demo Core Version 1.0\n" &
-   "MiSTer port done by Demo Author in 2022\n\n" &
+   "MEGA-PET Core Version 0.0...\n" &
+   "Port from MiSTer done by\n" & 
+   "Olaf 'Rhialto' Seibert in 2024\n\n" &
 
    -- We are not insisting. But it would be nice if you gave us credit for MiSTer2MEGA65 by leaving these lines in
    "Powered by MiSTer2MEGA65 Version [WIP],\n" &
    "done by sy2002 and MJoergen in 2022\n" &
 
    "\n\nEdit config.vhd to modify welcome screen.\n\n" &
-   "You can for example show the keyboard map.\n" &
-   "Look at this example for the Demo core:\n\n\n" &
+   "You can for example show the keyboard map.\n\n\n" &
 
-   "    Key                Demo core\n" &
-   "    " & CHR_LINE_10 & CHR_LINE_10 & CHR_LINE_10 & CHR_LINE_1 & CHR_LINE_1 & "\n" &
-   "    Left Cursor        Paddle left\n" &
-   "    Right Cursor       Paddle right\n" &
-   "    Space              Start game\n" &
-   "    Help               Options menu\n\n\n" &
+   "    Key              PET\n" &
+   "    " & CHR_LINE_10 & CHR_LINE_10 & CHR_LINE_10 & CHR_LINE_1 & CHR_LINE_1 & CHR_LINE_1 & CHR_LINE_1 & "\n" &
+   "    0123456789/*+=.- Keypad\n" &
+   "    !" & CHR_QUOTE & "#$%&'()<>?[]   Forced unshifted\n" &
+   "    Mega + above     Shift those anyway\n" &
 
    "\n\n    Press Space to continue.\n\n\n";
 
@@ -268,7 +269,7 @@ constant SEL_CORENAME      : std_logic_vector(15 downto 0) := x"0200";
 
 -- Currently this is only used in the debug console. Use the welcome screen and the
 -- help system to display the name and version of your core to the end user
-constant CORENAME          : string := "M2M DEMO CORE V1.0";
+constant CORENAME          : string := "MEGA PET CORE V0.0";
 
 --------------------------------------------------------------------------------------------------------------------
 -- "Help" menu / Options menu  (Selectors 0x0300 .. 0x0312): DO NOT TOUCH

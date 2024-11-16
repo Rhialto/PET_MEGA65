@@ -762,7 +762,7 @@ begin
          clk_i                   => clk_i,
 
          -- Share clock and reset with the framework
-         main_clk_o              => main_clk,            -- CORE's 54 MHz clock
+         main_clk_o              => main_clk,            -- CORE's 56 MHz clock
          main_rst_o              => main_rst,            -- CORE's reset, synchronized
 
          --------------------------------------------------------------------------------------------------------
