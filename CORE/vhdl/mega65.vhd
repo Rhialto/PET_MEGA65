@@ -381,7 +381,15 @@ begin
          pot1_x_i             => main_pot1_x_i,
          pot1_y_i             => main_pot1_y_i,
          pot2_x_i             => main_pot2_x_i,
-         pot2_y_i             => main_pot2_y_i
+         pot2_y_i             => main_pot2_y_i,
+
+         -- PET IEEE-488 handled by QNICE
+         pet_clk_sd_i           => qnice_clk_i,   -- "sd card write clock" for floppy drive internal dual clock RAM buffer
+
+         -- PET drive led
+         drive_led_o            => main_drive_led_o,
+         drive_led_col_o        => main_drive_led_col_o
+
       ); -- i_main
 
    ---------------------------------------------------------------------------------------------
@@ -492,8 +500,8 @@ begin
    -- a) In case that this is handled in main.vhd, you need to add the appropriate ports to i_main
    -- b) You might want to change the drive led's color (just like the C64 core does) as long as
    --    the cache is dirty (i.e. as long as the write process is not finished, yet)
-   main_drive_led_o     <= '0';
-   main_drive_led_col_o <= x"00FF00";  -- 24-bit RGB value for the led
+   -- main_drive_led_o     <= '0';
+   -- main_drive_led_col_o <= x"00FF00";  -- 24-bit RGB value for the led
 
    i_vdrives : entity work.vdrives
       generic map (
