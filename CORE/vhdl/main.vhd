@@ -386,7 +386,7 @@ begin
         ce_7mp          => ce_7mp,
         ce_7mn          => ce_7mn,
         ce_1m           => ce_1m,
-        reset           => reset_core_n
+        reset           => not reset_core_n
      ); -- hw_inst
 
     ieee488_bus : entity work.ieee488_bus_1
@@ -420,6 +420,21 @@ begin
         d01_nrfd_i => ieee488_d01_nrfd_o,
         d01_ndac_o => ieee488_d01_ndac_i,
         d01_ndac_i => ieee488_d01_ndac_o
+
+--        d01_data_o => open,
+--        d01_data_i => (others => 'H'),
+--        d01_atn_i  => 'H',
+--        d01_atn_o  => open,
+--        d01_ifc_o  => open,
+--        d01_srq_i  => 'H',
+--        d01_dav_o  => open,
+--        d01_dav_i  => 'H',
+--        d01_eoi_o  => open,
+--        d01_eoi_i  => 'H',
+--        d01_nrfd_o => open,
+--        d01_nrfd_i => 'H',
+--        d01_ndac_o => open,
+--        d01_ndac_i => 'H'
 
     ); -- ieee488_bus
 
@@ -507,7 +522,8 @@ begin
    --        "P2oNO,Enable Drive #9,If Mounted,Always,Never;"
    --        This code currently only implements the "If Mounted" option
    iec_drv_reset_gen : for i in 0 to G_VDNUM - 1 generate
-      iec_drives_reset(i) <= (not reset_core_n) or (not vdrives_mounted(i));
+      -- iec_drives_reset(i) <= (not reset_core_n) or (not vdrives_mounted(i));
+       iec_drives_reset(i) <= (not reset_core_n); -- for now allow empty drives...
    end generate iec_drv_reset_gen;
 
 ------------------------------------------
