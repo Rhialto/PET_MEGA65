@@ -71,6 +71,19 @@ constant CHAR_MEM_SIZE        : natural := CHARS_DX * CHARS_DY;
 constant VRAM_ADDR_WIDTH      : natural := f_log2(CHAR_MEM_SIZE);
 
 ----------------------------------------------------------------------------------------------------------
+-- Commodore PET specific devices
+----------------------------------------------------------------------------------------------------------
+
+constant C_DEV_PET_RAM           : std_logic_vector(15 downto 0) := x"0100";     -- C64's main RAM
+constant C_DEV_PET_VDRIVES       : std_logic_vector(15 downto 0) := x"0101";     -- Virtual Device Management System
+constant C_DEV_PET_MOUNT         : std_logic_vector(15 downto 0) := x"0102";     -- RAM to buffer disk images
+constant C_DEV_PET_MOUNT2        : std_logic_vector(15 downto 0) := x"0103";     -- RAM to buffer disk images
+constant C_DEV_PET_CRT           : std_logic_vector(15 downto 0) := x"0104";     -- SW cartridges (*.CRT)
+constant C_DEV_PET_PRG           : std_logic_vector(15 downto 0) := x"0105";     -- PRG loader
+constant C_DEV_PET_KERNAL_PET    : std_logic_vector(15 downto 0) := x"0106";     -- Custom Kernal: PET
+constant C_DEV_PET_KERNAL_C2031  : std_logic_vector(15 downto 0) := x"0107";     -- Custom Kernal: (simulated) C2031
+
+----------------------------------------------------------------------------------------------------------
 -- HyperRAM memory map (in units of 4kW)
 ----------------------------------------------------------------------------------------------------------
 
@@ -94,10 +107,10 @@ constant C_DEV_DEMO_NOBUFFER  : std_logic_vector(15 downto 0) := x"AAAA";
 -- Otherwise make sure that you wire C_VD_DEVICE in the qnice_ramrom_devices process and that you
 -- have as many appropriately sized RAM buffers for disk images as you have drives
 type vd_buf_array is array(natural range <>) of std_logic_vector;
-constant C_VDNUM              : natural := 2;                                          -- amount of virtual drives; maximum is 15
-constant C_VD_DEVICE          : std_logic_vector(15 downto 0) := C_DEV_DEMO_VD;        -- device number of vdrives.vhd device
-constant C_VD_BUFFER          : vd_buf_array := (  C_DEV_DEMO_NOBUFFER,
-                                                   C_DEV_DEMO_NOBUFFER,
+constant C_VDNUM              : natural := 1;                                          -- amount of virtual drives; maximum is 15
+constant C_VD_DEVICE          : std_logic_vector(15 downto 0) := C_DEV_PET_VDRIVES;    -- device number of vdrives.vhd device
+constant C_VD_BUFFER          : vd_buf_array := (  C_DEV_PET_MOUNT,
+                                                   C_DEV_PET_MOUNT2,
                                                    x"EEEE");                           -- Always finish the array using x"EEEE"
 
 ----------------------------------------------------------------------------------------------------------

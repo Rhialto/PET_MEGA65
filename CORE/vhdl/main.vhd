@@ -70,7 +70,24 @@ entity main is
       pot2_y_i                : in  std_logic_vector(7 downto 0);
 
       -- C64 IEC handled by QNICE
-      pet_clk_sd_i           : in  std_logic                 -- QNICE "sd card write clock" for floppy drive internal dual clock RAM buffer
+      pet_clk_sd_i           : in  std_logic;                -- QNICE "sd card write clock" for floppy drive internal dual clock RAM buffer
+      pet_qnice_addr_i       : in  std_logic_vector(27 downto 0);
+      pet_qnice_data_i       : in  std_logic_vector(15 downto 0);
+      pet_qnice_data_o       : out std_logic_vector(15 downto 0);
+      pet_qnice_ce_i         : in  std_logic;
+      pet_qnice_we_i         : in  std_logic;
+
+		-- Access custom Kernal: PET's Basic and DOS (in QNICE clock domain via c64_clk_sd_i)
+      petrom_we_i            : in  std_logic;
+      petrom_addr_i          : in  std_logic_vector(13 downto 0);
+      petrom_data_i          : in  std_logic_vector(7 downto 0);
+      petrom_data_o          : out std_logic_vector(7 downto 0);
+
+      -- Access custom DOS for the simulated C2031 (in QNICE clock domain via c64_clk_sd_i)
+      c2031rom_we_i          : in  std_logic;
+      c2031rom_addr_i        : in  std_logic_vector(15 downto 0);
+      c2031rom_data_i        : in  std_logic_vector(7 downto 0);
+      c2031rom_data_o        : out std_logic_vector(7 downto 0)
    );
 end entity main;
 
@@ -588,20 +605,72 @@ begin
          -- drive led
          led            => pet_drive_led,
 
-         -- Parallel C1541 port, not connected, at least not in this way
+         -- Parallel C1541 port, not connected on a 2031, at least not in this way
          par_stb_i      => 'H',
          par_stb_o      => open,
          par_data_i     => (others => 'H'),
          par_data_o     => open,
 
          -- Access custom rom (DOS): All in QNICE clock domain but rom_std_i is in main clock domain
-         rom_std_i      => '1',  -- c64_rom_i(0) or c64_rom_i(1), -- 1=use the factory default ROM
-         rom_addr_i     => (others => '0'), -- c1541rom_addr_i,
-         rom_data_i     => (others => '0'), -- c1541rom_data_i,
-         rom_wr_i       => '0', -- c1541rom_we_i,
-         rom_data_o     => open -- c1541rom_data_o
+         rom_std_i      => '1',  -- pet_rom_i(0) or pet_rom_i(1), -- 1=use the factory default ROM
+         rom_addr_i     => c2031rom_addr_i, -- (others => '0'), -- c2031rom_addr_i,
+         rom_data_i     => c2031rom_data_i, -- (others => '0'), -- c2031rom_data_i,
+         rom_wr_i       => c2031rom_we_i, -- '0', -- c2031rom_we_i,
+         rom_data_o     => c2031rom_data_o  -- open -- c2031rom_data_o
       ); -- iec_drive_inst
 
+   -- and the virtual counterpart...
+
+   vdrives_inst : entity work.vdrives
+      generic map (
+         VDNUM                => G_VDNUM,             -- amount of virtual drives
+         BLKSZ                => 1                    -- 1 = 256 bytes block size
+      )
+      port map (
+         clk_qnice_i          => pet_clk_sd_i,
+         clk_core_i           => clk_main_i,
+         reset_core_i         => not reset_core_n,
+
+         -- MiSTer's "SD config" interface, which runs in the core's clock domain
+         img_mounted_o        => iec_img_mounted,
+         img_readonly_o       => iec_img_readonly,
+         img_size_o           => iec_img_size,
+         img_type_o           => iec_img_type,      -- 00=1541 emulated GCR(D64), 01=1541 real GCR mode (G64,D64), 10=1581 (D81)
+
+         -- While "img_mounted_o" needs to be strobed, "drive_mounted" latches the strobe in the core's clock domain,
+         -- so that it can be used for resetting (and unresetting) the drive.
+         drive_mounted_o      => vdrives_mounted,
+
+         -- Cache output signals: The dirty flags is used to enforce data consistency
+         -- (for example by ignoring/delaying a reset or delaying a drive unmount/mount, etc.)
+         -- and to signal via "the yellow led" to the user that the cache is not yet
+         -- written to the SD card, i.e. that writing is in progress
+         cache_dirty_o        => cache_dirty,
+         cache_flushing_o     => open,
+
+         -- MiSTer's "SD block level access" interface, which runs in QNICE's clock domain
+         -- using dedicated signal on Mister's side such as "clk_sys"
+         sd_lba_i             => iec_sd_lba,
+         sd_blk_cnt_i         => iec_sd_blk_cnt,    -- number of blocks-1
+         sd_rd_i              => iec_sd_rd,
+         sd_wr_i              => iec_sd_wr,
+         sd_ack_o             => iec_sd_ack,
+
+         -- MiSTer's "SD byte level access": the MiSTer components use a combination of the drive-specific sd_ack and the sd_buff_wr
+         -- to determine, which RAM buffer actually needs to be written to (using the clk_qnice_i clock domain)
+         sd_buff_addr_o       => iec_sd_buf_addr,
+         sd_buff_dout_o       => iec_sd_buf_data_in,
+         sd_buff_din_i        => iec_sd_buf_data_out,
+         sd_buff_wr_o         => iec_sd_buf_wr,
+
+         -- QNICE interface (MMIO, 4k-segmented)
+         -- qnice_addr is 28-bit because we have a 16-bit window selector and a 4k window: 65536*4096 = 268.435.456 = 2^28
+         qnice_addr_i         => pet_qnice_addr_i,
+         qnice_data_i         => pet_qnice_data_i,
+         qnice_data_o         => pet_qnice_data_o,
+         qnice_ce_i           => pet_qnice_ce_i,
+         qnice_we_i           => pet_qnice_we_i
+      ); -- vdrives_inst
 
 end architecture synthesis;
 

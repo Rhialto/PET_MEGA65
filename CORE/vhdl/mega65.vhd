@@ -252,9 +252,33 @@ constant C_MENU_HDMI_ZOOM      : natural := 31;
 constant C_MENU_IMPROVE_AUDIO  : natural := 32;
 
 -- QNICE clock domain
-signal qnice_demo_vd_data_o   : std_logic_vector(15 downto 0);
-signal qnice_demo_vd_ce       : std_logic;
-signal qnice_demo_vd_we       : std_logic;
+
+-- RAMs for the PET
+--signal qnice_c64_ram_we             : std_logic;
+--signal qnice_c64_ram_data           : std_logic_vector(7 downto 0);  -- The actual RAM of the C64
+signal qnice_pet_mount_buf_addr      : std_logic_vector(17 downto 0);
+signal qnice_pet_mount_buf_ram_we    : std_logic;
+signal qnice_pet_mount_buf_ram_data  : std_logic_vector(7 downto 0);  -- Disk mount buffer
+signal qnice_pet_mount2_buf_addr     : std_logic_vector(17 downto 0);
+signal qnice_pet_mount2_buf_ram_we   : std_logic;
+signal qnice_pet_mount2_buf_ram_data : std_logic_vector(7 downto 0);  -- Disk mount buffer
+
+-- Custom Kernal access: PET ROM
+signal qnice_petrom_we              : std_logic;
+signal qnice_petrom_addr            : std_logic_vector(13 downto 0);
+signal qnice_petrom_data_to         : std_logic_vector(7 downto 0);
+signal qnice_petrom_data_from	    : std_logic_vector(7 downto 0);
+
+-- Custom DOS access: Simulated C2031
+signal qnice_c2031rom_we            : std_logic;
+signal qnice_c2031rom_addr          : std_logic_vector(15 downto 0);
+signal qnice_c2031rom_data_to       : std_logic_vector(7 downto 0);
+signal qnice_c2031rom_data_from	    : std_logic_vector(7 downto 0);
+
+-- QNICE signals passed down to main.vhd to handle IEC drives using vdrives.vhd
+signal qnice_pet_qnice_ce           : std_logic;
+signal qnice_pet_qnice_we           : std_logic;
+signal qnice_pet_qnice_data         : std_logic_vector(15 downto 0);
 
 begin
 
@@ -384,12 +408,28 @@ begin
          pot2_y_i             => main_pot2_y_i,
 
          -- PET IEEE-488 handled by QNICE
-         pet_clk_sd_i           => qnice_clk_i,   -- "sd card write clock" for floppy drive internal dual clock RAM buffer
+         pet_clk_sd_i         => qnice_clk_i,   -- "sd card write clock" for floppy drive internal dual clock RAM buffer
+         pet_qnice_addr_i     => qnice_dev_addr_i,
+         pet_qnice_data_i     => qnice_dev_data_i,
+         pet_qnice_data_o     => qnice_pet_qnice_data,
+         pet_qnice_ce_i       => qnice_pet_qnice_ce,
+         pet_qnice_we_i       => qnice_pet_qnice_we,
 
          -- PET drive led
-         drive_led_o            => main_drive_led_o,
-         drive_led_col_o        => main_drive_led_col_o
+         drive_led_o          => main_drive_led_o,
+         drive_led_col_o      => main_drive_led_col_o,
 
+         -- Custom Kernal: PET ROM (in QNICE clock domain via pet_clk_sd_i)
+         petrom_we_i            => qnice_petrom_we,
+         petrom_addr_i          => qnice_petrom_addr,
+         petrom_data_i          => qnice_petrom_data_to,
+         petrom_data_o          => qnice_petrom_data_from,
+
+         -- Access custom DOS for the simulated C1541 (in QNICE clock domain via pet_clk_sd_i)
+         c2031rom_we_i          => qnice_c2031rom_we,
+         c2031rom_addr_i        => qnice_c2031rom_addr,
+         c2031rom_data_i        => qnice_c2031rom_data_to,
+         c2031rom_data_o        => qnice_c2031rom_data_from
       ); -- i_main
 
    ---------------------------------------------------------------------------------------------
@@ -454,27 +494,110 @@ begin
    core_specific_devices : process(all)
    begin
       -- make sure that this is x"EEEE" by default and avoid a register here by having this default value
-      qnice_dev_data_o     <= x"EEEE";
-      qnice_dev_wait_o     <= '0';
-
       -- Demo core specific: Delete before starting to port your core
-      qnice_demo_vd_ce     <= '0';
-      qnice_demo_vd_we     <= '0';
+      --qnice_demo_vd_ce     <= '0';
+      --qnice_demo_vd_we     <= '0';
+
+      -- avoid latches
+      qnice_dev_data_o           <= x"EEEE";
+      qnice_dev_wait_o           <= '0';
+      --qnice_pet_ram_we           <= '0';
+      qnice_pet_qnice_ce         <= '0';
+      qnice_pet_qnice_we         <= '0';
+      qnice_pet_mount_buf_addr   <= (others => '0');
+      qnice_pet_mount_buf_ram_we <= '0';
+      qnice_pet_mount2_buf_addr  <= (others => '0');
+      qnice_pet_mount2_buf_ram_we <= '0';
+      --qnice_prg_qnice_ce         <= '0';
+      --qnice_prg_qnice_we         <= '0';
+      --qnice_prg_petram_d_frm     <= (others => '0');
+      --qnice_crt_qnice_ce         <= '0';
+      --qnice_crt_qnice_we         <= '0';
+      --qnice_pet_ramx_addr        <= (others => '0');
+      --qnice_pet_ramx_d_to        <= (others => '0');
+      --qnice_pet_ramx_we          <= '0';
+      qnice_petrom_we            <= '0';
+      qnice_petrom_addr          <= (others => '0');
+      qnice_petrom_data_to       <= (others => '0');
+      qnice_c2031rom_we          <= '0';
+      qnice_c2031rom_addr        <= (others => '0');
+      qnice_c2031rom_data_to     <= (others => '0');
 
       case qnice_dev_id_i is
-
-         -- Demo core specific stuff: delete before porting your own core
-         when C_DEV_DEMO_VD =>
-            qnice_demo_vd_ce     <= qnice_dev_ce_i;
-            qnice_demo_vd_we     <= qnice_dev_we_i;
-            qnice_dev_data_o     <= qnice_demo_vd_data_o;
 
          -- @TODO YOUR RAMs or ROMs (e.g. for cartridges) or other devices here
          -- Device numbers need to be >= 0x0100
 
+         -- PET IEEE-488 drives
+         when C_VD_DEVICE =>
+            qnice_pet_qnice_ce         <= qnice_dev_ce_i;
+            qnice_pet_qnice_we         <= qnice_dev_we_i;
+            qnice_dev_data_o           <= qnice_pet_qnice_data;
+
+         -- Disk mount buffer RAM
+         when C_DEV_PET_MOUNT =>
+            qnice_pet_mount_buf_addr   <= qnice_dev_addr_i(17 downto 0);
+            qnice_pet_mount_buf_ram_we <= qnice_dev_we_i;
+            qnice_dev_data_o           <= x"00" & qnice_pet_mount_buf_ram_data;
+
+         -- Disk mount buffer RAM 2
+         when C_DEV_PET_MOUNT2 =>
+            qnice_pet_mount2_buf_addr  <= qnice_dev_addr_i(17 downto 0);
+            qnice_pet_mount2_buf_ram_we <= qnice_dev_we_i;
+            qnice_dev_data_o           <= x"00" & qnice_pet_mount2_buf_ram_data;
+
+         -- Custom Kernal Access: C64 ROM
+         when C_DEV_PET_KERNAL_PET =>
+            qnice_petrom_addr          <= qnice_dev_addr_i(13 downto 0);
+            qnice_petrom_we            <= qnice_dev_we_i;
+            qnice_dev_data_o           <= x"00" & qnice_petrom_data_from;
+            qnice_petrom_data_to       <= qnice_dev_data_i(7 downto 0);
+
+         -- Custom Kernal Access: C2031 ROM
+         when C_DEV_PET_KERNAL_C2031 =>
+            qnice_c2031rom_addr        <= "00" & qnice_dev_addr_i(13 downto 0);
+            qnice_c2031rom_we          <= qnice_dev_we_i;
+            qnice_dev_data_o           <= x"00" & qnice_c2031rom_data_from;
+            qnice_c2031rom_data_to     <= qnice_dev_data_i(7 downto 0);
+
          when others => null;
       end case;
    end process core_specific_devices;
+
+   -- For now: Let's use a simple BRAM (using only 1 port will make a BRAM) for buffering
+   -- the disks that we are mounting. This will work for D64 only.
+   -- @TODO: Switch to HyperRAM at a later stage
+   mount_buf_ram : entity work.dualport_2clk_ram
+      generic map (
+         ADDR_WIDTH        => 18,
+         DATA_WIDTH        => 8,
+         MAXIMUM_SIZE      => 197376,        -- maximum size of any D64 image: non-standard 40-track incl. 768 error bytes
+         FALLING_A         => true
+      )
+      port map (
+         -- QNICE only
+         clock_a           => qnice_clk_i,
+         address_a         => qnice_pet_mount_buf_addr, --  qnice_dev_addr_i(17 downto 0),
+         data_a            => qnice_dev_data_i(7 downto 0),
+         wren_a            => qnice_pet_mount_buf_ram_we,
+         q_a               => qnice_pet_mount_buf_ram_data
+      ); -- mount_buf_ram
+
+   mount2_buf_ram : entity work.dualport_2clk_ram
+      generic map (
+         ADDR_WIDTH        => 18,
+         DATA_WIDTH        => 8,
+         MAXIMUM_SIZE      => 197376,        -- maximum size of any D64 image: non-standard 40-track incl. 768 error bytes
+         FALLING_A         => true
+      )
+      port map (
+         -- QNICE only
+         clock_a           => qnice_clk_i,
+         address_a         => qnice_pet_mount2_buf_addr, --  qnice_dev_addr_i(17 downto 0),
+         data_a            => qnice_dev_data_i(7 downto 0),
+         wren_a            => qnice_pet_mount2_buf_ram_we,
+         q_a               => qnice_pet_mount2_buf_ram_data
+      ); -- mount2_buf_ram
 
    ---------------------------------------------------------------------------------------------
    -- Dual Clocks
@@ -485,69 +608,6 @@ begin
    -- Use the M2M framework's official RAM/ROM: dualport_2clk_ram
    -- and make sure that the you configure the port that works with QNICE as a falling edge
    -- by setting G_FALLING_A or G_FALLING_B (depending on which port you use) to true.
-
-   ---------------------------------------------------------------------------------------
-   -- Virtual drive handler
-   --
-   -- Only added for demo-purposes at this place, so that we can demonstrate the
-   -- firmware's ability to browse files and folders. It is very likely, that the
-   -- virtual drive handler needs to be placed somewhere else, for example inside
-   -- main.vhd. We advise to delete this before starting to port a core and re-adding
-   -- it later (and at the right place), if and when needed.
-   ---------------------------------------------------------------------------------------
-
-   -- @TODO:
-   -- a) In case that this is handled in main.vhd, you need to add the appropriate ports to i_main
-   -- b) You might want to change the drive led's color (just like the C64 core does) as long as
-   --    the cache is dirty (i.e. as long as the write process is not finished, yet)
-   -- main_drive_led_o     <= '0';
-   -- main_drive_led_col_o <= x"00FF00";  -- 24-bit RGB value for the led
-
-   i_vdrives : entity work.vdrives
-      generic map (
-         VDNUM       => C_VDNUM
-      )
-      port map
-      (
-         clk_qnice_i       => qnice_clk_i,
-         clk_core_i        => main_clk,
-         reset_core_i      => main_reset_core_i,
-
-         -- Core clock domain
-         img_mounted_o     => open,
-         img_readonly_o    => open,
-         img_size_o        => open,
-         img_type_o        => open,
-         drive_mounted_o   => open,
-
-         -- Cache output signals: The dirty flags can be used to enforce data consistency
-         -- (for example by ignoring/delaying a reset or delaying a drive unmount/mount, etc.)
-         -- The flushing flags can be used to signal the fact that the caches are currently
-         -- flushing to the user, for example using a special color/signal for example
-         -- at the drive led
-         cache_dirty_o     => open,
-         cache_flushing_o  => open,
-
-         -- QNICE clock domain
-         sd_lba_i          => (others => (others => '0')),
-         sd_blk_cnt_i      => (others => (others => '0')),
-         sd_rd_i           => (others => '0'),
-         sd_wr_i           => (others => '0'),
-         sd_ack_o          => open,
-
-         sd_buff_addr_o    => open,
-         sd_buff_dout_o    => open,
-         sd_buff_din_i     => (others => (others => '0')),
-         sd_buff_wr_o      => open,
-
-         -- QNICE interface (MMIO, 4k-segmented)
-         -- qnice_addr is 28-bit because we have a 16-bit window selector and a 4k window: 65536*4096 = 268.435.456 = 2^28
-         qnice_addr_i      => qnice_dev_addr_i,
-         qnice_data_i      => qnice_dev_data_i,
-         qnice_data_o      => qnice_demo_vd_data_o,
-         qnice_ce_i        => qnice_demo_vd_ce,
-         qnice_we_i        => qnice_demo_vd_we
-      ); -- i_vdrives
 
 end architecture synthesis;
 
