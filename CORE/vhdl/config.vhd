@@ -427,8 +427,8 @@ constant OPTM_GROUPS       : OPTM_GTYPE := ( OPTM_G_TEXT + OPTM_G_HEADLINE,     
                                              OPTM_G_LINE,                              -- Line
                                              OPTM_G_TEXT + OPTM_G_HEADLINE,            -- Headline "Drives"
                                              OPTM_G_LINE,                              -- Line
-                                             OPTM_G_Drive_8 + OPTM_G_MOUNT_DRV,        -- Drive X
-                                             OPTM_G_Drive_9 + OPTM_G_MOUNT_DRV,        -- Drive Y
+                                             OPTM_G_Drive_8 + OPTM_G_MOUNT_DRV,        -- Drive 8
+                                             OPTM_G_Drive_9                   ,        -- Drive 9
                                              OPTM_G_Drive_Z                   ,        -- Drive Z, not used
                                              OPTM_G_LINE,                              -- Line
                                              OPTM_G_TEXT + OPTM_G_HEADLINE,            -- Headline "Another Headline"
