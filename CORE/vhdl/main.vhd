@@ -122,6 +122,7 @@ architecture synthesis of main is
     -- Directly connect the PET's PIA1 to the emulated keyboard matrix within keyboard.vhd
     signal keyb_row_select : std_logic_vector(3 downto 0);
     signal keyb_column_selected : std_logic_vector(7 downto 0);
+    signal diag_sense : std_logic;
 
     -- PET's IEEE connector to the bus
     signal ieee488_pet_data_i  : std_logic_vector(7 downto 0);
@@ -398,7 +399,7 @@ begin
 
         clk_speed       => 0,
         clk_stop        => 0,
-        diag_l          => 1, -- !status[3],
+        diag_l          => diag_sense,
         clk             => clk_main_i,
         ce_7mp          => ce_7mp,
         ce_7mn          => ce_7mn,
@@ -467,13 +468,6 @@ begin
         end if;
      end process;
 
-    -- port map (
-    -- core_name => our name or expression
-    -- ...
-    -- ); -- i_petcore
-   -- The demo core's purpose is to show a test image and to make sure, that the MiSTer2MEGA65 framework
-   -- can be synthesized and run stand-alone without an actual MiSTer core being there, yet
-
    -- On video_ce_o and video_ce_ovl_o: You have an important @TODO when porting a core:
    -- video_ce_o: You need to make sure that video_ce_o divides clk_main_i such that it transforms clk_main_i
    --             into the pixelclock of the core (means: the core's native output resolution pre-scandoubler)
@@ -485,11 +479,6 @@ begin
    --             Hint: Scandoubler off does not automatically mean retro 15 kHz on.
    video_ce_ovl_o <= video_ce_o;
 
-   -- @TODO: Keyboard mapping and keyboard behavior
-   -- Each core is treating the keyboard in a different way: Some need low-active "matrices", some
-   -- might need small high-active keyboard memories, etc. This is why the MiSTer2MEGA65 framework
-   -- lets you define literally everything and only provides a minimal abstraction layer to the keyboard.
-   -- You need to adjust keyboard.vhd to your needs
    i_keyboard : entity work.keyboard
       port map (
          clk_main_i           => clk_main_i,
@@ -499,7 +488,9 @@ begin
          key_pressed_n_i      => kb_key_pressed_n_i,
 
 	 row_select_i         => keyb_row_select,
-	 column_selected_o    => keyb_column_selected
+	 column_selected_o    => keyb_column_selected,
+
+	 diag_sense_o         => diag_sense
       ); -- i_keyboard
 
 

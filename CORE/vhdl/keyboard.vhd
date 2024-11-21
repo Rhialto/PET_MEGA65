@@ -73,6 +73,8 @@ entity keyboard is
         -- 0    CA1 control: IRQ on=1, off = 0
       row_select_i      : in  std_logic_vector(3 downto 0);
       column_selected_o : out std_logic_vector(7 downto 0)
+      
+      diag_sense_o      : out  std_logic;
    );
 end keyboard;
 
@@ -173,6 +175,8 @@ begin
             key_pressed_n(key_num_i) <= key_pressed_n_i;
         end if;
     end process;
+
+    diag_sense_o <= key_pressed_n(m65_mega);
 
     -- 4-to-10 decoder for keyboard row selection. Active low.
     -- We should probaly use variables for these intermediate calulations,
