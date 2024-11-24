@@ -72,9 +72,9 @@ entity keyboard is
         -- 1    CA1 control: Active High = 1, Low = 0
         -- 0    CA1 control: IRQ on=1, off = 0
       row_select_i      : in  std_logic_vector(3 downto 0);
-      column_selected_o : out std_logic_vector(7 downto 0)
+      column_selected_o : out std_logic_vector(7 downto 0);
       
-      diag_sense_o      : out  std_logic;
+      diag_sense_o      : out  std_logic
    );
 end keyboard;
 
@@ -226,11 +226,6 @@ begin
         (row_n(5) or key_pressed_n(m65_s)                          ) and     -- s
         (row_n(6) or key_pressed_n(m65_z)                          ) and     -- z
         (row_n(7) or key_pressed_n(m65_x)                          ) and     -- x
---        (row_n(8) or (mega_n and                                             -- mega is *always* shift
---                      ((key_pressed_n(m65_left_shift) and                    -- left shift or up or left
---                        key_pressed_n(m65_up_crsr) and
---                        key_pressed_n(m65_left_crsr))
---                                                 or not unshift_n))) and     -- unshift for !"#<> etc
         (row_n(8) or (mega_n and                                             -- mega is *always* shift
                       (key_pressed_n(m65_left_shift) or not unshift_n) and   -- left shift unless !"<> etc
                       key_pressed_n(m65_up_crsr) and                         --   or up

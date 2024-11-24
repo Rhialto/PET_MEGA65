@@ -256,12 +256,16 @@ constant C_MENU_IMPROVE_AUDIO  : natural := 32;
 -- RAMs for the PET
 --signal qnice_c64_ram_we             : std_logic;
 --signal qnice_c64_ram_data           : std_logic_vector(7 downto 0);  -- The actual RAM of the C64
-signal qnice_pet_mount_buf_addr      : std_logic_vector(17 downto 0);
-signal qnice_pet_mount_buf_ram_we    : std_logic;
-signal qnice_pet_mount_buf_ram_data  : std_logic_vector(7 downto 0);  -- Disk mount buffer
+signal qnice_pet_mount1_buf_addr     : std_logic_vector(17 downto 0);
+signal qnice_pet_mount1_buf_ram_we   : std_logic;
+signal qnice_pet_mount1_buf_ram_data : std_logic_vector(7 downto 0);  -- Disk mount buffer
 signal qnice_pet_mount2_buf_addr     : std_logic_vector(17 downto 0);
 signal qnice_pet_mount2_buf_ram_we   : std_logic;
 signal qnice_pet_mount2_buf_ram_data : std_logic_vector(7 downto 0);  -- Disk mount buffer
+
+attribute mark_debug : string;
+attribute mark_debug of qnice_pet_mount1_buf_ram_we       : signal is "false";
+attribute mark_debug of qnice_pet_mount2_buf_ram_we       : signal is "false";
 
 -- Custom Kernal access: PET ROM
 signal qnice_petrom_we              : std_logic;
@@ -494,9 +498,6 @@ begin
    core_specific_devices : process(all)
    begin
       -- make sure that this is x"EEEE" by default and avoid a register here by having this default value
-      -- Demo core specific: Delete before starting to port your core
-      --qnice_demo_vd_ce     <= '0';
-      --qnice_demo_vd_we     <= '0';
 
       -- avoid latches
       qnice_dev_data_o           <= x"EEEE";
@@ -504,8 +505,8 @@ begin
       --qnice_pet_ram_we           <= '0';
       qnice_pet_qnice_ce         <= '0';
       qnice_pet_qnice_we         <= '0';
-      qnice_pet_mount_buf_addr   <= (others => '0');
-      qnice_pet_mount_buf_ram_we <= '0';
+      qnice_pet_mount1_buf_addr   <= (others => '0');
+      qnice_pet_mount1_buf_ram_we <= '0';
       qnice_pet_mount2_buf_addr  <= (others => '0');
       qnice_pet_mount2_buf_ram_we <= '0';
       --qnice_prg_qnice_ce         <= '0';
@@ -534,11 +535,11 @@ begin
             qnice_pet_qnice_we         <= qnice_dev_we_i;
             qnice_dev_data_o           <= qnice_pet_qnice_data;
 
-         -- Disk mount buffer RAM
-         when C_DEV_PET_MOUNT =>
-            qnice_pet_mount_buf_addr   <= qnice_dev_addr_i(17 downto 0);
-            qnice_pet_mount_buf_ram_we <= qnice_dev_we_i;
-            qnice_dev_data_o           <= x"00" & qnice_pet_mount_buf_ram_data;
+         -- Disk mount buffer RAM 1
+         when C_DEV_PET_MOUNT1 =>
+            qnice_pet_mount1_buf_addr  <= qnice_dev_addr_i(17 downto 0);
+            qnice_pet_mount1_buf_ram_we <= qnice_dev_we_i;
+            qnice_dev_data_o           <= x"00" & qnice_pet_mount1_buf_ram_data;
 
          -- Disk mount buffer RAM 2
          when C_DEV_PET_MOUNT2 =>
@@ -577,10 +578,10 @@ begin
       port map (
          -- QNICE only
          clock_a           => qnice_clk_i,
-         address_a         => qnice_pet_mount_buf_addr, --  qnice_dev_addr_i(17 downto 0),
+         address_a         => qnice_pet_mount1_buf_addr, --  qnice_dev_addr_i(17 downto 0),
          data_a            => qnice_dev_data_i(7 downto 0),
-         wren_a            => qnice_pet_mount_buf_ram_we,
-         q_a               => qnice_pet_mount_buf_ram_data
+         wren_a            => qnice_pet_mount1_buf_ram_we,
+         q_a               => qnice_pet_mount1_buf_ram_data
       ); -- mount_buf_ram
 
    mount2_buf_ram : entity work.dualport_2clk_ram
