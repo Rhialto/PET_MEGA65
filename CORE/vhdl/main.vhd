@@ -229,6 +229,10 @@ architecture synthesis of main is
    signal hard_reset_n_d       : std_logic := '1';
    signal cold_start_done      : std_logic := '0';
 
+   signal sound_ce             : std_logic;      -- chip enable for sound (clock divider, see sound_proc below)
+   signal sound_dce_sum        : integer := 0;   -- caution: we expect 32-bit integers here and we expect the initialization to 0
+   signal sound_sample         : signed(15 downto 0);
+
 begin
 
    -- prevent data corruption by not allowing a soft reset to happen while the cache is still dirty
@@ -374,7 +378,7 @@ begin
 
         cass_motor_n    => open,              -- output? not connected?
         cass_write      => open,              -- tape_write,
-        audio           => audioDat,
+        audio           => audioDat,          -- sound from CB2: 1 MHz, 1 bit
         cass_sense_n    => 0,
         cass_read       => tape_audio,
 
@@ -666,6 +670,44 @@ begin
          qnice_ce_i           => pet_qnice_ce_i,
          qnice_we_i           => pet_qnice_we_i
       ); -- vdrives_inst
+
+    -- 48 kHz for sound.
+    -- Derive it from ce_1m because they must be in sync, and sometimes both 1 at the same time.
+
+--    sound_ce_proc : process (all)
+--        constant msum    : integer := 1_000_000;
+--        variable nextsum : integer;
+--    begin
+--        nextsum := sound_dce_sum + 48000;
+
+--        if rising_edge(ce_1m) then
+--            sound_ce <= '0';
+--            if reset_core_n = '0' then
+--                sound_dce_sum <= 0;
+--            else
+--                sound_dce_sum <= nextsum;
+--                if nextsum >= msum then
+--                    sound_dce_sum <= nextsum - msum;
+--                    sound_ce <= '1';
+--                end if;
+--            end if;
+--        end if;
+--    end process sound_ce_proc;
+
+    lowpass_inst : entity work.lowpass
+    generic map(
+                N => 3,
+                DIVISOR => 32
+    )
+    port map(
+                clock => clk_main_i,
+                sample_clock => ce_1m,
+                sample_bit => audioDat,
+                sample_out => sound_sample
+    );
+
+    audio_left_o <= sound_sample;
+    audio_right_o <= sound_sample;
 
 end architecture synthesis;
 
