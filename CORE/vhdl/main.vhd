@@ -114,8 +114,10 @@ architecture synthesis of main is
     signal irq : std_logic;
 
     signal pix : std_logic;
-    signal HSync : std_logic;
-    signal VSync : std_logic;
+    signal HBlank : std_logic;
+    signal VBlank : std_logic;
+    --signal HSync : std_logic;
+    --signal VSync : std_logic;
     signal audioDat : std_logic ;
     signal tape_audio : std_logic;
 
@@ -364,8 +366,8 @@ begin
         pix         => pix,
         HSync       => video_hs_o,
         VSync       => video_vs_o,
-        HBlank      => video_hblank_o,
-        VBlank      => video_vblank_o,
+        HBlank      => HBlank,                -- delayed to video_hblank_o,
+        VBlank      => VBlank,                -- delayed to video_vblank_o,
 
         keyrow      => keyb_row_select,       -- keyboard scanning (row select)
         keyin       => keyb_column_selected,  -- keyboard scanning (pressed keys)
@@ -463,6 +465,8 @@ begin
                 video_red_o <= "00011111"; -- test signal
                 video_green_o <= "11111111" when pix = '1' else "00000000";
                 video_blue_o <= "00000000";
+		video_hblank_o <= HBlank;
+		video_vblank_o <= VBlank;
             end if;
             video_ce_o <= ce_7mn;
         end if;
