@@ -229,9 +229,7 @@ architecture synthesis of main is
    signal hard_reset_n_d       : std_logic := '1';
    signal cold_start_done      : std_logic := '0';
 
-   signal sound_ce             : std_logic;      -- chip enable for sound (clock divider, see sound_proc below)
-   signal sound_dce_sum        : integer := 0;   -- caution: we expect 32-bit integers here and we expect the initialization to 0
-   signal sound_sample         : signed(15 downto 0);
+   signal sound_sample         : signed(15 downto 0);	-- low-passed sound
 
 begin
 
@@ -671,28 +669,8 @@ begin
          qnice_we_i           => pet_qnice_we_i
       ); -- vdrives_inst
 
-    -- 48 kHz for sound.
-    -- Derive it from ce_1m because they must be in sync, and sometimes both 1 at the same time.
-
---    sound_ce_proc : process (all)
---        constant msum    : integer := 1_000_000;
---        variable nextsum : integer;
---    begin
---        nextsum := sound_dce_sum + 48000;
-
---        if rising_edge(ce_1m) then
---            sound_ce <= '0';
---            if reset_core_n = '0' then
---                sound_dce_sum <= 0;
---            else
---                sound_dce_sum <= nextsum;
---                if nextsum >= msum then
---                    sound_dce_sum <= nextsum - msum;
---                    sound_ce <= '1';
---                end if;
---            end if;
---        end if;
---    end process sound_ce_proc;
+    -- Use a low-pass filter to convert the 1-bit sound at 1 MHz to signed 16-bit data.
+    -- Presumably this is being used at 48 kHz but it's available at 1 MHz anyway.
 
     lowpass_inst : entity work.lowpass
     generic map(
