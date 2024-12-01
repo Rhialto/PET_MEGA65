@@ -806,6 +806,7 @@
       </File>
       <File Path="$PPRDIR/PET2001_MiSTer/rtl/ieee488_drive/c1541_direct_gcr.sv">
         <FileInfo>
+          <Attr Name="UserDisabled" Val="1"/>
           <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
@@ -830,6 +831,7 @@
       </File>
       <File Path="$PPRDIR/PET2001_MiSTer/rtl/ieee488_drive/c1581_multi.sv">
         <FileInfo>
+          <Attr Name="UserDisabled" Val="1"/>
           <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
