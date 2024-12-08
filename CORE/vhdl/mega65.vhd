@@ -235,21 +235,7 @@ signal main_rst               : std_logic;
 -- qnice_clk
 ---------------------------------------------------------------------------------------------
 
----------------------------------------------------------------------------------------------
--- Democore & example stuff: Delete before starting to port your own core
----------------------------------------------------------------------------------------------
-
--- Democore menu items
-constant C_MENU_HDMI_16_9_50   : natural := 12;
-constant C_MENU_HDMI_16_9_60   : natural := 13;
-constant C_MENU_HDMI_4_3_50    : natural := 14;
-constant C_MENU_HDMI_5_4_50    : natural := 15;
-constant C_MENU_HDMI_640_60    : natural := 16;
-constant C_MENU_HDMI_720_5994  : natural := 17;
-constant C_MENU_SVGA_800_60    : natural := 18;
-constant C_MENU_CRT_EMULATION  : natural := 30;
-constant C_MENU_HDMI_ZOOM      : natural := 31;
-constant C_MENU_IMPROVE_AUDIO  : natural := 32;
+-- Core menu items moved to globals.vhd
 
 -- QNICE clock domain
 
@@ -267,17 +253,25 @@ attribute mark_debug : string;
 attribute mark_debug of qnice_pet_mount1_buf_ram_we       : signal is "false";
 attribute mark_debug of qnice_pet_mount2_buf_ram_we       : signal is "false";
 
--- Custom Kernal access: PET ROM
+-- Custom Kernal access: PET ROM or PET CHAR ROM (if qnice_petchars_ce)
 signal qnice_petrom_we              : std_logic;
-signal qnice_petrom_addr            : std_logic_vector(13 downto 0);
+signal qnice_petchars_ce            : std_logic;
+signal qnice_petrom_addr            : std_logic_vector(14 downto 0);
 signal qnice_petrom_data_to         : std_logic_vector(7 downto 0);
-signal qnice_petrom_data_from	    : std_logic_vector(7 downto 0);
+signal qnice_petrom_data_from       : std_logic_vector(7 downto 0);
 
 -- Custom DOS access: Simulated C2031
 signal qnice_c2031rom_we            : std_logic;
 signal qnice_c2031rom_addr          : std_logic_vector(15 downto 0);
 signal qnice_c2031rom_data_to       : std_logic_vector(7 downto 0);
-signal qnice_c2031rom_data_from	    : std_logic_vector(7 downto 0);
+signal qnice_c2031rom_data_from     : std_logic_vector(7 downto 0);
+
+attribute mark_debug of qnice_c2031rom_we       : signal is "false";
+attribute mark_debug of qnice_dev_we_i          : signal is "false";
+attribute mark_debug of qnice_dev_id_i          : signal is "false";
+attribute mark_debug of qnice_dev_addr_i        : signal is "false";
+attribute mark_debug of qnice_dev_data_i        : signal is "false";
+attribute mark_debug of qnice_dev_data_o        : signal is "false";
 
 -- QNICE signals passed down to main.vhd to handle IEC drives using vdrives.vhd
 signal qnice_pet_qnice_ce           : std_logic;
@@ -371,6 +365,9 @@ begin
          reset_hard_i         => main_reset_m2m_i,
          pause_i              => main_pause_core_i,
 
+         -- On-screen-menu selection
+         osm_i                => main_osm_control_i,
+
          clk_main_speed_i     => CORE_CLK_SPEED,
 
          -- Video output
@@ -425,6 +422,7 @@ begin
 
          -- Custom Kernal: PET ROM (in QNICE clock domain via pet_clk_sd_i)
          petrom_we_i            => qnice_petrom_we,
+         petchars_ce_i          => qnice_petchars_ce,
          petrom_addr_i          => qnice_petrom_addr,
          petrom_data_i          => qnice_petrom_data_to,
          petrom_data_o          => qnice_petrom_data_from,
@@ -496,6 +494,9 @@ begin
    ---------------------------------------------------------------------------------------------
 
    core_specific_devices : process(all)
+        -- Check if QNICE wants to access its "CSR Window" and if so, we ignore writes.
+        variable qnice_csr_window         : std_logic;
+        constant CRTROM_CSR_PT_OK         : std_logic_vector(15 downto 0) := x"0002";
    begin
       -- make sure that this is x"EEEE" by default and avoid a register here by having this default value
 
@@ -518,11 +519,15 @@ begin
       --qnice_pet_ramx_d_to        <= (others => '0');
       --qnice_pet_ramx_we          <= '0';
       qnice_petrom_we            <= '0';
+      qnice_petchars_ce          <= '0';
       qnice_petrom_addr          <= (others => '0');
       qnice_petrom_data_to       <= (others => '0');
       qnice_c2031rom_we          <= '0';
       qnice_c2031rom_addr        <= (others => '0');
       qnice_c2031rom_data_to     <= (others => '0');
+
+      qnice_csr_window           :=      '1' when qnice_dev_addr_i(27 downto 12) = x"FFFF"
+                                    else '0';
 
       case qnice_dev_id_i is
 
@@ -538,27 +543,39 @@ begin
          -- Disk mount buffer RAM 1
          when C_DEV_PET_MOUNT1 =>
             qnice_pet_mount1_buf_addr  <= qnice_dev_addr_i(17 downto 0);
-            qnice_pet_mount1_buf_ram_we <= qnice_dev_we_i;
+            qnice_pet_mount1_buf_ram_we <= qnice_dev_we_i and not qnice_csr_window;
             qnice_dev_data_o           <= x"00" & qnice_pet_mount1_buf_ram_data;
 
          -- Disk mount buffer RAM 2
          when C_DEV_PET_MOUNT2 =>
             qnice_pet_mount2_buf_addr  <= qnice_dev_addr_i(17 downto 0);
-            qnice_pet_mount2_buf_ram_we <= qnice_dev_we_i;
+            qnice_pet_mount2_buf_ram_we <= qnice_dev_we_i and not qnice_csr_window;
             qnice_dev_data_o           <= x"00" & qnice_pet_mount2_buf_ram_data;
 
-         -- Custom Kernal Access: C64 ROM
+         -- Custom Kernal Access: PET main ROMs
          when C_DEV_PET_KERNAL_PET =>
-            qnice_petrom_addr          <= qnice_dev_addr_i(13 downto 0);
-            qnice_petrom_we            <= qnice_dev_we_i;
-            qnice_dev_data_o           <= x"00" & qnice_petrom_data_from;
+            qnice_petrom_addr          <= qnice_dev_addr_i(14 downto 0);
+            qnice_petrom_we            <= qnice_dev_we_i and not qnice_csr_window;
+            qnice_dev_data_o           <= CRTROM_CSR_PT_OK when qnice_csr_window else
+                                          x"00" & qnice_petrom_data_from;
             qnice_petrom_data_to       <= qnice_dev_data_i(7 downto 0);
+            qnice_petchars_ce          <= '0';
+
+         -- Custom Kernal Access: PET character ROM
+         when C_DEV_PET_CHARS_PET =>
+            qnice_petrom_addr          <= qnice_dev_addr_i(14 downto 0);
+            qnice_petrom_we            <= qnice_dev_we_i and not qnice_csr_window;
+            qnice_dev_data_o           <= CRTROM_CSR_PT_OK when qnice_csr_window else
+                                          x"00" & qnice_petrom_data_from;
+            qnice_petrom_data_to       <= qnice_dev_data_i(7 downto 0);
+            qnice_petchars_ce          <= '1';
 
          -- Custom Kernal Access: C2031 ROM
          when C_DEV_PET_KERNAL_C2031 =>
             qnice_c2031rom_addr        <= "00" & qnice_dev_addr_i(13 downto 0);
-            qnice_c2031rom_we          <= qnice_dev_we_i;
-            qnice_dev_data_o           <= x"00" & qnice_c2031rom_data_from;
+            qnice_c2031rom_we          <= qnice_dev_we_i and not qnice_csr_window;
+            qnice_dev_data_o           <= CRTROM_CSR_PT_OK when qnice_csr_window else
+                                          x"00" & qnice_c2031rom_data_from;
             qnice_c2031rom_data_to     <= qnice_dev_data_i(7 downto 0);
 
          when others => null;

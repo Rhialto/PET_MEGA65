@@ -13,6 +13,9 @@ use ieee.numeric_std.all;
 library work;
 use work.video_modes_pkg.all;
 use work.vdrives_pkg.all;
+use work.globals.C_MENU_MODEL_2001_BLANK;
+use work.globals.C_MENU_MODEL_2001_WHITE;
+
 
 entity main is
    generic (
@@ -23,6 +26,9 @@ entity main is
       reset_soft_i            : in  std_logic;
       reset_hard_i            : in  std_logic;
       pause_i                 : in  std_logic;
+
+      -- On-screen-menu selection
+      osm_i                   : in  std_logic_vector(255 downto 0);
 
       -- MiSTer core main clock speed:
       -- Make sure you pass very exact numbers here, because they are used for avoiding clock drift at derived clocks
@@ -77,13 +83,14 @@ entity main is
       pet_qnice_ce_i         : in  std_logic;
       pet_qnice_we_i         : in  std_logic;
 
-		-- Access custom Kernal: PET's Basic and DOS (in QNICE clock domain via c64_clk_sd_i)
+		-- Access custom Kernal: PET's Basic and character ROM (in QNICE clock domain via pet_clk_sd_i)
       petrom_we_i            : in  std_logic;
-      petrom_addr_i          : in  std_logic_vector(13 downto 0);
+      petchars_ce_i          : in  std_logic;
+      petrom_addr_i          : in  std_logic_vector(14 downto 0);
       petrom_data_i          : in  std_logic_vector(7 downto 0);
       petrom_data_o          : out std_logic_vector(7 downto 0);
 
-      -- Access custom DOS for the simulated C2031 (in QNICE clock domain via c64_clk_sd_i)
+      -- Access custom DOS for the simulated C2031 (in QNICE clock domain via pet_clk_sd_i)
       c2031rom_we_i          : in  std_logic;
       c2031rom_addr_i        : in  std_logic_vector(15 downto 0);
       c2031rom_data_i        : in  std_logic_vector(7 downto 0);
@@ -93,7 +100,7 @@ end entity main;
 
 architecture synthesis of main is
 
-   -- Generic MiSTer C64 signals
+   -- Generic MiSTer PET signals
    --signal pet_pause            : std_logic;
     signal pet_drive_led        : std_logic_vector(G_VDNUM-1 downto 0);
 
@@ -370,6 +377,7 @@ begin
         VSync       => video_vs_o,
         HBlank      => HBlank,                -- delayed to video_hblank_o,
         VBlank      => VBlank,                -- delayed to video_vblank_o,
+        eoi_blanks  => osm_i(C_MENU_MODEL_2001_BLANK),
 
         keyrow      => keyb_row_select,       -- keyboard scanning (row select)
         keyin       => keyb_column_selected,  -- keyboard scanning (pressed keys)
@@ -396,10 +404,13 @@ begin
         ieee488_ndac_i  => ieee488_pet_ndac_i,
         ieee488_ndac_o  => ieee488_pet_ndac_o,
 
-        dma_addr        => 0, -- dl_addr,
-        dma_din         => 0, -- dl_data,
-        dma_dout        => open,
-        dma_we          => 0, -- dl_wr,
+        -- QNICE clock domain via pet_clk_sd_i
+        dma_clk         => pet_clk_sd_i,
+        dma_addr        => petrom_addr_i, -- 0,
+        dma_din         => petrom_data_i, -- 0,
+        dma_dout        => petrom_data_o, -- open,
+        dma_we          => petrom_we_i, --0,
+        dma_char_ce     => petchars_ce_i, --0,
 
         clk_speed       => 0,
         clk_stop        => 0,
@@ -464,11 +475,17 @@ begin
      begin
          if rising_edge(clk_main_i) then
             if ce_7mn then
-                video_red_o <= "00011111"; -- test signal
-                video_green_o <= "11111111" when pix = '1' else "00000000";
-                video_blue_o <= "00000000";
-		video_hblank_o <= HBlank;
-		video_vblank_o <= VBlank;
+                if osm_i(C_MENU_MODEL_2001_WHITE) then
+                    video_red_o   <= x"AA" when pix = '1' else "00011111"; -- test signal
+                    video_green_o <= x"AA" when pix = '1' else "00000000";
+                    video_blue_o  <= x"FF" when pix = '1' else "00000000";
+                else
+                    video_red_o   <= "00011111"; -- test signal
+                    video_green_o <= "11111111" when pix = '1' else "00000000";
+                    video_blue_o  <= "00000000";
+                end if;
+                video_hblank_o <= HBlank;
+                video_vblank_o <= VBlank;
             end if;
             video_ce_o <= ce_7mn;
         end if;
@@ -493,10 +510,10 @@ begin
          key_num_i            => kb_key_num_i,
          key_pressed_n_i      => kb_key_pressed_n_i,
 
-	 row_select_i         => keyb_row_select,
-	 column_selected_o    => keyb_column_selected,
+         row_select_i         => keyb_row_select,
+         column_selected_o    => keyb_column_selected,
 
-	 diag_sense_o         => diag_sense
+         diag_sense_o         => diag_sense
       ); -- i_keyboard
 
 
@@ -610,10 +627,10 @@ begin
 
          -- Access custom rom (DOS): All in QNICE clock domain but rom_std_i is in main clock domain
          rom_std_i      => '1',  -- pet_rom_i(0) or pet_rom_i(1), -- 1=use the factory default ROM
-         rom_addr_i     => c2031rom_addr_i, -- (others => '0'), -- c2031rom_addr_i,
-         rom_data_i     => c2031rom_data_i, -- (others => '0'), -- c2031rom_data_i,
-         rom_wr_i       => c2031rom_we_i, -- '0', -- c2031rom_we_i,
-         rom_data_o     => c2031rom_data_o  -- open -- c2031rom_data_o
+         rom_addr_i     => c2031rom_addr_i,
+         rom_data_i     => c2031rom_data_i,
+         rom_wr_i       => c2031rom_we_i,
+         rom_data_o     => c2031rom_data_o
       ); -- iec_drive_inst
 
    -- and the virtual counterpart...

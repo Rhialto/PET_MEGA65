@@ -74,14 +74,16 @@ constant VRAM_ADDR_WIDTH      : natural := f_log2(CHAR_MEM_SIZE);
 -- Commodore PET specific devices
 ----------------------------------------------------------------------------------------------------------
 
-constant C_DEV_PET_RAM           : std_logic_vector(15 downto 0) := x"0100";     -- C64's main RAM
+--nstant C_DEV_PET_RAM           : std_logic_vector(15 downto 0) := x"0100";     -- PET's main RAM
 constant C_DEV_PET_VDRIVES       : std_logic_vector(15 downto 0) := x"0101";     -- Virtual Device Management System
 constant C_DEV_PET_MOUNT1        : std_logic_vector(15 downto 0) := x"0102";     -- RAM 1 to buffer disk images
 constant C_DEV_PET_MOUNT2        : std_logic_vector(15 downto 0) := x"0103";     -- RAM 2 to buffer disk images
-constant C_DEV_PET_CRT           : std_logic_vector(15 downto 0) := x"0104";     -- SW cartridges (*.CRT)
-constant C_DEV_PET_PRG           : std_logic_vector(15 downto 0) := x"0105";     -- PRG loader
+--nstant C_DEV_PET_CRT           : std_logic_vector(15 downto 0) := x"0104";     -- SW cartridges (*.CRT)
+--nstant C_DEV_PET_PRG           : std_logic_vector(15 downto 0) := x"0105";     -- PRG loader
 constant C_DEV_PET_KERNAL_PET    : std_logic_vector(15 downto 0) := x"0106";     -- Custom Kernal: PET
-constant C_DEV_PET_KERNAL_C2031  : std_logic_vector(15 downto 0) := x"0107";     -- Custom Kernal: (simulated) C2031
+constant C_DEV_PET_CHARS_PET     : std_logic_vector(15 downto 0) := x"0107";     -- Custom character set: PET
+-- skip 0108
+constant C_DEV_PET_KERNAL_C2031  : std_logic_vector(15 downto 0) := x"0109";     -- Custom Kernal: C2031
 
 ----------------------------------------------------------------------------------------------------------
 -- HyperRAM memory map (in units of 4kW)
@@ -136,9 +138,11 @@ constant C_CRTROMTYPE_OPTIONAL   : std_logic_vector(15 downto 0) := x"0004";
 --       else it is a 4k window in HyperRAM or in SDRAM
 -- In case we are loading to a QNICE device, then the control and status register is located at the 4k window 0xFFFF.
 -- @TODO: See @TODO for more details about the control and status register
-constant C_CRTROMS_MAN_NUM       : natural := 0;                                       -- amount of manually loadable ROMs and carts; maximum is 16
-constant C_CRTROMS_MAN           : crtrom_buf_array := ( x"EEEE", x"EEEE",
-                                                         x"EEEE");                     -- Always finish the array using x"EEEE"
+constant C_CRTROMS_MAN_NUM       : natural := 3;                                       -- amount of manually loadable ROMs and carts; maximum is 16
+constant C_CRTROMS_MAN           : crtrom_buf_array := ( C_CRTROMTYPE_DEVICE, C_DEV_PET_KERNAL_PET,
+                                                         C_CRTROMTYPE_DEVICE, C_DEV_PET_CHARS_PET,
+							 C_CRTROMTYPE_DEVICE, C_DEV_PET_KERNAL_C2031,
+                                                         x"EEEE", x"EEEE", x"EEEE");   -- Always finish the array using x"EEEE"
 
 -- Automatically loaded ROMs: These ROMs are loaded before the core starts
 --
@@ -183,5 +187,25 @@ constant audio_cy2      : std_logic_vector(23 downto 0) := std_logic_vector(to_s
 constant audio_att      : std_logic_vector( 4 downto 0) := "00000";
 constant audio_mix      : std_logic_vector( 1 downto 0) := "00"; -- 0 - no mix, 1 - 25%, 2 - 50%, 3 - 100% (mono)
 
+-----------------------------------------------------------------------------------------------------------
+-- Core menu items
+-- from config.vhd
+-----------------------------------------------------------------------------------------------------------
+constant C_MENU_MODEL_2001_BLANK : natural :=  2;
+constant C_MENU_MODEL_2001_WHITE : natural :=  3;
+constant C_MENU_MODEL_B_KEYBOARD : natural :=  4;
+constant C_MENU_MODEL_CRTC       : natural :=  5;
+constant C_MENU_MODEL_80_COLUMNS : natural :=  6;
+
+constant C_MENU_HDMI_16_9_50     : natural := 24;
+constant C_MENU_HDMI_16_9_60     : natural := 25;
+constant C_MENU_HDMI_4_3_50      : natural := 26;
+constant C_MENU_HDMI_5_4_50      : natural := 27;
+constant C_MENU_HDMI_640_60      : natural := 28;
+constant C_MENU_HDMI_720_5994    : natural := 29;
+constant C_MENU_SVGA_800_60      : natural := 30;
+constant C_MENU_CRT_EMULATION    : natural := 33;
+constant C_MENU_HDMI_ZOOM        : natural := 34;
+constant C_MENU_IMPROVE_AUDIO    : natural := 35;
 end package globals;
 
