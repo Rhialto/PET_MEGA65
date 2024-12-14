@@ -104,11 +104,14 @@ architecture synthesis of main is
    --signal pet_pause            : std_logic;
     signal pet_drive_led        : std_logic_vector(G_VDNUM-1 downto 0);
 
-    signal div : std_logic_vector(2 downto 0); -- range 0 to 7 := 0;        -- 3 bits
+    signal divby8 : std_logic_vector(2 downto 0); -- range 0 to 7 := 0;        -- 3 bits
+    signal divby7 : INTEGER range 0 to 7 := 0;          -- 3 bits
     signal cpu_div : INTEGER range 0 to 127 := 0;       -- 7 bits
     signal cpu_rate : INTEGER range 0 to 127 := 55;     -- 7 bits
     type cpu_rates_array is array (0 to 3) of INTEGER range 0 to 127 ;  -- 7 bits each
     constant cpu_rates : cpu_rates_array := (55, 27, 13, 6);
+    signal ce_8mp : STD_LOGIC;
+    signal ce_8mn : STD_LOGIC;
     signal ce_7mp : STD_LOGIC;
     signal ce_7mn : STD_LOGIC;
     signal ce_1m : STD_LOGIC;
@@ -319,10 +322,20 @@ begin
      process(clk_main_i)
      begin
          if rising_edge(clk_main_i) then
-             div <= std_logic_vector(unsigned(div) + 1);
-             ce_7mp <= not div(2) and not div(1) and not div(0);
-             ce_7mn <=     div(2) and not div(1) and not div(0);
+             -- Divide 56 MHz by 8 to get 7 Mhz.
+             divby8 <= std_logic_vector(unsigned(divby8) + 1);
+             ce_7mp <= not divby8(2) and not divby8(1) and not divby8(0);
+             ce_7mn <=     divby8(2) and not divby8(1) and not divby8(0);
 
+             -- Divide 56 MHz by 7 to get 8 Mhz.
+             divby7 <= divby7 + 1;
+             if divby7 = 6 then
+                 divby7 <= 0;
+             end if;
+             ce_8mp <= '1' when divby7 = 0 else '0';
+             ce_8mn <= '1' when divby7 = 3 else '0';
+
+             -- Divide 56 MHz by 56 to get 1 MHz (other factors potentially available).
              cpu_div <= cpu_div + 1;
              if cpu_div = cpu_rate then
                  cpu_div <= 0;
@@ -416,6 +429,8 @@ begin
         clk_stop        => 0,
         diag_l          => diag_sense,
         clk             => clk_main_i,
+        ce_8mp          => ce_8mp,
+        ce_8mn          => ce_8mn,
         ce_7mp          => ce_7mp,
         ce_7mn          => ce_7mn,
         ce_1m           => ce_1m,
@@ -474,7 +489,7 @@ begin
      process (clk_main_i)
      begin
          if rising_edge(clk_main_i) then
-            if ce_7mn then
+            if ce_8mn then  -- was ce_7mn
                 if osm_i(C_MENU_MODEL_2001_WHITE) then
                     video_red_o   <= x"AA" when pix = '1' else "00011111"; -- test signal
                     video_green_o <= x"AA" when pix = '1' else "00000000";
@@ -487,7 +502,7 @@ begin
                 video_hblank_o <= HBlank;
                 video_vblank_o <= VBlank;
             end if;
-            video_ce_o <= ce_7mn;
+            video_ce_o <= ce_8mn;   -- was ce_7mn
         end if;
      end process;
 
