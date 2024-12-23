@@ -371,7 +371,7 @@ begin
          clk_main_speed_i     => CORE_CLK_SPEED,
 
          -- Video output
-         -- This is PAL 720x576 @ 50 Hz (pixel clock 27 MHz), but synchronized to main_clk (54 MHz).
+         -- This starts out as 416x240 @ 60 Hz (pixel clock 8 MHz), but synchronized to main_clk (56 MHz).
          video_ce_o           => video_ce_o,
          video_ce_ovl_o       => video_ce_ovl_o,
          video_red_o          => video_red_o,
@@ -467,6 +467,7 @@ begin
    --    "Standard VGA":                     qnice_retro15kHz_o=0 and qnice_csync_o=0
    --    "Retro 15 kHz with HSync and VSync" qnice_retro15kHz_o=1 and qnice_csync_o=0
    --    "Retro 15 kHz with CSync"           qnice_retro15kHz_o=1 and qnice_csync_o=1
+   -- Note that PETs do NOT output VGA NOR nice PAL or NTSC!
    qnice_retro15kHz_o         <= '0';
    qnice_csync_o              <= '0';
    qnice_osm_cfg_scaling_o    <= (others => '1');
