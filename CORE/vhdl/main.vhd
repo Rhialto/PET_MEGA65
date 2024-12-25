@@ -104,7 +104,6 @@ architecture synthesis of main is
    --signal pet_pause            : std_logic;
     signal pet_drive_led        : std_logic_vector(G_VDNUM-1 downto 0);
 
-    signal divby8 : std_logic_vector(2 downto 0); -- range 0 to 7 := 0;        -- 3 bits
     signal divby7 : INTEGER range 0 to 7 := 0;          -- 3 bits
     signal cpu_div : INTEGER range 0 to 127 := 0;       -- 7 bits
     signal cpu_rate : INTEGER range 0 to 127 := 55;     -- 7 bits
@@ -112,8 +111,6 @@ architecture synthesis of main is
     constant cpu_rates : cpu_rates_array := (55, 27, 13, 6);
     signal ce_8mp : STD_LOGIC;
     signal ce_8mn : STD_LOGIC;
-    signal ce_7mp : STD_LOGIC;
-    signal ce_7mn : STD_LOGIC;
     signal ce_1m : STD_LOGIC;
 
     signal addr : std_logic_vector(15 downto 0);
@@ -322,11 +319,6 @@ begin
      process(clk_main_i)
      begin
          if rising_edge(clk_main_i) then
-             -- Divide 56 MHz by 8 to get 7 Mhz.
-             divby8 <= std_logic_vector(unsigned(divby8) + 1);
-             ce_7mp <= not divby8(2) and not divby8(1) and not divby8(0);
-             ce_7mn <=     divby8(2) and not divby8(1) and not divby8(0);
-
              -- Divide 56 MHz by 7 to get 8 Mhz.
              divby7 <= divby7 + 1;
              if divby7 = 6 then
@@ -431,8 +423,6 @@ begin
         clk             => clk_main_i,
         ce_8mp          => ce_8mp,
         ce_8mn          => ce_8mn,
-        ce_7mp          => ce_7mp,
-        ce_7mn          => ce_7mn,
         ce_1m           => ce_1m,
         reset           => not reset_core_n
      ); -- hw_inst

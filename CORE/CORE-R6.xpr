@@ -96,7 +96,7 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/PET2001_MiSTer/rtl/pet2001video.v">
+      <File Path="$PPRDIR/PET2001_MiSTer/rtl/pet2001video8mhz.v">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
@@ -792,6 +792,7 @@
       </File>
       <File Path="$PPRDIR/PET2001_MiSTer/rtl/ieee488_drive/iecdrv_mos8520.v">
         <FileInfo>
+          <Attr Name="UserDisabled" Val="1"/>
           <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
@@ -813,7 +814,6 @@
       <File Path="$PPRDIR/PET2001_MiSTer/rtl/ieee488_drive/c1541_direct_gcr.sv">
         <FileInfo>
           <Attr Name="UserDisabled" Val="1"/>
-          <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
@@ -821,6 +821,7 @@
       </File>
       <File Path="$PPRDIR/PET2001_MiSTer/rtl/ieee488_drive/c1581_drv.sv">
         <FileInfo>
+          <Attr Name="UserDisabled" Val="1"/>
           <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
@@ -829,6 +830,7 @@
       </File>
       <File Path="$PPRDIR/PET2001_MiSTer/rtl/ieee488_drive/floppy.v">
         <FileInfo>
+          <Attr Name="UserDisabled" Val="1"/>
           <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
@@ -838,7 +840,6 @@
       <File Path="$PPRDIR/PET2001_MiSTer/rtl/ieee488_drive/c1581_multi.sv">
         <FileInfo>
           <Attr Name="UserDisabled" Val="1"/>
-          <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
@@ -846,6 +847,7 @@
       </File>
       <File Path="$PPRDIR/PET2001_MiSTer/rtl/ieee488_drive/fdc1772.v">
         <FileInfo>
+          <Attr Name="UserDisabled" Val="1"/>
           <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
