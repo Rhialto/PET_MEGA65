@@ -324,8 +324,8 @@ begin
              if divby7 = 6 then
                  divby7 <= 0;
              end if;
-             ce_8mp <= '1' when divby7 = 0 else '0';
-             ce_8mn <= '1' when divby7 = 3 else '0';
+             ce_8mp <= '1' when divby7 = 2 else '0';
+             ce_8mn <= '1' when divby7 = 5 else '0';    -- Takes 3 of these clocks to fetch the character data from the character ROM.
 
              -- Divide 56 MHz by 56 to get 1 MHz (other factors potentially available).
              cpu_div <= cpu_div + 1;
@@ -382,7 +382,7 @@ begin
         VSync       => video_vs_o,
         HBlank      => HBlank,                -- delayed to video_hblank_o,
         VBlank      => VBlank,                -- delayed to video_vblank_o,
-        eoi_blanks  => osm_i(C_MENU_MODEL_2001_BLANK),
+        pref_eoi_blanks  => osm_i(C_MENU_MODEL_2001_BLANK),
 
         keyrow      => keyb_row_select,       -- keyboard scanning (row select)
         keyin       => keyb_column_selected,  -- keyboard scanning (pressed keys)
