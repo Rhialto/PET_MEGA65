@@ -342,9 +342,9 @@ constant OPTM_DY           : natural := 24;
 
 constant OPTM_ITEMS        : string :=
 
-   " Model options\n"       &	-- 0
+   " Model options...\n"    &	-- 0
    " Model options\n"       &	-- 1  Model options submenu
-   " 2001 screen blank\n"   &
+   " 2001 screen blank etc\n" &
    " 2001 white\n"          &
    " B keyboard (TODO)\n"   &
    " 6545 CRTC (TODO)\n"    &   -- 5
@@ -361,7 +361,7 @@ constant OPTM_ITEMS        : string :=
    " Drive 9:%s\n"          &
    " Drive Z:%s\n"          &
    "\n"                     &
-   " HDMI settings\n"    &
+   " HDMI settings...\n"    &
    "\n"                     &   -- 20
    " HDMI: %s\n"            &   -- HDMI submenu
    " HDMI Settings\n"       &
@@ -410,12 +410,12 @@ type OPTM_GTYPE is array (0 to OPTM_SIZE - 1) of integer range 0 to 2**OPTM_GTC-
 -- make sure that you have exactly the same amount of entries here than in OPTM_ITEMS and defined by OPTM_SIZE
 constant OPTM_GROUPS       : OPTM_GTYPE := ( OPTM_G_SUBMENU + OPTM_G_START,            -- Model Options
                                              OPTM_G_TEXT + OPTM_G_HEADLINE,            -- Headline "Model Options"
-                                             OPTM_G_2001_Blank + OPTM_G_SINGLESEL + OPTM_G_STDSEL, -- Item 2001 screen blank
+                                             OPTM_G_2001_Blank + OPTM_G_SINGLESEL,     -- Item 2001 screen blank etc
                                              OPTM_G_2001_White + OPTM_G_SINGLESEL,     -- Item 2001 white
                                              OPTM_G_B_Keyboard + OPTM_G_SINGLESEL,     -- Item B keyboard
                                              OPTM_G_CRTC + OPTM_G_SINGLESEL,           -- Item 6545 CRTC
                                              OPTM_G_80_Cols + OPTM_G_SINGLESEL,        -- Item 80 Columns
-                                             OPTM_G_LD_ROMs + OPTM_G_LOAD_ROM, -- Load ROMs
+                                             OPTM_G_LD_ROMs + OPTM_G_LOAD_ROM,         -- Load ROMs
                                              OPTM_G_LD_CHAR + OPTM_G_LOAD_ROM,         -- Load characters
                                              OPTM_G_LD_Drive + OPTM_G_LOAD_ROM,        -- Load drive ROMs
                                              OPTM_G_LINE,                              -- open

@@ -15,6 +15,7 @@ use work.video_modes_pkg.all;
 use work.vdrives_pkg.all;
 use work.globals.C_MENU_MODEL_2001_BLANK;
 use work.globals.C_MENU_MODEL_2001_WHITE;
+use work.globals.C_MENU_MODEL_CRTC;
 
 
 entity main is
@@ -383,6 +384,7 @@ begin
         HBlank      => HBlank,                -- delayed to video_hblank_o,
         VBlank      => VBlank,                -- delayed to video_vblank_o,
         pref_eoi_blanks  => osm_i(C_MENU_MODEL_2001_BLANK),
+        pref_have_crtc   => osm_i(C_MENU_MODEL_CRTC),
 
         keyrow      => keyb_row_select,       -- keyboard scanning (row select)
         keyin       => keyb_column_selected,  -- keyboard scanning (pressed keys)
@@ -479,7 +481,7 @@ begin
      process (clk_main_i)
      begin
          if rising_edge(clk_main_i) then
-            if ce_8mn then  -- was ce_7mn
+            if ce_8mn then
                 if osm_i(C_MENU_MODEL_2001_WHITE) then
                     video_red_o   <= x"AA" when pix = '1' else "00011111"; -- test signal
                     video_green_o <= x"AA" when pix = '1' else "00000000";
@@ -492,7 +494,7 @@ begin
                 video_hblank_o <= HBlank;
                 video_vblank_o <= VBlank;
             end if;
-            video_ce_o <= ce_8mn;   -- was ce_7mn
+            video_ce_o <= ce_8mn;
         end if;
      end process;
 
