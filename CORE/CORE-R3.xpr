@@ -216,6 +216,13 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
+      <File Path="$PPRDIR/PET2001_MiSTer/rtl/video_blanker.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
       <File Path="$PPRDIR/../M2M/vhdl/controllers/MiSTer/video_mixer.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -242,6 +249,12 @@
         </FileInfo>
       </File>
       <File Path="$PPRDIR/PET2001_MiSTer/rtl/ieee488.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/PET2001_MiSTer/rtl/mc6845.vhd">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
