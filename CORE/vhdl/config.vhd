@@ -347,7 +347,7 @@ constant OPTM_ITEMS        : string :=
    " 2001 screen blank etc\n" &
    " 2001 white\n"          &
    " B keyboard (TODO)\n"   &
-   " 6545 CRTC (TODO)\n"    &   -- 5
+   " 6545 CRTC\n"           &   -- 5
    " 80 columns (TODO)\n"   &
    " PET ROM: %s\n"         &
    " Charset: %s\n"         &
