@@ -73,6 +73,8 @@ entity keyboard is
         -- 0    CA1 control: IRQ on=1, off = 0
       row_select_i      : in  std_logic_vector(3 downto 0);
       column_selected_o : out std_logic_vector(7 downto 0);
+
+      business_layout_i : in  std_logic;    -- 0=normal/graphic layout, 1=business layout
       
       diag_sense_o      : out  std_logic
    );
@@ -166,6 +168,10 @@ signal row_n : std_logic_vector(9 downto 0);
 signal shift_n : std_logic;
 signal mega_n : std_logic;
 signal unshift_n: std_logic;
+signal b_unshift_n: std_logic;
+
+signal n_column_selected : std_logic_vector(7 downto 0);
+signal b_column_selected : std_logic_vector(7 downto 0);
 
 begin
 
@@ -176,7 +182,18 @@ begin
         end if;
     end process;
 
-    diag_sense_o <= key_pressed_n(m65_mega);
+    -- When you press the MEGA and the CTRL key simultaneously,
+    -- assert the diagnostic sense line (for resetting into the monitor).
+    -- Instructions in the monitor:
+    -- Type a ; and return. Then cursor to the SP value and make it F8,
+    -- then type return. Now you can X back to BASIC.
+    -- Instructions from https://mikenaberezny.com/hardware/pet-cbm/its-new-cursor/
+    -- https://mikenaberezny.com/wp-content/uploads/2012/07/new-cursor-installation-instructions.pdf
+    diag_sense_o <= key_pressed_n(m65_mega) or key_pressed_n(m65_ctrl);
+
+    -- Select which keyboard to use.
+    column_selected_o <=      b_column_selected  when business_layout_i
+                         else n_column_selected;
 
     -- 4-to-10 decoder for keyboard row selection. Active low.
     -- We should probaly use variables for these intermediate calulations,
@@ -195,6 +212,15 @@ begin
     -- Since we use "negative logic" we swap 'and' and 'or' too; De Morgan.
     shift_n <= key_pressed_n(m65_left_shift) and key_pressed_n(m65_right_shift);
     mega_n <= key_pressed_n(m65_mega);
+
+    ---------------------------------------------------------------------
+    --
+    -- N keyboard decoding
+    --
+    -- Use MEGA to force-shift a key such as ! which is unshifted on this
+    -- keyboard but shifted on the M65.
+    ---------------------------------------------------------------------
+
     -- Mark the keys where we press SHIFT on the M65 keyboard, but which do not
     -- have shift on the PET keyboard.
     unshift_n <= shift_n or (key_pressed_n(m65_1) and           -- !
@@ -217,7 +243,7 @@ begin
     -- shifted on both keyboards.
     -- TODO: everything with MEGA pressed.
 
-    column_selected_o(0) <=
+    n_column_selected(0) <=
         (row_n(0) or key_pressed_n(m65_1)          or shift_n      ) and     -- !
         (row_n(1) or key_pressed_n(m65_2)          or shift_n      ) and     -- "
         (row_n(2) or key_pressed_n(m65_q)                          ) and     -- q
@@ -232,7 +258,7 @@ begin
                       key_pressed_n(m65_left_crsr))                ) and     --   or left
         (row_n(9) or key_pressed_n(m65_ctrl)                       );        -- off/rvs
 
-    column_selected_o(1) <=
+    n_column_selected(1) <=
         (row_n(0) or key_pressed_n(m65_3)          or shift_n      ) and     -- #
         (row_n(1) or key_pressed_n(m65_4)          or shift_n      ) and     -- $
         (row_n(2) or key_pressed_n(m65_e)                          ) and     -- e
@@ -244,7 +270,7 @@ begin
         (row_n(8) or key_pressed_n(m65_at)                         ) and     -- @
         (row_n(9) or key_pressed_n(m65_colon)      or shift_n      );        -- [
 
-    column_selected_o(2) <=
+    n_column_selected(2) <=
         (row_n(0) or key_pressed_n(m65_5)          or shift_n      ) and     -- %
         (row_n(1) or key_pressed_n(m65_7)          or shift_n      ) and     -- '
         (row_n(2) or key_pressed_n(m65_t)                          ) and     -- t
@@ -256,7 +282,7 @@ begin
         (row_n(8) or key_pressed_n(m65_semicolon)  or shift_n      ) and     -- ]
         (row_n(9) or key_pressed_n(m65_space)                      );        -- space
 
-    column_selected_o(3) <=
+    n_column_selected(3) <=
         (row_n(0) or key_pressed_n(m65_6)          or shift_n      ) and     -- &
         (row_n(1) or key_pressed_n(m65_gbp)                        ) and     -- \ or pound
         (row_n(2) or key_pressed_n(m65_u)                          ) and     -- u
@@ -268,7 +294,7 @@ begin
         (row_n(8) or '1'                                           ) and     -- n/c
         (row_n(9) or key_pressed_n(m65_comma)      or shift_n      );        -- <
 
-    column_selected_o(4) <=
+    n_column_selected(4) <=
         (row_n(0) or key_pressed_n(m65_8)          or shift_n      ) and     -- (
         (row_n(1) or key_pressed_n(m65_9)          or shift_n      ) and     -- )
         (row_n(2) or key_pressed_n(m65_o)                          ) and     -- o
@@ -280,7 +306,7 @@ begin
         (row_n(8) or key_pressed_n(m65_dot)        or     shift_n  ) and     -- >
         (row_n(9) or key_pressed_n(m65_run_stop)                   );        -- run/stop
 
-    column_selected_o(5) <=
+    n_column_selected(5) <=
         (row_n(0) or key_pressed_n(m65_arrow_left)                 ) and     -- <-
         (row_n(1) or '1'                                           ) and     -- n/c
         (row_n(2) or key_pressed_n(m65_arrow_up)                   ) and     -- ^
@@ -292,7 +318,7 @@ begin
         (row_n(8) or key_pressed_n(m65_right_shift) or not unshift_n) and    -- right shift
         (row_n(9) or '1'                                           );        -- n/c
 
-    column_selected_o(6) <=
+    n_column_selected(6) <=
         (row_n(0) or key_pressed_n(m65_clr_home)                   ) and     -- clr/home
         (row_n(1) or (key_pressed_n(m65_vert_crsr) and
                       key_pressed_n(m65_up_crsr))                  ) and     -- crsr down (or up)
@@ -305,7 +331,7 @@ begin
         (row_n(8) or key_pressed_n(m65_0)                          ) and     -- 0
         (row_n(9) or key_pressed_n(m65_dot)        or not shift_n  );        -- .
 
-    column_selected_o(7) <=
+    n_column_selected(7) <=
         (row_n(0) or (key_pressed_n(m65_horz_crsr) and
                       key_pressed_n(m65_left_crsr))                ) and     -- crsr => (or <=)
         (row_n(1) or key_pressed_n(m65_ins_del)                    ) and     -- inst/del
@@ -317,5 +343,127 @@ begin
         (row_n(7) or key_pressed_n(m65_plus)                       ) and     -- +
         (row_n(8) or key_pressed_n(m65_minus)                      ) and     -- -
         (row_n(9) or key_pressed_n(m65_equal)                      );        -- =
+
+    ---------------------------------------------------------------------
+    --
+    -- B keyboard decoding.
+    --
+    -- Use the MEGA + digits (or dot) for the numeric pad version.
+    -- Use MEGA to shift the unshifted chars [ and ].
+    -- Use ALT for the repeat key.
+    -- * beside a charactre means that it has no shifted equivalent.
+    --   for digits this means it's the numeric keypad version.
+    -- the numbers in [brackets] appear to be unused PETSCII values.
+    ---------------------------------------------------------------------
+    b_unshift_n <= shift_n or (key_pressed_n(m65_colon) and       -- [
+                               key_pressed_n(m65_semicolon)       -- ]
+                            );
+    b_column_selected(0) <=
+        (row_n(0) or key_pressed_n(m65_2)   or not mega_n          ) and     -- 2
+        (row_n(1) or key_pressed_n(m65_1)   or not mega_n          ) and     -- 1
+        (row_n(2) or key_pressed_n(m65_esc)                        ) and     -- ESC*
+        (row_n(3) or key_pressed_n(m65_a)                          ) and     -- a
+        (row_n(4) or key_pressed_n(m65_tab)                        ) and     -- TAB
+        (row_n(5) or key_pressed_n(m65_q)                          ) and     -- q
+        (row_n(6) or ((key_pressed_n(m65_left_shift) or not b_unshift_n) and   -- left shift unless ...
+                      (b_unshift_n or mega_n) and                            --   or mega+[] 
+                      key_pressed_n(m65_asterisk) and                        --   or *
+                      key_pressed_n(m65_equal) and                           --   or =
+                      key_pressed_n(m65_plus) and                            --   or +
+                      key_pressed_n(m65_up_crsr) and                         --   or up
+                      key_pressed_n(m65_left_crsr))                ) and     --   or left
+        (row_n(7) or key_pressed_n(m65_z)                          ) and     -- z
+        (row_n(8) or key_pressed_n(m65_ctrl)                       ) and     -- off/rvs
+        (row_n(9) or key_pressed_n(m65_arrow_left)                 );        -- <- left arrow*
+
+    b_column_selected(1) <=
+        (row_n(0) or key_pressed_n(m65_5)    or not mega_n         ) and     -- 5
+        (row_n(1) or key_pressed_n(m65_4)    or not mega_n         ) and     -- 4
+        (row_n(2) or key_pressed_n(m65_s)                          ) and     -- s
+        (row_n(3) or key_pressed_n(m65_d)                          ) and     -- d
+        (row_n(4) or key_pressed_n(m65_w)                          ) and     -- w
+        (row_n(5) or key_pressed_n(m65_e)                          ) and     -- e
+        (row_n(6) or key_pressed_n(m65_c)                          ) and     -- c
+        (row_n(7) or key_pressed_n(m65_v)                          ) and     -- v
+        (row_n(8) or key_pressed_n(m65_x)                          ) and     -- x
+        (row_n(9) or key_pressed_n(m65_3)    or not mega_n         );        -- 3
+
+    b_column_selected(2) <=
+        (row_n(0) or key_pressed_n(m65_8)    or not mega_n         ) and     -- 8
+        (row_n(1) or key_pressed_n(m65_7)    or not mega_n         ) and     -- 7
+        (row_n(2) or key_pressed_n(m65_f)                          ) and     -- f
+        (row_n(3) or key_pressed_n(m65_g)                          ) and     -- g
+        (row_n(4) or key_pressed_n(m65_r)                          ) and     -- r
+        (row_n(5) or key_pressed_n(m65_t)                          ) and     -- t
+        (row_n(6) or key_pressed_n(m65_b)                          ) and     -- b
+        (row_n(7) or key_pressed_n(m65_n)                          ) and     -- n
+        (row_n(8) or key_pressed_n(m65_space)                      ) and     -- SPACE
+        (row_n(9) or key_pressed_n(m65_6)    or not mega_n         );        -- 6
+
+    b_column_selected(3) <=
+        (row_n(0) or (key_pressed_n(m65_minus) and
+                      key_pressed_n(m65_equal))                    ) and     -- - and =
+        (row_n(1) or key_pressed_n(m65_0)                          ) and     -- 0* (top row)
+        (row_n(2) or key_pressed_n(m65_h)                          ) and     -- h
+        (row_n(3) or key_pressed_n(m65_j)                          ) and     -- j
+        (row_n(4) or key_pressed_n(m65_y)                          ) and     -- y
+        (row_n(5) or key_pressed_n(m65_u)                          ) and     -- u
+        (row_n(6) or key_pressed_n(m65_dot)  or not mega_n         ) and     -- . and <
+        (row_n(7) or key_pressed_n(m65_comma)                      ) and     -- , and >
+        (row_n(8) or key_pressed_n(m65_m)                          ) and     -- m
+        (row_n(9) or key_pressed_n(m65_9)    or not mega_n         );        -- 9
+
+    b_column_selected(4) <=
+        (row_n(0) or key_pressed_n(m65_8)    or     mega_n         ) and     -- 8*
+        (row_n(1) or key_pressed_n(m65_7)    or     mega_n         ) and     -- 7*
+        (row_n(2) or key_pressed_n(m65_semicolon) or     shift_n   ) and     -- ]*
+        (row_n(3) or key_pressed_n(m65_return)                     ) and     -- RETURN
+        (row_n(4) or key_pressed_n(m65_gbp)                        ) and     -- \*
+        (row_n(5) or (key_pressed_n(m65_vert_crsr) and
+                      key_pressed_n(m65_up_crsr))                  ) and     -- crsr down (or up)
+        (row_n(6) or key_pressed_n(m65_dot)  or     mega_n         ) and     -- .*
+        (row_n(7) or key_pressed_n(m65_0)    or     mega_n         ) and     -- 0* (keypad)
+        (row_n(8) or key_pressed_n(m65_clr_home)                   ) and     -- HOME
+        (row_n(9) or key_pressed_n(m65_run_stop)                   );        -- STOP
+
+    -- TODO: find out which 3-key combinations trigger the unused entries.
+    b_column_selected(5) <=
+        (row_n(0) or (key_pressed_n(m65_horz_crsr) and
+                      key_pressed_n(m65_left_crsr))                ) and     -- crsr => (or <=)
+        (row_n(1) or key_pressed_n(m65_arrow_up)                   ) and     -- ^*
+        (row_n(2) or key_pressed_n(m65_k)                          ) and     -- k
+        (row_n(3) or key_pressed_n(m65_l)                          ) and     -- l
+        (row_n(4) or key_pressed_n(m65_i)                          ) and     -- i
+        (row_n(5) or key_pressed_n(m65_o)                          ) and     -- o
+        (row_n(6) or '1'                                           ) and     -- [25]
+        (row_n(7) or '1'                                           ) and     -- [15]
+        (row_n(8) or '1'                                           ) and     -- [21]
+        (row_n(9) or ((key_pressed_n(m65_colon) or not shift_n) and
+                       key_pressed_n(m65_asterisk))                );        -- : and *
+
+    b_column_selected(6) <=
+        (row_n(0) or '1'                                           ) and     -- [14]
+        (row_n(1) or '1'                                           ) and     -- [6]
+        (row_n(2) or ((key_pressed_n(m65_semicolon) or not shift_n) and
+                       key_pressed_n(m65_plus))                    ) and     -- ; and +
+        (row_n(3) or key_pressed_n(m65_at)                         ) and     -- @
+        (row_n(4) or key_pressed_n(m65_p)                          ) and     -- p
+        (row_n(5) or (key_pressed_n(m65_colon) or     shift_n)     ) and     -- [*
+        (row_n(6) or key_pressed_n(m65_right_shift)                ) and     -- RIGHT SHIFT
+        (row_n(7) or key_pressed_n(m65_alt)                        ) and     -- [16] REPEAT
+        (row_n(8) or key_pressed_n(m65_slash)                      ) and     -- / and ?
+        (row_n(9) or '1'                                           );        -- [4]
+
+    b_column_selected(7) <=
+        (row_n(0) or '1'                                           ) and     -- [5]
+        (row_n(1) or key_pressed_n(m65_9)    or     mega_n         ) and     -- 9*
+        (row_n(2) or key_pressed_n(m65_5)    or     mega_n         ) and     -- 5*
+        (row_n(3) or key_pressed_n(m65_6)    or     mega_n         ) and     -- 6*
+        (row_n(4) or key_pressed_n(m65_ins_del)                    ) and     -- INST/DEL
+        (row_n(5) or key_pressed_n(m65_4)    or     mega_n         ) and     -- 4*
+        (row_n(6) or key_pressed_n(m65_3)    or     mega_n         ) and     -- 3*
+        (row_n(7) or key_pressed_n(m65_2)    or     mega_n         ) and     -- 2*
+        (row_n(8) or key_pressed_n(m65_1)    or     mega_n         ) and     -- 1*
+        (row_n(9) or '1'                                           );        -- [20]
 
 end beh;

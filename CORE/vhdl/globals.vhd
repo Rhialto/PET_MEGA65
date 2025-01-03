@@ -191,21 +191,22 @@ constant audio_mix      : std_logic_vector( 1 downto 0) := "00"; -- 0 - no mix, 
 -- Core menu items
 -- from config.vhd
 -----------------------------------------------------------------------------------------------------------
-constant C_MENU_MODEL_2001_BLANK : natural :=  2;
-constant C_MENU_MODEL_2001_WHITE : natural :=  3;
-constant C_MENU_MODEL_B_KEYBOARD : natural :=  4;
-constant C_MENU_MODEL_CRTC       : natural :=  5;
-constant C_MENU_MODEL_80_COLUMNS : natural :=  6;
+constant C_MENU_MODEL_2001_BLANK : natural :=  3;
+constant C_MENU_MODEL_2001_WHITE : natural :=  4;
+constant C_MENU_MODEL_B_KEYBOARD : natural :=  5;
+constant C_MENU_MODEL_CRTC       : natural :=  6;
+constant C_MENU_MODEL_80_COLUMNS : natural :=  7;
 
-constant C_MENU_HDMI_16_9_50     : natural := 24;
-constant C_MENU_HDMI_16_9_60     : natural := 25;
-constant C_MENU_HDMI_4_3_50      : natural := 26;
-constant C_MENU_HDMI_5_4_50      : natural := 27;
-constant C_MENU_HDMI_640_60      : natural := 28;
-constant C_MENU_HDMI_720_5994    : natural := 29;
-constant C_MENU_SVGA_800_60      : natural := 30;
-constant C_MENU_CRT_EMULATION    : natural := 33;
-constant C_MENU_HDMI_ZOOM        : natural := 34;
-constant C_MENU_IMPROVE_AUDIO    : natural := 35;
+constant C_MENU_HDMI_16_9_50     : natural := 27;
+constant C_MENU_HDMI_16_9_60     : natural := 28;
+constant C_MENU_HDMI_4_3_50      : natural := 29;
+constant C_MENU_HDMI_5_4_50      : natural := 30;
+constant C_MENU_HDMI_640_60      : natural := 31;
+constant C_MENU_HDMI_720_5994    : natural := 32;
+constant C_MENU_SVGA_800_60      : natural := 33;
+
+constant C_MENU_CRT_EMULATION    : natural := 36;
+constant C_MENU_HDMI_ZOOM        : natural := 37;
+constant C_MENU_IMPROVE_AUDIO    : natural := 38;
 end package globals;
 

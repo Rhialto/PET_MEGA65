@@ -80,78 +80,36 @@ constant SCR_WELCOME : string :=
 
    "MEGA-PET Core Version 0.0...\n" &
    "Port from MiSTer done by\n" & 
-   "Olaf 'Rhialto' Seibert in 2024\n\n" &
+   "Olaf 'Rhialto' Seibert in 2025\n\n" &
 
    -- We are not insisting. But it would be nice if you gave us credit for MiSTer2MEGA65 by leaving these lines in
    "Powered by MiSTer2MEGA65 Version [WIP],\n" &
    "done by sy2002 and MJoergen in 2022\n" &
+   "\n" &
 
-   "\n\nEdit config.vhd to modify welcome screen.\n\n" &
-   "You can for example show the keyboard map.\n\n\n" &
-
-   "    Key              PET\n" &
-   "    " & CHR_LINE_10 & CHR_LINE_10 & CHR_LINE_10 & CHR_LINE_1 & CHR_LINE_1 & CHR_LINE_1 & CHR_LINE_1 & "\n" &
-   "    0123456789/*+=.- Keypad\n" &
-   "    !" & CHR_QUOTE & "#$%&'()<>?[]   Forced unshifted\n" &
-   "    Mega + above     Shift those anyway\n" &
+   "  Key                PET with N keyboard\n" &
+   "  " & CHR_LINE_10 & CHR_LINE_10 & CHR_LINE_10 & CHR_LINE_10 & "\n" &
+   "  CTRL               OFF/RVS\n" &
+   "  0123456789/*+=.-   Keypad\n" &
+   "  !" & CHR_QUOTE & "#$%&'()<>?[]     Forced unshifted\n" &
+   "  Mega + above       Shift those anyway\n" &
+   "\n\n" &
+   "  Key                PET with B keyboard\n" &
+   "  " & CHR_LINE_10 & CHR_LINE_10 & CHR_LINE_10 & CHR_LINE_10 & "\n" &
+   "  Mega + 1234567890. Keypad\n" &
+   "  Mega + []          Forced shifted\n" &
+   "  ALT,TAB,ESC        REPEAT, TAB, ESC\n" &
+   "  CTRL               OFF/RVS\n" &
+   "\n" &
+   "CTRL+MEGA: diagnostic sense\n" &
 
    "\n\n    Press Space to continue.\n\n\n";
 
-constant HELP_1 : string :=
+constant HELP_1 : string := "";
 
-   "\n Demo Core for MEGA65 Version 1\n\n" &
+constant HELP_2 : string := "";
 
-   " MiSTer port 2022 by YOU\n" &
-   " Powered by MiSTer2MEGA65\n\n\n" &
-
-   " Lorem ipsum dolor sit amet, consetetur\n" &
-   " sadipscing elitr, sed diam nonumy eirmod\n" &
-   " Mpor invidunt ut labore et dolore magna\n" &
-   " aliquyam erat, sed diam voluptua. At vero\n" &
-   " eos et accusam et justo duo.\n\n" &
-
-   " Dolores et ea rebum. Stet clita kasd gube\n" &
-   " gren, no sea takimata sanctus est Lorem ip\n" &
-   " Sed diam nonumy eirmod tempor invidunt ut\n" &
-   " labore et dolore magna aliquyam era\n\n" &
-
-   " Cursor right to learn more.       (1 of 3)\n" &
-   " Press Space to close the help screen.";
-
-constant HELP_2 : string :=
-
-   "\n Demo Core for MEGA65 Version 1\n\n" &
-
-   " XYZ ABCDEFGH:\n\n" &
-
-   " 1. ABCD EFGH\n" &
-   " 2. IJK LM NOPQ RSTUVWXYZ\n" &
-   " 3. 10 20 30 40 50\n\n" &
-
-   " a) Dolores et ea rebum\n" &
-   " b) Takimata sanctus est\n" &
-   " c) Tempor Invidunt ut\n" &
-   " d) Sed Diam Nonumy eirmod te\n" &
-   " e) Awesome\n\n" &
-
-   " Ut wisi enim ad minim veniam, quis nostru\n" &
-   " exerci tation ullamcorper suscipit lobor\n" &
-   " tis nisl ut aliquip ex ea commodo.\n\n" &
-
-   " Crsr left: Prev  Crsr right: Next (2 of 3)\n" &
-   " Press Space to close the help screen.";
-
-constant HELP_3 : string :=
-
-   "\n Help Screens\n\n" &
-
-   " You can have 255 screens per help topic.\n\n" &
-
-   " 15 topics overall.\n" &
-   " 1 menu item per topic.\n\n\n\n" &
-
-   " Cursor left to go back.           (3 of 3)\n" &
-   " Press Space to close the help screen.";
+constant HELP_3 : string := "";
 
 -- Concatenate all your Welcome and Help screens into one large string, so that during synthesis one large string ROM can be build.
 constant WHS_DATA : string := SCR_WELCOME & HELP_1 & HELP_2 & HELP_3;
@@ -330,7 +288,7 @@ constant OPTM_S_SAVING     : string := "<Saving>";          -- the internal writ
 --             Do use a lower case \n. If you forget one of them or if you use upper case, you will run into undefined behavior.
 --          2. Start each line that contains an actual menu item (multi- or single-select) with a Space character,
 --             otherwise you will experience visual glitches.
-constant OPTM_SIZE         : natural := 38;  -- amount of items including empty lines:
+constant OPTM_SIZE         : natural := 41;  -- amount of items including empty lines:
                                              -- needs to be equal to the number of lines in OPTM_ITEMS and amount of items in OPTM_GROUPS
                                              -- IMPORTANT: If SAVE_SETTINGS is true and OPTM_SIZE changes: Make sure to re-generate and
                                              -- and re-distribute the config file. You can make a new one using M2M/tools/make_config.sh
@@ -344,42 +302,45 @@ constant OPTM_ITEMS        : string :=
 
    " Model options...\n"    &	-- 0
    " Model options\n"       &	-- 1  Model options submenu
+   "\n"                     &   
    " 2001 screen blank etc\n" &
    " 2001 white\n"          &
-   " B keyboard (TODO)\n"   &
-   " 6545 CRTC\n"           &   -- 5
+   " B keyboard\n"          & -- 5
+   " 6545 CRT Controller\n" &
    " 80 columns (TODO)\n"   &
+   " ColourPET (TODO)\n"    &
+   " 8096 memory exp(TODO)\n"  &
+   " 8296 memory exp(TODO)\n"  &  -- 10
    " PET ROM: %s\n"         &
    " Charset: %s\n"         &
    " Drive ROM: %s\n"       &
-   "\n"                     &   -- 10
-   " Back to main menu\n"   &
+   "\n"                     &
+   " Back to main menu\n"   & -- 15
    "\n"                     &
    " Drives\n"              &
    "\n"                     &
-   " Drive 8:%s\n"          &	-- 15
-   " Drive 9:%s\n"          &
-   " Drive Z:%s\n"          &
+   " Drive 8:%s\n"          &
+   " Drive 9:%s\n"          & -- 20
    "\n"                     &
    " HDMI settings...\n"    &
-   "\n"                     &   -- 20
-   " HDMI: %s\n"            &   -- HDMI submenu
-   " HDMI Settings\n"       &
+   "\n"                     & -- HDMI submenu
+   " HDMI: %s\n"            &
+   " HDMI Settings\n"       & -- 25
    "\n"                     &
    " 720p 50 Hz 16:9\n"     &
-   " 720p 60 Hz 16:9\n"     &   -- 25
+   " 720p 60 Hz 16:9\n"     &
    " 576p 50 Hz 4:3\n"      &
-   " 576p 50 Hz 5:4\n"      &
+   " 576p 50 Hz 5:4\n"      & -- 30
    " 640x480 60 Hz\n"       &
    " 720x480 59.94 Hz\n"    &
-   " 800x600 60 Hz\n"       &   -- 30
+   " 800x600 60 Hz\n"       &
    "\n"                     &
-   " Back to main menu\n"   &
+   " Back to main menu\n"   & -- 35
    " HDMI: CRT emulation\n" &
    " HDMI: Zoom-in\n"       &
-   " Audio improvements\n"  &	-- 35
+   " Audio improvements\n"  &
    "\n"                     &
-   " Close Menu\n";	        -- 37
+   " Close Menu\n";           -- 40
 
 -- define your own constants here and choose meaningful names
 -- make sure that your first group uses the value 1 (0 means "no menu item", such as text and line),
@@ -391,16 +352,18 @@ constant OPTM_G_2001_White : integer :=  2;
 constant OPTM_G_B_Keyboard : integer :=  3;
 constant OPTM_G_CRTC       : integer :=  4;
 constant OPTM_G_80_Cols    : integer :=  5;
-constant OPTM_G_LD_ROMs    : integer :=  6;
-constant OPTM_G_LD_CHAR    : integer :=  7;
-constant OPTM_G_LD_Drive   : integer :=  8;
-constant OPTM_G_HDMI       : integer :=  9;
-constant OPTM_G_Drive_8    : integer := 10;
-constant OPTM_G_Drive_9    : integer := 11;
-constant OPTM_G_Drive_Z    : integer := 12;
-constant OPTM_G_CRT        : integer := 13;
-constant OPTM_G_Zoom       : integer := 14;
-constant OPTM_G_Audio      : integer := 15;
+constant OPTM_G_Colour     : integer :=  6;
+constant OPTM_G_8096       : integer :=  7;
+constant OPTM_G_8296       : integer :=  8;
+constant OPTM_G_LD_ROMs    : integer :=  9;
+constant OPTM_G_LD_CHAR    : integer := 10;
+constant OPTM_G_LD_Drive   : integer := 11;
+constant OPTM_G_HDMI       : integer := 12;
+constant OPTM_G_Drive_8    : integer := 13;
+constant OPTM_G_Drive_9    : integer := 14;
+constant OPTM_G_CRT        : integer := 15;
+constant OPTM_G_Zoom       : integer := 16;
+constant OPTM_G_Audio      : integer := 17;
 
 -- !!! DO NOT TOUCH !!!
 type OPTM_GTYPE is array (0 to OPTM_SIZE - 1) of integer range 0 to 2**OPTM_GTC- 1;
@@ -410,11 +373,15 @@ type OPTM_GTYPE is array (0 to OPTM_SIZE - 1) of integer range 0 to 2**OPTM_GTC-
 -- make sure that you have exactly the same amount of entries here than in OPTM_ITEMS and defined by OPTM_SIZE
 constant OPTM_GROUPS       : OPTM_GTYPE := ( OPTM_G_SUBMENU + OPTM_G_START,            -- Model Options
                                              OPTM_G_TEXT + OPTM_G_HEADLINE,            -- Headline "Model Options"
+                                             OPTM_G_LINE,                              -- Line
                                              OPTM_G_2001_Blank + OPTM_G_SINGLESEL,     -- Item 2001 screen blank etc
                                              OPTM_G_2001_White + OPTM_G_SINGLESEL,     -- Item 2001 white
                                              OPTM_G_B_Keyboard + OPTM_G_SINGLESEL,     -- Item B keyboard
                                              OPTM_G_CRTC + OPTM_G_SINGLESEL,           -- Item 6545 CRTC
                                              OPTM_G_80_Cols + OPTM_G_SINGLESEL,        -- Item 80 Columns
+                                             OPTM_G_Colour + OPTM_G_SINGLESEL,         -- Item ColourPET
+                                             OPTM_G_8096 + OPTM_G_SINGLESEL,           -- Item 8096 memory expansion
+                                             OPTM_G_8296 + OPTM_G_SINGLESEL,           -- Item 8296 memory expansion
                                              OPTM_G_LD_ROMs + OPTM_G_LOAD_ROM,         -- Load ROMs
                                              OPTM_G_LD_CHAR + OPTM_G_LOAD_ROM,         -- Load characters
                                              OPTM_G_LD_Drive + OPTM_G_LOAD_ROM,        -- Load drive ROMs
@@ -426,7 +393,6 @@ constant OPTM_GROUPS       : OPTM_GTYPE := ( OPTM_G_SUBMENU + OPTM_G_START,     
                                              OPTM_G_LINE,                              -- Line
                                              OPTM_G_Drive_8 + OPTM_G_MOUNT_DRV,        -- Drive 8
                                              OPTM_G_Drive_9                   ,        -- Drive 9
-                                             OPTM_G_Drive_Z                   ,        -- Drive Z, not used
                                              OPTM_G_LINE,                              -- Line
                                              OPTM_G_TEXT + OPTM_G_HEADLINE,            -- Headline "Another Headline"
                                              OPTM_G_LINE,                              -- Line

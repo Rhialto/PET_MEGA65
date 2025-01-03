@@ -16,6 +16,7 @@ use work.vdrives_pkg.all;
 use work.globals.C_MENU_MODEL_2001_BLANK;
 use work.globals.C_MENU_MODEL_2001_WHITE;
 use work.globals.C_MENU_MODEL_CRTC;
+use work.globals.C_MENU_MODEL_B_KEYBOARD;
 
 
 entity main is
@@ -124,8 +125,6 @@ architecture synthesis of main is
     signal pix : std_logic;
     signal HBlank : std_logic;
     signal VBlank : std_logic;
-    --signal HSync : std_logic;
-    --signal VSync : std_logic;
     signal audioDat : std_logic ;
     signal tape_audio : std_logic;
 
@@ -519,6 +518,7 @@ begin
 
          row_select_i         => keyb_row_select,
          column_selected_o    => keyb_column_selected,
+         business_layout_i    => osm_i(C_MENU_MODEL_B_KEYBOARD),
 
          diag_sense_o         => diag_sense
       ); -- i_keyboard
