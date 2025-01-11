@@ -24,7 +24,7 @@ entity main is
       G_VDNUM                 : natural         -- amount of virtual drives
    );
    port (
-      clk_main_i              : in  std_logic;  -- 56 MHz
+      clk_main_i              : in  std_logic;  -- 32 MHz
       reset_soft_i            : in  std_logic;
       reset_hard_i            : in  std_logic;
       pause_i                 : in  std_logic;
@@ -106,13 +106,7 @@ architecture synthesis of main is
    --signal pet_pause            : std_logic;
     signal pet_drive_led        : std_logic_vector(G_VDNUM-1 downto 0);
 
-    signal divby7 : INTEGER range 0 to 7 := 0;          -- 3 bits
-    signal cpu_div : INTEGER range 0 to 127 := 0;       -- 7 bits
-    signal cpu_rate : INTEGER range 0 to 127 := 55;     -- 7 bits
-    type cpu_rates_array is array (0 to 3) of INTEGER range 0 to 127 ;  -- 7 bits each
-    constant cpu_rates : cpu_rates_array := (55, 27, 13, 6);
-    signal ce_8mp : STD_LOGIC;
-    signal ce_8mn : STD_LOGIC;
+    signal cnt31 : INTEGER range 0 to 31 := 0;        -- 5 bits
     signal ce_1m : STD_LOGIC;
 
     signal addr : std_logic_vector(15 downto 0);
@@ -238,6 +232,7 @@ architecture synthesis of main is
 
    signal sound_sample         : signed(15 downto 0);	-- low-passed sound
 
+   signal ce_pixel             : std_logic;
 begin
 
    -- prevent data corruption by not allowing a soft reset to happen while the cache is still dirty
@@ -319,27 +314,12 @@ begin
      process(clk_main_i)
      begin
          if rising_edge(clk_main_i) then
-             -- Divide 56 MHz by 7 to get 8 Mhz.
-             divby7 <= divby7 + 1;
-             if divby7 = 6 then
-                 divby7 <= 0;
+             -- Divide 32 MHz by 32 to get 1 MHz.
+             cnt31 <= cnt31 + 1;
+             if cnt31 = 31 then
+                 cnt31 <= 0;
              end if;
-             ce_8mp <= '1' when divby7 = 2 else '0';
-             ce_8mn <= '1' when divby7 = 5 else '0';    -- Takes 3 of these clocks to fetch the character data from the character ROM.
-
-             -- Divide 56 MHz by 56 to get 1 MHz (other factors potentially available).
-             cpu_div <= cpu_div + 1;
-             if cpu_div = cpu_rate then
-                 cpu_div <= 0;
-                 --if tape_active = '1' and status(8 downto 7) = "00" then
-                 --    cpu_rate <= 2;
-                 --else
-                     -- cpu_rate <= cpu_rates(to_integer(unsigned(status(10 downto 9))));
-                     cpu_rate <= cpu_rates(0);
-                 --end if;
-             end if;
-             -- ce_1m <= not (tape_active = '1' and ram_ready = '0') and (cpu_div = 0);
-             ce_1m <= '1' when (cpu_div = 0) else '0';
+             ce_1m <= '1' when cnt31 = 0 else '0';
          end if;
      end process;
 -- 
@@ -350,23 +330,23 @@ begin
 -- we don't need this, all RAM and ROM is included in pet2001hw.
 ----------------------------------------------------
 
-     cpu_inst : entity work.T65
-         port map (
-             Mode => "00", -- Assuming Mode is a 2-bit signal
-             Res_n => reset_core_n,
-             Enable => ce_1m,
-             Clk => clk_main_i,
-             Rdy => '1',
-             Abort_n => '1',
-             IRQ_n => not irq,
-             NMI_n => '1',
-             SO_n => '1',
-             R_W_n => rnw,
-             A(23 downto 16) => addr_unused,
-             A(15 downto 0) => addr,
-             DIn => cpu_data_in,
-             DOut => cpu_data_out
-         );
+    cpu_inst : entity work.T65
+        port map (
+            Mode => "00", -- Assuming Mode is a 2-bit signal
+            Res_n => reset_core_n,
+            Enable => ce_1m,
+            Clk => clk_main_i,
+            Rdy => '1',
+            Abort_n => '1',
+            IRQ_n => not irq,
+            NMI_n => '1',
+            SO_n => '1',
+            R_W_n => rnw,
+            A(23 downto 16) => addr_unused,
+            A(15 downto 0) => addr,
+            DIn => cpu_data_in,
+            DOut => cpu_data_out
+        );
 
 
     pet2001hw_inst : entity work.pet2001hw
@@ -377,11 +357,12 @@ begin
         we          => not rnw,
         irq         => irq,
 
-        pix         => pix,
-        HSync       => video_hs_o,
-        VSync       => video_vs_o,
-        HBlank      => HBlank,                -- delayed to video_hblank_o,
-        VBlank      => VBlank,                -- delayed to video_vblank_o,
+        ce_pixel_o  => ce_pixel,
+        pix_o       => pix,
+        HSync_o     => video_hs_o,
+        VSync_o     => video_vs_o,
+        HBlank_o    => HBlank,                -- delayed to video_hblank_o,
+        VBlank_o    => VBlank,                -- delayed to video_vblank_o,
         pref_eoi_blanks  => osm_i(C_MENU_MODEL_2001_BLANK),
         pref_have_crtc   => osm_i(C_MENU_MODEL_CRTC),
 
@@ -422,8 +403,7 @@ begin
         clk_stop        => 0,
         diag_l          => diag_sense,
         clk             => clk_main_i,
-        ce_8mp          => ce_8mp,
-        ce_8mn          => ce_8mn,
+        cnt31_i         => cnt31,
         ce_1m           => ce_1m,
         reset           => not reset_core_n
      ); -- hw_inst
@@ -477,10 +457,11 @@ begin
 
     ); -- ieee488_bus
 
-     process (clk_main_i)
-     begin
-         if rising_edge(clk_main_i) then
-            if ce_8mn then
+
+    process (clk_main_i)
+    begin
+        if rising_edge(clk_main_i) then
+            if ce_pixel then
                 if osm_i(C_MENU_MODEL_2001_WHITE) then
                     video_red_o   <= x"AA" when pix = '1' else "00011111"; -- test signal
                     video_green_o <= x"AA" when pix = '1' else "00000000";
@@ -493,9 +474,9 @@ begin
                 video_hblank_o <= HBlank;
                 video_vblank_o <= VBlank;
             end if;
-            video_ce_o <= ce_8mn;
+            video_ce_o <= ce_pixel;
         end if;
-     end process;
+    end process;
 
    -- On video_ce_o and video_ce_ovl_o: You have an important @TODO when porting a core:
    -- video_ce_o: You need to make sure that video_ce_o divides clk_main_i such that it transforms clk_main_i

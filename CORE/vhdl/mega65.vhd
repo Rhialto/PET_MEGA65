@@ -104,7 +104,7 @@ port (
    clk_i                   : in  std_logic;              -- 100 MHz clock
 
    -- Share clock and reset with the framework
-   main_clk_o              : out std_logic;              -- CORE's 56 MHz clock
+   main_clk_o              : out std_logic;              -- CORE's 32 MHz clock
    main_rst_o              : out std_logic;              -- CORE's reset, synchronized
 
    -- M2M's reset manager provides 2 signals:
@@ -332,11 +332,11 @@ begin
 
 
    -- MMCME2_ADV clock generators:
-   --   @TODO YOURCORE:       56 MHz
+   --   @TODO YOURCORE:       32 MHz
    clk_gen : entity work.clk
       port map (
          sys_clk_i         => clk_i,           -- expects 100 MHz
-         main_clk_o        => main_clk,        -- CORE's 56 MHz clock
+         main_clk_o        => main_clk,        -- CORE's 32 MHz clock
          main_rst_o        => main_rst         -- CORE's reset, synchronized
       ); -- clk_gen
 
@@ -371,7 +371,7 @@ begin
          clk_main_speed_i     => CORE_CLK_SPEED,
 
          -- Video output
-         -- This starts out as 416x240 @ 60 Hz (pixel clock 8 MHz), but synchronized to main_clk (56 MHz).
+         -- This starts out as 416x240 @ 60 Hz (pixel clock 8 MHz), but synchronized to main_clk (32 MHz).
          video_ce_o           => video_ce_o,
          video_ce_ovl_o       => video_ce_ovl_o,
          video_red_o          => video_red_o,
