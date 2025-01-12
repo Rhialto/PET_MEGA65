@@ -307,7 +307,7 @@ constant OPTM_ITEMS        : string :=
    " 2001 white\n"          &
    " B keyboard\n"          & -- 5
    " 6545 CRT Controller\n" &
-   " 80 columns (TODO)\n"   &
+   " 80 columns\n"          &
    " ColourPET (TODO)\n"    &
    " 8096 memory exp(TODO)\n"  &
    " 8296 memory exp(TODO)\n"  &  -- 10

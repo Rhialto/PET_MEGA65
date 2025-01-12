@@ -196,6 +196,9 @@ constant C_MENU_MODEL_2001_WHITE : natural :=  4;
 constant C_MENU_MODEL_B_KEYBOARD : natural :=  5;
 constant C_MENU_MODEL_CRTC       : natural :=  6;
 constant C_MENU_MODEL_80_COLUMNS : natural :=  7;
+constant C_MENU_MODEL_COLOUR_PET : natural :=  8;
+constant C_MENU_MODEL_8096_MEM   : natural :=  9;
+constant C_MENU_MODEL_8296_MEM   : natural := 10;
 
 constant C_MENU_HDMI_16_9_50     : natural := 27;
 constant C_MENU_HDMI_16_9_60     : natural := 28;

@@ -7,7 +7,7 @@ This is the MegaPET, the PET implementation on the Mega-65 hardware.
 
 There have been many different versions of PET, and the MegaPET aims to support most of them, eventually.
 
-This project is organized in 2 git repositories. The top-level one is a snapshot of the MiSTer2MEGA65 framework, and much of the actual PET is in a submodule [CORE/PET2001_MiSTer](https://github.com/Rhialto/PET2001_MiSTer). If you want to get the source code, use these commands:
+This project is organized in 3 git repositories. The top-level one is a snapshot of the MiSTer2MEGA65 framework (which also brings the QNICE repo with it), and much of the actual PET is in a submodule [CORE/PET2001_MiSTer](https://github.com/Rhialto/PET2001_MiSTer). If you want to get the source code, use these commands:
 
 * `git clone https://github.com/Rhialto/PET_MEGA65`
 * `cd PET_MEGA65`
@@ -20,12 +20,25 @@ There are currently no releases.
 
 From time to time there is a pre-release, when there seems to be some useful addition to the code base. There is absolutely no guarantee when those happen.
 
+v0.00009
+--------
+This prerelease adds, compared to v0.00007:
+
+- 80 columns of text. Enabling this option automatically enables the CRTC too, but you need to load the `8032b.rom` yourself. You will also need to enable the following new feature:
+- B-type ("business") keyboard. By itself this is not so interesting, since with the symbolic mapping of the Mega-65 keyboard you don't notice much difference (but do refer to the keyboard mapping section below).
+- 2001-style screen snow. This is enabled as part of "2001 screen blank etc". This option affects 2001-specific quirks as part of the "etcetera". At his time they are:
+  - screen snow, when the CPU accesses screen memory at the same time as the video system.
+  - the screen blanks when EOI is sent on the IEEE-488 bus. This is used by the ROM to mask the previous effect when scrolling (only the non-CRTC ROMs do this).
+  - the 1 KB of screen memory $8000-$83FF is repeated 3 more times, up to $8FFF. Later models go only up to $87FF.
+- I have extended the set of ROMs with B keyboard and 80 column ROMs. You can get more variants from the well-known Zimmers site.
+- I am including a `petcfg` file which you can copy to the `/PET` directory on the sd-card. It will remember the menu selections. Unfortunately not the ROM file you loaded, so it is less useful than it could be.
+
 v0.00007
 --------
 As of v0.00007, the core features:
 
 - R3 and R6 versions. I have an R6 myself and the R3 is generated from the MiSTeR2MEGA framework but not tested.
-- PET with or without CRTC (the CRTC controller which is used in later models)
+- PET with or without CRTC (the CRT Controller which is used in later models)
 - 40 columns only
 - with "2001" properties, or without (= screen blanks when EOI is sent, screen memory has more mirrors)
 - with "2001" blue-ish white, or green screen
@@ -107,6 +120,8 @@ Both layouts have a numerical keypad, which the Mega-65's keyboard is unfortunat
 * `!"#$%&'()<>?[]` are shifted on the Mega-65 keyboard but the shift key will be ignored for the PET.
 * `Mega` + the above keys: if you want to access the PET graphic characters on `!"#` etc, additionally press the `Mega` key. This *will* activate the PET's shift key.
 
+The ROMs slow down scrolling if you press the OFF/RVS key.
+
 ### B keyboard
 
 The B keyboard has 2 sets of number keys (and `.`): once on the numeric keypad, and once on the main. By default typing these keys will activate the version on the PET's main keyboard.
@@ -117,11 +132,13 @@ The B keyboard has 2 sets of number keys (and `.`): once on the numeric keypad, 
 * `ESC` and `TAB` are 2 more extra keys compared to the N keyboard
 * `CTRL`: works as the `OFF/RVS` key
 
+The ROMs slow down scrolling if you press the `<-` key (arrow left, not the cursor key). `:` works as a no-scroll key.
+
 ### Diagnostic Sense
 
 Normally the PET's memory counting is destructive. This is annoying when you're trying to debug some program: pressing reset causes you to lose the memory contents. However in ROM versons 2 and higher there is a built-in monitor available. This monitor is entered if the so-called "diagnostic sense" line is pulled low when resetting.
 
-On the MegaPET you can press `Mega` + `CTRL` to pull down the diagnostic sense line. While holding these, additionally press the reset button. Since both are on the left-hand side of the Mega-65, you can conveniently press `Mega` + `CTRL` with a thumb while using a finger around the corner for the reset.
+On the MegaPET you can press `Mega` + `CTRL` to pull down the diagnostic sense line. While holding these, additionally press the reset button. Since both are on the left-hand side of the Mega-65, you can conveniently press `Mega` + `CTRL` with a thumb while using a finger around the corner for the reset. This will land you in the machine language monitor.
 
 There's more: you're not yet out of the woods. Type a semicolon followed by RETURN; PET will respond with a question mark. Now move the cursor back to your register display line, and change the Stack Pointer (SP) value from 01 to F8. This strange procedure is important: you must follow it exactly. Once you've done so, you're clear. You may return to Basic with an X if you like, or proceed in the MLM.
 
@@ -131,8 +148,7 @@ Source: Jim Butterfield in [Compute! Magazine, issue #1, page 89](https://archiv
 CREDITS
 -------
 
-This project is based on, and would have been impossible without, the
-following other projects:
+This project is based on, and would have been impossible without, the following other projects:
 
 * [MiSTer2MEGA65](https://github.com/sy2002/MiSTer2MEGA65) by MJoergen and sy2002 is a framework to simplify porting MiSTer cores to the MEGA65.
 * [PET2001_MiSTer](https://github.com/MiSTer-devel/PET2001_MiSTer) from sorgelig. This was the starting point of the PET core.
