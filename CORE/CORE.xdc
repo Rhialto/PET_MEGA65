@@ -11,6 +11,7 @@
 ## Important: Using them in subsequent statements, e.g. clock dividers requires that they
 ## have been named/defined here before
 ## otherwise Vivado does not find the pins)
-create_generated_clock -name main_clk      [get_pins CORE/clk_gen/i_clk_main/CLKOUT0]
+create_generated_clock -name main_clk [get_pins CORE/clk_gen/i_clk_main/CLKOUT0]
 # Add more clocks here, if needed
+
 
