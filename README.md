@@ -20,6 +20,14 @@ There are currently no releases.
 
 From time to time there is a pre-release, when there seems to be some useful addition to the code base. There is absolutely no guarantee when those happen.
 
+v0.00010
+--------
+This prerelease adds, compared to v0.00009:
+
+- The optional second half of the character ROM can now be used (if it is 4 KB), by setting MA13 (poke 59520,12: poke 59521,3\*16). The MegaPET comes loaded with the character ROM from the SuperPET, which has ASCII and APL characters in the extra part.
+- Similarly the screen as a whole can be inverted by unsetting MA12 (use poke 59521,0\*16 or 2\*16).
+  These features only work with the CRTC, and these address bits may be repurposed in later PET models: the HRE uses MA12.
+
 v0.00009
 --------
 This prerelease adds, compared to v0.00007:
@@ -31,7 +39,7 @@ This prerelease adds, compared to v0.00007:
   - the screen blanks when EOI is sent on the IEEE-488 bus. This is used by the ROM to mask the previous effect when scrolling (only the non-CRTC ROMs do this).
   - the 1 KB of screen memory $8000-$83FF is repeated 3 more times, up to $8FFF. Later models go only up to $87FF.
 - I have extended the set of ROMs with B keyboard and 80 column ROMs. You can get more variants from the well-known Zimmers site.
-- I am including a `petcfg` file which you can copy to the `/PET` directory on the sd-card. It will remember the menu selections. Unfortunately not the ROM file you loaded, so it is less useful than it could be.
+- I am including a `petcfg` file which you can copy to the `/PET` directory on the sd-card. It will remember the menu selections. Unfortunately not the ROM file you loaded, so it is less useful than it could be. Actually I would recommend against using this. It got me into a scare when I left it set to 80 columns, and on the next load of the core I just got a black screen, because the corresponding ROM was not loaded any more...
 
 v0.00007
 --------
