@@ -19,6 +19,9 @@ use work.globals.C_MENU_MODEL_CRTC;
 use work.globals.C_MENU_MODEL_B_KEYBOARD;
 use work.globals.C_MENU_MODEL_80_COLUMNS;
 use work.globals.C_MENU_MODEL_COLOUR_PET;
+use work.globals.C_MENU_MODEL_08_KB;
+use work.globals.C_MENU_MODEL_16_KB;
+use work.globals.C_MENU_MODEL_32_KB;
 
 
 entity main is
@@ -365,9 +368,13 @@ begin
         VSync_o     => video_vs_o,
         HBlank_o    => HBlank,                -- delayed to video_hblank_o,
         VBlank_o    => VBlank,                -- delayed to video_vblank_o,
+
         pref_eoi_blanks   => osm_i(C_MENU_MODEL_2001_BLANK),
         pref_have_crtc    => osm_i(C_MENU_MODEL_CRTC) or osm_i(C_MENU_MODEL_80_COLUMNS), -- or osm_i(C_MENU_MODEL_COLOUR_PET),
         pref_have_80_cols => osm_i(C_MENU_MODEL_80_COLUMNS),
+        pref_have_08k => osm_i(C_MENU_MODEL_08_KB),
+        pref_have_16k => osm_i(C_MENU_MODEL_16_KB),
+        pref_have_32k => osm_i(C_MENU_MODEL_32_KB),
 
         keyrow      => keyb_row_select,       -- keyboard scanning (row select)
         keyin       => keyb_column_selected,  -- keyboard scanning (pressed keys)

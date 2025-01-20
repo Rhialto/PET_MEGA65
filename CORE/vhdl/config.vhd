@@ -288,7 +288,7 @@ constant OPTM_S_SAVING     : string := "<Saving>";          -- the internal writ
 --             Do use a lower case \n. If you forget one of them or if you use upper case, you will run into undefined behavior.
 --          2. Start each line that contains an actual menu item (multi- or single-select) with a Space character,
 --             otherwise you will experience visual glitches.
-constant OPTM_SIZE         : natural := 41;  -- amount of items including empty lines:
+constant OPTM_SIZE         : natural := 44;  -- amount of items including empty lines:
                                              -- needs to be equal to the number of lines in OPTM_ITEMS and amount of items in OPTM_GROUPS
                                              -- IMPORTANT: If SAVE_SETTINGS is true and OPTM_SIZE changes: Make sure to re-generate and
                                              -- and re-distribute the config file. You can make a new one using M2M/tools/make_config.sh
@@ -309,38 +309,41 @@ constant OPTM_ITEMS        : string :=
    " 6545 CRT Controller\n" &
    " 80 columns\n"          &
    " ColourPET (TODO)\n"    &
+   "  8 KB memory\n"        &
+   " 16 KB memory\n"        & -- 10
+   " 32 KB memory\n"        &
    " 8096 memory exp(TODO)\n"  &
-   " 8296 memory exp(TODO)\n"  &  -- 10
+   " 8296 memory exp(TODO)\n"  & 
    " PET ROM: %s\n"         &
-   " Charset: %s\n"         &
+   " Charset: %s\n"         & -- 15
    " Drive ROM: %s\n"       &
    "\n"                     &
-   " Back to main menu\n"   & -- 15
+   " Back to main menu\n"   &
    "\n"                     &
-   " Drives\n"              &
+   " Drives\n"              & -- 20
    "\n"                     &
    " Drive 8:%s\n"          &
-   " Drive 9:%s\n"          & -- 20
+   " Drive 9:%s\n"          &
    "\n"                     &
-   " HDMI settings...\n"    &
+   " HDMI settings...\n"    & -- 25
    "\n"                     & -- HDMI submenu
    " HDMI: %s\n"            &
-   " HDMI Settings\n"       & -- 25
+   " HDMI Settings\n"       &
    "\n"                     &
-   " 720p 50 Hz 16:9\n"     &
+   " 720p 50 Hz 16:9\n"     & -- 30
    " 720p 60 Hz 16:9\n"     &
    " 576p 50 Hz 4:3\n"      &
-   " 576p 50 Hz 5:4\n"      & -- 30
+   " 576p 50 Hz 5:4\n"      &
    " 640x480 60 Hz\n"       &
-   " 720x480 59.94 Hz\n"    &
+   " 720x480 59.94 Hz\n"    & -- 35
    " 800x600 60 Hz\n"       &
    "\n"                     &
-   " Back to main menu\n"   & -- 35
+   " Back to main menu\n"   &
    " HDMI: CRT emulation\n" &
-   " HDMI: Zoom-in\n"       &
+   " HDMI: Zoom-in\n"       & -- 40
    " Audio improvements\n"  &
    "\n"                     &
-   " Close Menu\n";           -- 40
+   " Close Menu\n";           -- 43
 
 -- define your own constants here and choose meaningful names
 -- make sure that your first group uses the value 1 (0 means "no menu item", such as text and line),
@@ -353,17 +356,18 @@ constant OPTM_G_B_Keyboard : integer :=  3;
 constant OPTM_G_CRTC       : integer :=  4;
 constant OPTM_G_80_Cols    : integer :=  5;
 constant OPTM_G_Colour     : integer :=  6;
-constant OPTM_G_8096       : integer :=  7;
-constant OPTM_G_8296       : integer :=  8;
-constant OPTM_G_LD_ROMs    : integer :=  9;
-constant OPTM_G_LD_CHAR    : integer := 10;
-constant OPTM_G_LD_Drive   : integer := 11;
-constant OPTM_G_HDMI       : integer := 12;
-constant OPTM_G_Drive_8    : integer := 13;
-constant OPTM_G_Drive_9    : integer := 14;
-constant OPTM_G_CRT        : integer := 15;
-constant OPTM_G_Zoom       : integer := 16;
-constant OPTM_G_Audio      : integer := 17;
+constant OPTM_G_BaseMem    : integer :=  7;
+constant OPTM_G_8096       : integer :=  8;
+constant OPTM_G_8296       : integer :=  9;
+constant OPTM_G_LD_ROMs    : integer := 10;
+constant OPTM_G_LD_CHAR    : integer := 11;
+constant OPTM_G_LD_Drive   : integer := 12;
+constant OPTM_G_HDMI       : integer := 13;
+constant OPTM_G_Drive_8    : integer := 14;
+constant OPTM_G_Drive_9    : integer := 15;
+constant OPTM_G_CRT        : integer := 16;
+constant OPTM_G_Zoom       : integer := 17;
+constant OPTM_G_Audio      : integer := 18;
 
 -- !!! DO NOT TOUCH !!!
 type OPTM_GTYPE is array (0 to OPTM_SIZE - 1) of integer range 0 to 2**OPTM_GTC- 1;
@@ -380,6 +384,9 @@ constant OPTM_GROUPS       : OPTM_GTYPE := ( OPTM_G_SUBMENU + OPTM_G_START,     
                                              OPTM_G_CRTC + OPTM_G_SINGLESEL,           -- Item 6545 CRTC
                                              OPTM_G_80_Cols + OPTM_G_SINGLESEL,        -- Item 80 Columns
                                              OPTM_G_Colour + OPTM_G_SINGLESEL,         -- Item ColourPET
+                                             OPTM_G_BaseMem,                           -- Item  8 KB memory
+                                             OPTM_G_BaseMem,                           -- Item 16 KB memory
+                                             OPTM_G_BaseMem + OPTM_G_STDSEL,           -- Item 32 KB memory
                                              OPTM_G_8096 + OPTM_G_SINGLESEL,           -- Item 8096 memory expansion
                                              OPTM_G_8296 + OPTM_G_SINGLESEL,           -- Item 8296 memory expansion
                                              OPTM_G_LD_ROMs + OPTM_G_LOAD_ROM,         -- Load ROMs

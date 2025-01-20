@@ -197,19 +197,23 @@ constant C_MENU_MODEL_B_KEYBOARD : natural :=  5;
 constant C_MENU_MODEL_CRTC       : natural :=  6;
 constant C_MENU_MODEL_80_COLUMNS : natural :=  7;
 constant C_MENU_MODEL_COLOUR_PET : natural :=  8;
-constant C_MENU_MODEL_8096_MEM   : natural :=  9;
-constant C_MENU_MODEL_8296_MEM   : natural := 10;
+constant C_MENU_MODEL_08_KB      : natural :=  9;
+constant C_MENU_MODEL_16_KB      : natural := 10;
+constant C_MENU_MODEL_32_KB      : natural := 11;
+constant C_MENU_MODEL_8096_MEM   : natural := 12;
+constant C_MENU_MODEL_8296_MEM   : natural := 13;
 
-constant C_MENU_HDMI_16_9_50     : natural := 27;
-constant C_MENU_HDMI_16_9_60     : natural := 28;
-constant C_MENU_HDMI_4_3_50      : natural := 29;
-constant C_MENU_HDMI_5_4_50      : natural := 30;
-constant C_MENU_HDMI_640_60      : natural := 31;
-constant C_MENU_HDMI_720_5994    : natural := 32;
-constant C_MENU_SVGA_800_60      : natural := 33;
+constant C_MENU_HDMI_16_9_50     : natural := 30;
+constant C_MENU_HDMI_16_9_60     : natural := 31;
+constant C_MENU_HDMI_4_3_50      : natural := 32;
+constant C_MENU_HDMI_5_4_50      : natural := 33;
+constant C_MENU_HDMI_640_60      : natural := 34;
+constant C_MENU_HDMI_720_5994    : natural := 35;
+constant C_MENU_SVGA_800_60      : natural := 36;
 
-constant C_MENU_CRT_EMULATION    : natural := 36;
-constant C_MENU_HDMI_ZOOM        : natural := 37;
-constant C_MENU_IMPROVE_AUDIO    : natural := 38;
+constant C_MENU_CRT_EMULATION    : natural := 39;
+constant C_MENU_HDMI_ZOOM        : natural := 40;
+constant C_MENU_IMPROVE_AUDIO    : natural := 41;
+
 end package globals;
 
