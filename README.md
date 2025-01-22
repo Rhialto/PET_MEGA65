@@ -24,9 +24,11 @@ v0.00010
 --------
 This prerelease adds, compared to v0.00009:
 
-- The optional second half of the character ROM can now be used (if it is 4 KB), by setting MA13 (poke 59520,12: poke 59521,3\*16). The MegaPET comes loaded with the character ROM from the SuperPET, which has ASCII and APL characters in the extra part.
-- Similarly the screen as a whole can be inverted by unsetting MA12 (use poke 59521,0\*16 or 2\*16).
-  These features only work with the CRTC, and these address bits may be repurposed in later PET models: the HRE uses MA12.
+- Steve Gray's [ColourPET](http://cbmsteve.ca/colourpet/index.html) board.
+- You can now select 8, 16 or 32 KB as the basic memory size.
+- The optional second half of the character ROM can now be used (if it is 4 KB), by setting MA13 (`poke 59520,12: poke 59521,3\*16`). The MegaPET comes loaded with the character ROM from the SuperPET, which has ASCII and APL characters in the extra part. To go back to normal use `poke 59520,12: 59521,1\*16`.
+- Similarly the screen as a whole can be inverted by unsetting MA12 (use `poke 59521,0\*16` or `2\*16`).
+  These features only work with the CRTC, and these address bits may be repurposed in later PET models: for example, the HRE uses MA12.
 
 v0.00009
 --------
@@ -69,7 +71,7 @@ At least the following variations of PET exist:
 
 -   Basic 1.0
     These all have a "chicklet" keyboard, functionally identical to the N keyboard, no CRT controller chip, 60 Hz refresh, 40 columns, shifted characters can be lower case.
-    These are the "2001" machines. `2001.rom` is the appropriate ROM for this, although you probably want to use `2001+ieee.rom` instead. It adds a ROM patch, taken from (VICE)[https://vice-emu.sourceforge.io/], to make loading from disk drives work. For the correct character set, you need `PET2001-chars.rom`.
+    These are the "2001" machines. `2001.rom` is the appropriate ROM for this, although you probably want to use `2001+ieee.rom` instead. It adds a ROM patch, taken from [VICE](https://vice-emu.sourceforge.io/), to make loading from disk drives work. For the correct character set, you need `PET2001-chars.rom`.
 
 -   Basic 2.0
     The character generator ROM has changed: in upper/lowercase mode, the unshifted characters are now lower case.
@@ -100,6 +102,64 @@ All the differences in display and keyboard manifest in the "editor" ROM. The Ba
 Later models are all variants of the 8032 model. These include a 64 KB memory expansion (making a 8096) and the 8296 which has 128 KB of memory (essentially the 64 KB memory expansion built-in and using 2 banks of 64 Kbit RAM chips).
 A different and incompatible expansion is the SuperPET a.k.a. MicroMainFrame 9000 (an 8032 with an additional 6809 CPU and a *different* 64 KB memory expansion).
 This is all not implemented at this time.
+
+SETTINGS
+--------
+
+These are the settings in the "Model options..." submenu.
+
+### 2001 screen blank etc
+
+This option enables the "2001 quirks":
+
+  - screen snow, when the CPU accesses screen memory at the same time as the video system.
+  - the screen blanks when EOI is sent on the IEEE-488 bus. This is used by the ROM to mask the previous effect when scrolling (only the non-CRTC ROMs do this).
+  - the 1 KB of screen memory $8000-$83FF is repeated 3 more times, up to $8FFF. Later models go only up to $87FF.
+
+For the full "2001 experience", enable this option, "2001 white" and "8 KB". Also load "2001+ieee.rom" (which allows you to use the disk drive, so this is cheating a bit).
+
+### 2001 white
+
+This changes the display colour to an approximation of that of the 2001, which was a slightly blue-ish white.
+The default colour is green.
+
+### B keyboard
+
+Normally an N (normal) keyboard is used, but with this option the Business mapping is used. This setting needs to correspond to what the Editor ROM expects. See below for the mapping from the Mega-65 keyboard to the PET keyboard types.
+
+### 6545 CRT Controller
+
+This option enables the CRT Controller, as present in the 40xx and 8xxx models. When enabled you need an Editor ROM that supports it. (You can mostly get away with using an Editor ROM that expects a CRTC when you have it disabled)
+
+### 80 columns
+
+This enables 80 columns of text (rather than the default 40), making an 8xxx model. Again, needs an Editor ROM that supports it. Most of those also expect a B keyboard and all need a CRTC. Therefore enabling this option implicitly enables the CRTC.
+
+### ColourPET rgbi
+
+This enables the [ColourPET extension](http://cbmsteve.ca/colourpet/index.html) from Steve Gray. It is made for 40 columns but in principle it could be made to work with 80 columns. Again, needs a supporting [Editor ROM](http://cbmsteve.ca/editrom/index.html). Enabling this option implicitly enables the CRTC.
+
+Without a supporting Editor ROM, the colour memory ($8800...) will be initialized to all zero bytes and your text will be black on black: invisible. (On real PET hardware, screen memory is random on power-on). To help a bit with that, the "2001 white" option will partially override the Colour option and display in b/w, while keeping the colour RAM enabled so you can initialize it.
+
+### 8 KB memory, 16 KB memory, 32 KB memory
+
+A group of 3 options. Choose one for the amount of "normal" memory (available to Basic).
+
+### PET ROM: \<Load>
+
+Load a ROM file. See below in the ROMMAKER section for how these are put together.
+
+### Charset: \<Load>
+
+Load a character generator ROM. These can be 2 KB or 4 KB. Only the non-reversed characters are present. Inverting them is done in hardware.
+
+The optional second half of the character ROM can be used (if it is 4 KB), by setting MA13 (poke 59520,12: poke 59521,3\*16). The MegaPET comes loaded with the character ROM from the SuperPET, which has ASCII and APL characters in the extra part.
+Similarly the screen as a whole can be inverted by unsetting MA12 (use poke 59521,0\*16 or 2\*16).
+These features only work with the CRTC, and these address bits may be repurposed in later PET models: the HRE uses MA12.
+
+### Drive ROM: \<Load>
+
+Actually I didn't test this yet. There aren't so many alternative ROM sets for a 2031 drive.
 
 ROMMAKER
 --------
@@ -162,6 +222,7 @@ This project is based on, and would have been impossible without, the following 
 * [PET2001_MiSTer](https://github.com/MiSTer-devel/PET2001_MiSTer) from sorgelig. This was the starting point of the PET core.
 * [C64_MiSTerMEGA65](https://github.com/MJoergen/C64_MiSTerMEGA65) by MJoergen and sy2002 and contributors. I used the 1541 from this, and converted it to a 2031 drive (replaced the serial IEC bus with a parallel IEEE-488 bus) so it can connect to a PET.
 * The work-in-progress [CBM-II_MiSTer](https://github.com/eriks5/CBM-II_MiSTer) from which I first used the 6845 CRTC.
-* The BBC micro implementation [BeebFpga](https://github.com/hoglet67/BeebFpga) rom which I used the updates to the CRTC.
+* The BBC micro implementation [BeebFpga](https://github.com/hoglet67/BeebFpga) from which I used the updates to the CRTC.
+* Steve Gray's [ColourPET](http://cbmsteve.ca/colourpet/index.html) and [Edit ROM](http://cbmsteve.ca/editrom/index.html) projects. 
 
 /* vim:lbr

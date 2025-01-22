@@ -308,7 +308,7 @@ constant OPTM_ITEMS        : string :=
    " B keyboard\n"          & -- 5
    " 6545 CRT Controller\n" &
    " 80 columns\n"          &
-   " ColourPET (TODO)\n"    &
+   " ColourPET rgbi\n"      &
    "  8 KB memory\n"        &
    " 16 KB memory\n"        & -- 10
    " 32 KB memory\n"        &

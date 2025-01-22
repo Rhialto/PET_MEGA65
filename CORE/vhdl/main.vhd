@@ -364,17 +364,22 @@ begin
 
         ce_pixel_o  => ce_pixel,
         pix_o       => pix,
+	video_red_o => video_red_o,
+	video_green_o => video_green_o,
+	video_blue_o => video_blue_o,
         HSync_o     => video_hs_o,
         VSync_o     => video_vs_o,
-        HBlank_o    => HBlank,                -- delayed to video_hblank_o,
-        VBlank_o    => VBlank,                -- delayed to video_vblank_o,
+        HBlank_o    => video_hblank_o,
+        VBlank_o    => video_vblank_o,
 
-        pref_eoi_blanks   => osm_i(C_MENU_MODEL_2001_BLANK),
-        pref_have_crtc    => osm_i(C_MENU_MODEL_CRTC) or osm_i(C_MENU_MODEL_80_COLUMNS), -- or osm_i(C_MENU_MODEL_COLOUR_PET),
-        pref_have_80_cols => osm_i(C_MENU_MODEL_80_COLUMNS),
-        pref_have_08k => osm_i(C_MENU_MODEL_08_KB),
-        pref_have_16k => osm_i(C_MENU_MODEL_16_KB),
-        pref_have_32k => osm_i(C_MENU_MODEL_32_KB),
+        pref_eoi_blanks       => osm_i(C_MENU_MODEL_2001_BLANK),
+        pref_have_2001_white  => osm_i(C_MENU_MODEL_2001_WHITE),
+        pref_have_crtc        => osm_i(C_MENU_MODEL_CRTC) or osm_i(C_MENU_MODEL_80_COLUMNS) or osm_i(C_MENU_MODEL_COLOUR_PET),
+        pref_have_80_cols     => osm_i(C_MENU_MODEL_80_COLUMNS),
+	pref_have_colour      => osm_i(C_MENU_MODEL_COLOUR_PET),
+        pref_have_08k         => osm_i(C_MENU_MODEL_08_KB),
+        pref_have_16k         => osm_i(C_MENU_MODEL_16_KB),
+        pref_have_32k         => osm_i(C_MENU_MODEL_32_KB),
 
         keyrow      => keyb_row_select,       -- keyboard scanning (row select)
         keyin       => keyb_column_selected,  -- keyboard scanning (pressed keys)
@@ -468,26 +473,6 @@ begin
     ); -- ieee488_bus
 
 
-    process (clk_main_i)
-    begin
-        if rising_edge(clk_main_i) then
-            if ce_pixel then
-                if osm_i(C_MENU_MODEL_2001_WHITE) then
-                    video_red_o   <= x"AA" when pix = '1' else "00011111"; -- test signal
-                    video_green_o <= x"AA" when pix = '1' else "00000000";
-                    video_blue_o  <= x"FF" when pix = '1' else "00000000";
-                else
-                    video_red_o   <= "00011111"; -- test signal
-                    video_green_o <= "11111111" when pix = '1' else "00000000";
-                    video_blue_o  <= "00000000";
-                end if;
-                video_hblank_o <= HBlank;
-                video_vblank_o <= VBlank;
-            end if;
-            video_ce_o <= ce_pixel;
-        end if;
-    end process;
-
    -- On video_ce_o and video_ce_ovl_o: You have an important @TODO when porting a core:
    -- video_ce_o: You need to make sure that video_ce_o divides clk_main_i such that it transforms clk_main_i
    --             into the pixelclock of the core (means: the core's native output resolution pre-scandoubler)
@@ -497,7 +482,8 @@ begin
    --             resolution specified by VGA_DX/VGA_DY (globals.vhd)
    -- video_retro15kHz_o: '1', if the output from the core (post-scandoubler) in the retro 15 kHz analog RGB mode.
    --             Hint: Scandoubler off does not automatically mean retro 15 kHz on.
-   video_ce_ovl_o <= video_ce_o;
+   video_ce_o <= ce_pixel;
+   video_ce_ovl_o <= ce_pixel;
 
    i_keyboard : entity work.keyboard
       port map (
