@@ -24,11 +24,13 @@ v0.00010
 --------
 This prerelease adds, compared to v0.00009:
 
-- Steve Gray's [ColourPET](http://cbmsteve.ca/colourpet/index.html) board.
+- Steve Gray's [ColourPET](http://cbmsteve.ca/colourpet/index.html) board. Try it with [GridRunner](https://milasoft64.itch.io/gridrunner). I have included a test version of an editor ROM set for 40 columns `4032n+colour.rom`, specially created by Steve Gray for the MegaPET. Keep an eye on [github](https://github.com/sjgray/cbm-edit-rom/tree/master/binaries/ColourPET) for updates.
 - You can now select 8, 16 or 32 KB as the basic memory size.
+- 64 KB memory extension board, 8096-style. Not so well-tested but it seems ok.
 - The optional second half of the character ROM can now be used (if it is 4 KB), by setting MA13 (`poke 59520,12: poke 59521,3\*16`). The MegaPET comes loaded with the character ROM from the SuperPET, which has ASCII and APL characters in the extra part. To go back to normal use `poke 59520,12: 59521,1\*16`.
 - Similarly the screen as a whole can be inverted by unsetting MA12 (use `poke 59521,0\*16` or `2\*16`).
   These features only work with the CRTC, and these address bits may be repurposed in later PET models: for example, the HRE uses MA12.
+- Incorporated upstream fixes from the to-be-released next version of the M2M framework, fixing the "barcode" issue that affects a small number of Mega65 revision 6 machines.
 
 v0.00009
 --------
@@ -169,7 +171,7 @@ The Python program `./CORE/PET2001_MiSTer/roms/rommaker.py` is included in the s
 
 It has built-in knowledge of many ROM part numbers to know at which address they belong. For unknown ones, it falls back to an address in the file name.
 
-You use it by calling `python3 rommaker.py -o OUTPUT.rom file1 file2` or `python3 rommaker -p PRESET` (use `-p help` to see which presets are available).
+You use it by calling `python3 rommaker.py -o OUTPUT file1 file2` or `python3 rommaker -p PRESET` (use `-p help` to see which presets are available). `.rom` is automatically appended. Also a `.hex` file is created, suitable for using in core development.
 
 You can also use the rommaker to modify an existing 32 KB ROM file, by listing it as the first input. The next ROM files will be overlaid on top of this, effectively modifying the contents. This would be convenient for plugging for example a Toolkit ROM into the $9xxx, $Axxx or $Bxxx EPROM socket. As long as the file name contains "9000", "a000" or "b000", rommaker knows where to place it.
 

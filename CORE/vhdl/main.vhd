@@ -22,6 +22,8 @@ use work.globals.C_MENU_MODEL_COLOUR_PET;
 use work.globals.C_MENU_MODEL_08_KB;
 use work.globals.C_MENU_MODEL_16_KB;
 use work.globals.C_MENU_MODEL_32_KB;
+use work.globals.C_MENU_MODEL_8096_MEM;
+use work.globals.C_MENU_MODEL_8296_MEM;
 
 
 entity main is
@@ -380,6 +382,8 @@ begin
         pref_have_08k         => osm_i(C_MENU_MODEL_08_KB),
         pref_have_16k         => osm_i(C_MENU_MODEL_16_KB),
         pref_have_32k         => osm_i(C_MENU_MODEL_32_KB),
+        pref_have_8096        => osm_i(C_MENU_MODEL_8096_MEM),
+        pref_have_8296        => osm_i(C_MENU_MODEL_8296_MEM),
 
         keyrow      => keyb_row_select,       -- keyboard scanning (row select)
         keyin       => keyb_column_selected,  -- keyboard scanning (pressed keys)

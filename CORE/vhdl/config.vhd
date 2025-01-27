@@ -227,7 +227,7 @@ constant SEL_CORENAME      : std_logic_vector(15 downto 0) := x"0200";
 
 -- Currently this is only used in the debug console. Use the welcome screen and the
 -- help system to display the name and version of your core to the end user
-constant CORENAME          : string := "MEGA PET CORE V0.0";
+constant CORENAME          : string := "MegaPET CORE V0.0";
 
 --------------------------------------------------------------------------------------------------------------------
 -- "Help" menu / Options menu  (Selectors 0x0300 .. 0x0312): DO NOT TOUCH
@@ -312,7 +312,7 @@ constant OPTM_ITEMS        : string :=
    "  8 KB memory\n"        &
    " 16 KB memory\n"        & -- 10
    " 32 KB memory\n"        &
-   " 8096 memory exp(TODO)\n"  &
+   " 8096 memory expansion\n"  &
    " 8296 memory exp(TODO)\n"  & 
    " PET ROM: %s\n"         &
    " Charset: %s\n"         & -- 15
