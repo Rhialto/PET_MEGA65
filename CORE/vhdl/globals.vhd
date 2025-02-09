@@ -104,7 +104,7 @@ constant C_HMAP_M2M           : std_logic_vector(15 downto 0) := x"0000";     --
 -- Otherwise make sure that you wire C_VD_DEVICE in the qnice_ramrom_devices process and that you
 -- have as many appropriately sized RAM buffers for disk images as you have drives
 type vd_buf_array is array(natural range <>) of std_logic_vector;
-constant C_VDNUM              : natural := 1;                                          -- amount of virtual drives; maximum is 15
+constant C_VDNUM              : natural := 2;                                          -- amount of virtual drives; maximum is 15
 constant C_VD_DEVICE          : std_logic_vector(15 downto 0) := C_DEV_PET_VDRIVES;    -- device number of vdrives.vhd device
 constant C_VD_BUFFER          : vd_buf_array := (  C_DEV_PET_MOUNT1,
                                                    C_DEV_PET_MOUNT2,

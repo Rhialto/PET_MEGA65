@@ -111,7 +111,7 @@ architecture synthesis of main is
 
    -- Generic MiSTer PET signals
    --signal pet_pause            : std_logic;
-    signal pet_drive_led        : std_logic_vector(G_VDNUM-1 downto 0);
+    signal pet_drive_led        : std_logic_vector(G_VDNUM/2-1 downto 0);       -- FIXME number of LEDs
 
     signal cnt31 : INTEGER range 0 to 31 := 0;        -- 5 bits
     signal ce_1m : STD_LOGIC;
@@ -366,9 +366,9 @@ begin
 
         ce_pixel_o  => ce_pixel,
         pix_o       => pix,
-	video_red_o => video_red_o,
-	video_green_o => video_green_o,
-	video_blue_o => video_blue_o,
+        video_red_o => video_red_o,
+        video_green_o => video_green_o,
+        video_blue_o => video_blue_o,
         HSync_o     => video_hs_o,
         VSync_o     => video_vs_o,
         HBlank_o    => video_hblank_o,
@@ -378,7 +378,7 @@ begin
         pref_have_2001_white  => osm_i(C_MENU_MODEL_2001_WHITE),
         pref_have_crtc        => osm_i(C_MENU_MODEL_CRTC) or osm_i(C_MENU_MODEL_80_COLUMNS) or osm_i(C_MENU_MODEL_COLOUR_PET),
         pref_have_80_cols     => osm_i(C_MENU_MODEL_80_COLUMNS),
-	pref_have_colour      => osm_i(C_MENU_MODEL_COLOUR_PET),
+        pref_have_colour      => osm_i(C_MENU_MODEL_COLOUR_PET),
         pref_have_08k         => osm_i(C_MENU_MODEL_08_KB),
         pref_have_16k         => osm_i(C_MENU_MODEL_16_KB),
         pref_have_32k         => osm_i(C_MENU_MODEL_32_KB),
@@ -548,51 +548,125 @@ begin
 ------------------------------------------
 -- Let's connect some drives!
 ------------------------------------------
-   iec_drive_inst : entity work.iec_drive
+--    iec_drive_inst : entity work.iec_drive
+--       generic map (
+--          IEEE           => 1,                -- PETs only have an IEEE-488 bus, not IEC.
+--          PARPORT        => 0,                -- which implies there is no custom parallel cable needed or possible
+--          DUALROM        => 0,                -- and there is just one DOS as well.
+--          DRIVES         => G_VDNUM
+--       )
+--       port map (
+--          clk            => clk_main_i,
+--          ce             => iec_drive_ce,
+--          reset          => iec_drives_reset,
+--          pause          => pause_i,
+-- 
+--          -- IEC interface to the C64 core
+--          iec_clk_i      => 'H',
+--          iec_clk_o      => open,
+--          iec_atn_i      => 'H',
+--          iec_data_i     => 'H',
+--          iec_data_o     => open,
+-- 
+--          -- Device connected to IEEE-488 bus
+-- 
+--         ieee_data_i     => ieee488_d01_data_i,
+--         ieee_data_o     => ieee488_d01_data_o,
+--         ieee_atn_o      => ieee488_d01_atn_o ,
+--         ieee_atn_i      => ieee488_d01_atn_i ,
+--         ieee_ifc_i      => ieee488_d01_ifc_i ,
+--         ieee_srq_o      => ieee488_d01_srq_o ,
+--         ieee_dav_i      => ieee488_d01_dav_i ,
+--         ieee_dav_o      => ieee488_d01_dav_o ,
+--         ieee_eoi_i      => ieee488_d01_eoi_i ,
+--         ieee_eoi_o      => ieee488_d01_eoi_o ,
+--         ieee_nrfd_i     => ieee488_d01_nrfd_i,
+--         ieee_nrfd_o     => ieee488_d01_nrfd_o,
+--         ieee_ndac_i     => ieee488_d01_ndac_i,
+--         ieee_ndac_o     => ieee488_d01_ndac_o,
+-- 
+--          -- disk image status
+--          img_mounted    => iec_img_mounted,
+--          img_readonly   => iec_img_readonly,
+--          img_size       => iec_img_size,
+--          img_type       => iec_img_type,         -- 00=1541 emulated GCR(D64), 01=1541 real GCR mode (G64,D64), 10=1581 (D81)
+-- 
+--          -- QNICE SD-Card/FAT32 interface
+--          clk_sys        => pet_clk_sd_i,         -- "SD card" clock for writing to the drives' internal data buffers
+-- 
+--          sd_lba         => iec_sd_lba,
+--          sd_blk_cnt     => iec_sd_blk_cnt,
+--          sd_rd          => iec_sd_rd,
+--          sd_wr          => iec_sd_wr,
+--          sd_ack         => iec_sd_ack,
+--          sd_buff_addr   => iec_sd_buf_addr,
+--          sd_buff_dout   => iec_sd_buf_data_in,   -- data from SD card to the buffer RAM within the drive ("dout" is a strange name)
+--          sd_buff_din    => iec_sd_buf_data_out,  -- read the buffer RAM within the drive
+--          sd_buff_wr     => iec_sd_buf_wr,
+-- 
+--          -- drive led
+--          led            => pet_drive_led,
+-- 
+--          -- Parallel C1541 port, not connected on a 2031, at least not in this way
+--          par_stb_i      => 'H',
+--          par_stb_o      => open,
+--          par_data_i     => (others => 'H'),
+--          par_data_o     => open,
+-- 
+--          -- Access custom rom (DOS): All in QNICE clock domain but rom_std_i is in main clock domain
+--          rom_std_i      => '1',  -- pet_rom_i(0) or pet_rom_i(1), -- 1=use the factory default ROM
+--          rom_addr_i     => c2031rom_addr_i,
+--          rom_data_i     => c2031rom_data_i,
+--          rom_wr_i       => c2031rom_we_i,
+--          rom_data_o     => c2031rom_data_o
+--       ); -- iec_drive_inst
+
+   ieee_drive_inst : entity work.ieee_drive
       generic map (
-         IEEE           => 1,                -- PETs only have an IEEE-488 bus, not IEC.
-         PARPORT        => 0,                -- which implies there is no custom parallel cable needed or possible
-         DUALROM        => 0,                -- and there is just one DOS as well.
-         DRIVES         => G_VDNUM
+         DRIVES         => G_VDNUM / 2,
+         SUBDRV         => 2
       )
       port map (
-         clk            => clk_main_i,
-         ce             => iec_drive_ce,
+         clk            => clk_main_speed_i,
+         clk_sys        => clk_main_i,
          reset          => iec_drives_reset,
          pause          => pause_i,
 
-         -- IEC interface to the C64 core
-         iec_clk_i      => 'H',
-         iec_clk_o      => open,
-         iec_atn_i      => 'H',
-         iec_data_i     => 'H',
-         iec_data_o     => open,
+         -- drive led
+         led            => pet_drive_led,
 
          -- Device connected to IEEE-488 bus
 
-        ieee_data_i     => ieee488_d01_data_i,
-        ieee_data_o     => ieee488_d01_data_o,
-        ieee_atn_o      => ieee488_d01_atn_o ,
-        ieee_atn_i      => ieee488_d01_atn_i ,
-        ieee_ifc_i      => ieee488_d01_ifc_i ,
-        ieee_srq_o      => ieee488_d01_srq_o ,
-        ieee_dav_i      => ieee488_d01_dav_i ,
-        ieee_dav_o      => ieee488_d01_dav_o ,
-        ieee_eoi_i      => ieee488_d01_eoi_i ,
-        ieee_eoi_o      => ieee488_d01_eoi_o ,
-        ieee_nrfd_i     => ieee488_d01_nrfd_i,
-        ieee_nrfd_o     => ieee488_d01_nrfd_o,
-        ieee_ndac_i     => ieee488_d01_ndac_i,
-        ieee_ndac_o     => ieee488_d01_ndac_o,
+         bus_i_atn      => ieee488_d01_atn_i,
+         bus_i_eoi      => ieee488_d01_eoi_i,
+         bus_i_srq      => '1',
+         bus_i_ren      => '1',
+         bus_i_ifc      => ieee488_d01_ifc_i,
+         bus_i_dav      => ieee488_d01_dav_i,
+         bus_i_ndac     => ieee488_d01_ndac_i,
+         bus_i_nrfd     => ieee488_d01_nrfd_i,
+         bus_i_data     => ieee488_d01_data_i,
+
+         bus_o_atn      => ieee488_d01_atn_o,
+         bus_o_eoi      => ieee488_d01_eoi_o,
+         bus_o_srq      => ieee488_d01_srq_o,
+         bus_o_ren      => open,
+         bus_o_ifc      => open,
+         bus_o_dav      => ieee488_d01_dav_o,
+         bus_o_ndac     => ieee488_d01_ndac_o,
+         bus_o_nrfd     => ieee488_d01_nrfd_o,
+         bus_o_data     => ieee488_d01_data_o,
+
+         drv_type       => ("10"),                 -- 00=8050, 01=8250, 10=4040 XXX "10" for just one drive!
 
          -- disk image status
          img_mounted    => iec_img_mounted,
-         img_readonly   => iec_img_readonly,
          img_size       => iec_img_size,
-         img_type       => iec_img_type,         -- 00=1541 emulated GCR(D64), 01=1541 real GCR mode (G64,D64), 10=1581 (D81)
+         img_readonly   => iec_img_readonly,
+         --img_type       => iec_img_type,         -- 00=1541 emulated GCR(D64), 01=1541 real GCR mode (G64,D64), 10=1581 (D81)
 
          -- QNICE SD-Card/FAT32 interface
-         clk_sys        => pet_clk_sd_i,         -- "SD card" clock for writing to the drives' internal data buffers
+         --clk_sys        => pet_clk_sd_i,         -- "SD card" clock for writing to the drives' internal data buffers
 
          sd_lba         => iec_sd_lba,
          sd_blk_cnt     => iec_sd_blk_cnt,
@@ -602,24 +676,15 @@ begin
          sd_buff_addr   => iec_sd_buf_addr,
          sd_buff_dout   => iec_sd_buf_data_in,   -- data from SD card to the buffer RAM within the drive ("dout" is a strange name)
          sd_buff_din    => iec_sd_buf_data_out,  -- read the buffer RAM within the drive
-         sd_buff_wr     => iec_sd_buf_wr,
-
-         -- drive led
-         led            => pet_drive_led,
-
-         -- Parallel C1541 port, not connected on a 2031, at least not in this way
-         par_stb_i      => 'H',
-         par_stb_o      => open,
-         par_data_i     => (others => 'H'),
-         par_data_o     => open,
+         sd_buff_wr     => iec_sd_buf_wr
 
          -- Access custom rom (DOS): All in QNICE clock domain but rom_std_i is in main clock domain
-         rom_std_i      => '1',  -- pet_rom_i(0) or pet_rom_i(1), -- 1=use the factory default ROM
-         rom_addr_i     => c2031rom_addr_i,
-         rom_data_i     => c2031rom_data_i,
-         rom_wr_i       => c2031rom_we_i,
-         rom_data_o     => c2031rom_data_o
-      ); -- iec_drive_inst
+         --rom_std_i      => '1',  -- pet_rom_i(0) or pet_rom_i(1), -- 1=use the factory default ROM
+         --rom_addr_i     => c2031rom_addr_i,
+         --rom_data_i     => c2031rom_data_i,
+         --rom_wr_i       => c2031rom_we_i,
+         --rom_data_o     => c2031rom_data_o
+      ); -- ieee_drive_inst
 
    -- and the virtual counterpart...
 

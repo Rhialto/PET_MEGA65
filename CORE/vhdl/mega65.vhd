@@ -541,13 +541,13 @@ begin
             qnice_pet_qnice_we         <= qnice_dev_we_i;
             qnice_dev_data_o           <= qnice_pet_qnice_data;
 
-         -- Disk mount buffer RAM 1
+         -- Disk mount buffer RAM 1 (drive 0: or unit 8)
          when C_DEV_PET_MOUNT1 =>
             qnice_pet_mount1_buf_addr  <= qnice_dev_addr_i(17 downto 0);
             qnice_pet_mount1_buf_ram_we <= qnice_dev_we_i and not qnice_csr_window;
             qnice_dev_data_o           <= x"00" & qnice_pet_mount1_buf_ram_data;
 
-         -- Disk mount buffer RAM 2
+         -- Disk mount buffer RAM 2 (drive 1: or unit 9)
          when C_DEV_PET_MOUNT2 =>
             qnice_pet_mount2_buf_addr  <= qnice_dev_addr_i(17 downto 0);
             qnice_pet_mount2_buf_ram_we <= qnice_dev_we_i and not qnice_csr_window;
