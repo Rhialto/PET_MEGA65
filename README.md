@@ -20,6 +20,13 @@ There are currently no releases.
 
 From time to time there is a pre-release, when there seems to be some useful addition to the code base. There is absolutely no guarantee when those happen.
 
+v0.00011
+--------
+This prerelease adds/changes, compared to v0.00010:
+
+- Starts up as model 8032: with CRTC, 80 columns, B keyboard, 8032b.rom. Some people preferred this.
+- Updated ColourPET editor ROM to [cpet-c0-40-n-mega-wedge (2025-01-31).bin](https://github.com/sjgray/cbm-edit-rom/blob/269e4fb2f405f558f6d94e1a3dfefce39e28b60b/binaries/ColourPET/Test/cpet-c0-40-n-mega-wedge%20(2025-01-31).bin)
+
 v0.00010
 --------
 This prerelease adds, compared to v0.00009:

@@ -375,53 +375,54 @@ type OPTM_GTYPE is array (0 to OPTM_SIZE - 1) of integer range 0 to 2**OPTM_GTC-
 -- define your menu groups: which menu items are belonging together to form a group?
 -- where are separator lines? which items should be selected by default?
 -- make sure that you have exactly the same amount of entries here than in OPTM_ITEMS and defined by OPTM_SIZE
-constant OPTM_GROUPS       : OPTM_GTYPE := ( OPTM_G_SUBMENU + OPTM_G_START,            -- Model Options
-                                             OPTM_G_TEXT + OPTM_G_HEADLINE,            -- Headline "Model Options"
-                                             OPTM_G_LINE,                              -- Line
-                                             OPTM_G_2001_Blank + OPTM_G_SINGLESEL,     -- Item 2001 screen blank etc
-                                             OPTM_G_2001_White + OPTM_G_SINGLESEL,     -- Item 2001 white
-                                             OPTM_G_B_Keyboard + OPTM_G_SINGLESEL,     -- Item B keyboard
-                                             OPTM_G_CRTC + OPTM_G_SINGLESEL,           -- Item 6545 CRTC
-                                             OPTM_G_80_Cols + OPTM_G_SINGLESEL,        -- Item 80 Columns
-                                             OPTM_G_Colour + OPTM_G_SINGLESEL,         -- Item ColourPET
-                                             OPTM_G_BaseMem,                           -- Item  8 KB memory
-                                             OPTM_G_BaseMem,                           -- Item 16 KB memory
-                                             OPTM_G_BaseMem + OPTM_G_STDSEL,           -- Item 32 KB memory
-                                             OPTM_G_8096 + OPTM_G_SINGLESEL,           -- Item 8096 memory expansion
-                                             OPTM_G_8296 + OPTM_G_SINGLESEL,           -- Item 8296 memory expansion
-                                             OPTM_G_LD_ROMs + OPTM_G_LOAD_ROM,         -- Load ROMs
-                                             OPTM_G_LD_CHAR + OPTM_G_LOAD_ROM,         -- Load characters
-                                             OPTM_G_LD_Drive + OPTM_G_LOAD_ROM,        -- Load drive ROMs
-                                             OPTM_G_LINE,                              -- open
-                                             OPTM_G_CLOSE + OPTM_G_SUBMENU,            -- Close submenu / back to main menu
+constant OPTM_GROUPS       : OPTM_GTYPE := (
+	 OPTM_G_SUBMENU + OPTM_G_START,            -- Model Options
+	 OPTM_G_TEXT + OPTM_G_HEADLINE,            -- Headline "Model Options"
+	 OPTM_G_LINE,                              -- Line
+	 OPTM_G_2001_Blank + OPTM_G_SINGLESEL,     -- Item 2001 screen blank etc
+	 OPTM_G_2001_White + OPTM_G_SINGLESEL,     -- Item 2001 white
+	 OPTM_G_B_Keyboard +OPTM_G_SINGLESEL+OPTM_G_STDSEL, -- Item B keyboard
+	 OPTM_G_CRTC +OPTM_G_SINGLESEL+OPTM_G_STDSEL, -- Item 6545 CRTC
+	 OPTM_G_80_Cols +OPTM_G_SINGLESEL+OPTM_G_STDSEL, -- Item 80 Columns
+	 OPTM_G_Colour + OPTM_G_SINGLESEL,         -- Item ColourPET
+	 OPTM_G_BaseMem,                           -- Item  8 KB memory
+	 OPTM_G_BaseMem,                           -- Item 16 KB memory
+	 OPTM_G_BaseMem + OPTM_G_STDSEL,           -- Item 32 KB memory
+	 OPTM_G_8096 + OPTM_G_SINGLESEL,           -- Item 8096 memory expansion
+	 OPTM_G_8296 + OPTM_G_SINGLESEL,           -- Item 8296 memory expansion
+	 OPTM_G_LD_ROMs + OPTM_G_LOAD_ROM,         -- Load ROMs
+	 OPTM_G_LD_CHAR + OPTM_G_LOAD_ROM,         -- Load characters
+	 OPTM_G_LD_Drive + OPTM_G_LOAD_ROM,        -- Load drive ROMs
+	 OPTM_G_LINE,                              -- open
+	 OPTM_G_CLOSE + OPTM_G_SUBMENU,            -- Close submenu / back to main menu
 
-                                             OPTM_G_LINE,                              -- Line
-                                             OPTM_G_TEXT + OPTM_G_HEADLINE,            -- Headline "Drives"
-                                             OPTM_G_LINE,                              -- Line
-                                             OPTM_G_Drive_8 + OPTM_G_MOUNT_DRV,        -- Drive 8
-                                             OPTM_G_Drive_9                   ,        -- Drive 9
-                                             OPTM_G_LINE,                              -- Line
-                                             OPTM_G_TEXT + OPTM_G_HEADLINE,            -- Headline "Another Headline"
-                                             OPTM_G_LINE,                              -- Line
-                                             OPTM_G_SUBMENU,                           -- HDMI submenu block: START: "HDMI: %s"
-                                             OPTM_G_TEXT + OPTM_G_HEADLINE,            -- Headline "HDMI Settings"
-                                             OPTM_G_LINE,                              -- Line
-                                             OPTM_G_HDMI + OPTM_G_STDSEL,              -- 720p 50 Hz 16:9, selected by default
-                                             OPTM_G_HDMI,                              -- 720p 60 Hz 16:9
-                                             OPTM_G_HDMI,                              -- 576p 50 Hz 4:3
-                                             OPTM_G_HDMI,                              -- 576p 50 Hz 5:4
-                                             OPTM_G_HDMI,                              -- 640x480 60 Hz
-                                             OPTM_G_HDMI,                              -- 720x480 59.94 Hz
-                                             OPTM_G_HDMI,                              -- 600p 60 Hz
-                                             OPTM_G_LINE,                              -- open
-                                             OPTM_G_CLOSE + OPTM_G_SUBMENU,            -- Close submenu / back to main menu
-                                                                                       -- HDMI submenu block: END
-                                             OPTM_G_CRT +OPTM_G_SINGLESEL+OPTM_G_STDSEL, -- On/Off toggle ("Single Select")
-                                             OPTM_G_Zoom  + OPTM_G_SINGLESEL,          -- On/Off toggle ("Single Select")
-                                             OPTM_G_Audio + OPTM_G_SINGLESEL,          -- On/Off toggle ("Single Select")
-                                             OPTM_G_LINE,                              -- Line
-                                             OPTM_G_CLOSE                              -- Close Menu
-                                           );
+	 OPTM_G_LINE,                              -- Line
+	 OPTM_G_TEXT + OPTM_G_HEADLINE,            -- Headline "Drives"
+	 OPTM_G_LINE,                              -- Line
+	 OPTM_G_Drive_8 + OPTM_G_MOUNT_DRV,        -- Drive 8
+	 OPTM_G_Drive_9                   ,        -- Drive 9
+	 OPTM_G_LINE,                              -- Line
+	 OPTM_G_TEXT + OPTM_G_HEADLINE,            -- Headline "Another Headline"
+	 OPTM_G_LINE,                              -- Line
+	 OPTM_G_SUBMENU,                           -- HDMI submenu block: START: "HDMI: %s"
+	 OPTM_G_TEXT + OPTM_G_HEADLINE,            -- Headline "HDMI Settings"
+	 OPTM_G_LINE,                              -- Line
+	 OPTM_G_HDMI + OPTM_G_STDSEL,              -- 720p 50 Hz 16:9, selected by default
+	 OPTM_G_HDMI,                              -- 720p 60 Hz 16:9
+	 OPTM_G_HDMI,                              -- 576p 50 Hz 4:3
+	 OPTM_G_HDMI,                              -- 576p 50 Hz 5:4
+	 OPTM_G_HDMI,                              -- 640x480 60 Hz
+	 OPTM_G_HDMI,                              -- 720x480 59.94 Hz
+	 OPTM_G_HDMI,                              -- 600p 60 Hz
+	 OPTM_G_LINE,                              -- open
+	 OPTM_G_CLOSE + OPTM_G_SUBMENU,            -- Close submenu / back to main menu
+						   -- HDMI submenu block: END
+	 OPTM_G_CRT +OPTM_G_SINGLESEL+OPTM_G_STDSEL, -- On/Off toggle ("Single Select")
+	 OPTM_G_Zoom  + OPTM_G_SINGLESEL,          -- On/Off toggle ("Single Select")
+	 OPTM_G_Audio + OPTM_G_SINGLESEL,          -- On/Off toggle ("Single Select")
+	 OPTM_G_LINE,                              -- Line
+	 OPTM_G_CLOSE                              -- Close Menu
+       );
 
 --------------------------------------------------------------------------------------------------------------------
 -- !!! CAUTION: M2M FRAMEWORK CODE !!! DO NOT TOUCH ANYTHING BELOW THIS LINE !!!
