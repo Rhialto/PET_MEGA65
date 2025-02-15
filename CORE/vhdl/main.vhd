@@ -13,6 +13,7 @@ use ieee.numeric_std.all;
 library work;
 use work.video_modes_pkg.all;
 use work.vdrives_pkg.all;
+use work.globals.QNICE_CLK_SPEED;
 use work.globals.C_MENU_MODEL_2001_BLANK;
 use work.globals.C_MENU_MODEL_2001_WHITE;
 use work.globals.C_MENU_MODEL_CRTC;
@@ -515,31 +516,31 @@ begin
    -- This leads to a different frequency ratio C64 vs 1541 and therefore to incompatibilities such as the
    -- one described in this GitHub issue:
    -- https://github.com/MJoergen/C64MEGA65/issues/2
-   iec_drive_ce_proc : process (all)
-      variable msum, nextsum: integer;
-   begin
-      msum    := clk_main_speed_i;
-      nextsum := iec_dce_sum + 16000000;
-
-      if rising_edge(clk_main_i) then
-         iec_drive_ce <= '0';
-         if reset_core_n = '0' then
-            iec_dce_sum <= 0;
-         else
-            iec_dce_sum <= nextsum;
-            if nextsum >= msum then
-               iec_dce_sum <= nextsum - msum;
-               iec_drive_ce <= '1';
-            end if;
-         end if;
-      end if;
-   end process iec_drive_ce_proc;
+--    iec_drive_ce_proc : process (all)
+--       variable msum, nextsum: integer;
+--    begin
+--       msum    := clk_main_speed_i;
+--       nextsum := iec_dce_sum + 16000000;
+-- 
+--       if rising_edge(clk_main_i) then
+--          iec_drive_ce <= '0';
+--          if reset_core_n = '0' then
+--             iec_dce_sum <= 0;
+--          else
+--             iec_dce_sum <= nextsum;
+--             if nextsum >= msum then
+--                iec_dce_sum <= nextsum - msum;
+--                iec_drive_ce <= '1';
+--             end if;
+--          end if;
+--       end if;
+--    end process iec_drive_ce_proc;
 
    -- Drive is held to reset if the core is held to reset or if the drive is not mounted, yet
    -- @TODO: MiSTer also allows these options when it comes to drive-enable:
    --        "P2oPQ,Enable Drive #8,If Mounted,Always,Never;"
    --        "P2oNO,Enable Drive #9,If Mounted,Always,Never;"
-   --        This code currently only implements the "If Mounted" option
+   --        This code currently only implements the "Always" option
    iec_drv_reset_gen : for i in 0 to G_VDNUM - 1 generate
       -- iec_drives_reset(i) <= (not reset_core_n) or (not vdrives_mounted(i));
        iec_drives_reset(i) <= (not reset_core_n); -- for now allow empty drives...
@@ -623,13 +624,15 @@ begin
 
    ieee_drive_inst : entity work.ieee_drive
       generic map (
-         DRIVES         => G_VDNUM / 2,
+         DRIVES         => G_VDNUM / 2,         -- FIXME: 2 is drives per unit
          SUBDRV         => 2
       )
       port map (
-         clk            => clk_main_speed_i,
-         clk_sys        => clk_main_i,
-         reset          => iec_drives_reset,
+         --clk            => clk_main_speed_i,
+         --clk_sys        => clk_main_i,
+         clk            => QNICE_CLK_SPEED,
+         clk_sys        => pet_clk_sd_i,
+         reset          => iec_drives_reset(0), -- FIXME for >1 dual drive
          pause          => pause_i,
 
          -- drive led
@@ -657,7 +660,7 @@ begin
          bus_o_nrfd     => ieee488_d01_nrfd_o,
          bus_o_data     => ieee488_d01_data_o,
 
-         drv_type       => ("10"),                 -- 00=8050, 01=8250, 10=4040 XXX "10" for just one drive!
+         drv_type       => "1",                    -- 0=8250, 1=4040 FIXME "1" for just one drive!
 
          -- disk image status
          img_mounted    => iec_img_mounted,
@@ -667,6 +670,10 @@ begin
 
          -- QNICE SD-Card/FAT32 interface
          --clk_sys        => pet_clk_sd_i,         -- "SD card" clock for writing to the drives' internal data buffers
+         -- FIXME Should I have 2 clocks, clk_sys (for QNICE) and clk_main (for the core) and carefully
+         -- decide which parts of the drives get clocked by which clock?
+         -- Or alternatively run everything on the QNICE clock and supply the correct frequency?
+	 -- For now we do the second.
 
          sd_lba         => iec_sd_lba,
          sd_blk_cnt     => iec_sd_blk_cnt,
