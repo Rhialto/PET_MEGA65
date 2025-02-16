@@ -78,7 +78,7 @@ type WHS_RECORD_ARRAY_TYPE is array (0 to WHS_RECORDS - 1) of WHS_RECORD_TYPE;
 
 constant SCR_WELCOME : string :=
 
-   "MEGA-PET Core Version 0.0...\n" &
+   "MegaPET Core Version 0.0...\n" &
    "Port from MiSTer done by\n" & 
    "Olaf 'Rhialto' Seibert in 2025\n\n" &
 
@@ -320,10 +320,10 @@ constant OPTM_ITEMS        : string :=
    "\n"                     &
    " Back to main menu\n"   &
    "\n"                     &
-   " Drives\n"              & -- 20
+   " Drives of Unit 8\n"    & -- 20
    "\n"                     &
-   " Drive 8:%s\n"          &
-   " Drive 9:%s\n"          &
+   " 0:%s\n"                &
+   " 1:%s\n"                &
    "\n"                     &
    " HDMI settings...\n"    & -- 25
    "\n"                     & -- HDMI submenu
@@ -363,8 +363,8 @@ constant OPTM_G_LD_ROMs    : integer := 10;
 constant OPTM_G_LD_CHAR    : integer := 11;
 constant OPTM_G_LD_Drive   : integer := 12;
 constant OPTM_G_HDMI       : integer := 13;
-constant OPTM_G_Drive_8    : integer := 14;
-constant OPTM_G_Drive_9    : integer := 15;
+constant OPTM_G_Drive_0    : integer := 14;
+constant OPTM_G_Drive_1    : integer := 15;
 constant OPTM_G_CRT        : integer := 16;
 constant OPTM_G_Zoom       : integer := 17;
 constant OPTM_G_Audio      : integer := 18;
@@ -399,8 +399,8 @@ constant OPTM_GROUPS       : OPTM_GTYPE := (
 	 OPTM_G_LINE,                              -- Line
 	 OPTM_G_TEXT + OPTM_G_HEADLINE,            -- Headline "Drives"
 	 OPTM_G_LINE,                              -- Line
-	 OPTM_G_Drive_8 + OPTM_G_MOUNT_DRV,        -- Drive 8/0:
-	 OPTM_G_Drive_9 + OPTM_G_MOUNT_DRV,        -- Drive 9/1:
+	 OPTM_G_Drive_0 + OPTM_G_MOUNT_DRV,        -- Drive 0:
+	 OPTM_G_Drive_1 + OPTM_G_MOUNT_DRV,        -- Drive 1:
 	 OPTM_G_LINE,                              -- Line
 	 OPTM_G_TEXT + OPTM_G_HEADLINE,            -- Headline "Another Headline"
 	 OPTM_G_LINE,                              -- Line

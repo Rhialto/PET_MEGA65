@@ -241,6 +241,27 @@ architecture synthesis of main is
    signal sound_sample         : signed(15 downto 0);	-- low-passed sound
 
    signal ce_pixel             : std_logic;
+
+   -- -- --
+   -- -- --
+   --
+   -- Our vd_vec_arrays are typically declared as
+   --   signal iec_sd_lba  : vd_vec_array(G_VDNUM - 1 downto 0)(31 downto 0);
+   -- and the Verilog counterpart is
+   --   output      [31:0] sd_lba[NBD],
+   -- which has the opposite endianness in the first [NBD] index.
+   -- So we swap here, rather than changing the whole M2M framework to use
+   --   signal iec_sd_lba  : vd_vec_array(0 to G_VDNUM - 1)(31 downto 0);
+
+   function reverse_vd_vec_array(arr : vd_vec_array) return vd_vec_array is
+       variable result : vd_vec_array(arr'RANGE)(arr'element'RANGE);
+   begin
+       for i in arr'RANGE loop
+           result(arr'HIGH - i + arr'LOW) := arr(i);
+       end loop;
+       return result;
+   end function;
+
 begin
 
    -- prevent data corruption by not allowing a soft reset to happen while the cache is still dirty
@@ -356,7 +377,6 @@ begin
             DOut => cpu_data_out
         );
 
-
     pet2001hw_inst : entity work.pet2001hw
     port map (
         addr        => addr,
@@ -413,11 +433,11 @@ begin
 
         -- QNICE clock domain via pet_clk_sd_i
         dma_clk         => pet_clk_sd_i,
-        dma_addr        => petrom_addr_i, -- 0,
-        dma_din         => petrom_data_i, -- 0,
-        dma_dout        => petrom_data_o, -- open,
-        dma_we          => petrom_we_i, --0,
-        dma_char_ce     => petchars_ce_i, --0,
+        dma_addr        => petrom_addr_i,
+        dma_din         => petrom_data_i,
+        dma_dout        => petrom_data_o,
+        dma_we          => petrom_we_i,
+        dma_char_ce     => petchars_ce_i,
 
         clk_speed       => 0,
         clk_stop        => 0,
@@ -632,6 +652,7 @@ begin
          --clk_sys        => clk_main_i,
          clk            => QNICE_CLK_SPEED,
          clk_sys        => pet_clk_sd_i,
+         clk_main       => clk_main_i,
          reset          => iec_drives_reset(0), -- FIXME for >1 dual drive
          pause          => pause_i,
 
@@ -724,8 +745,8 @@ begin
 
          -- MiSTer's "SD block level access" interface, which runs in QNICE's clock domain
          -- using dedicated signal on Mister's side such as "clk_sys"
-         sd_lba_i             => iec_sd_lba,
-         sd_blk_cnt_i         => iec_sd_blk_cnt,    -- number of blocks-1
+         sd_lba_i             => reverse_vd_vec_array(iec_sd_lba),
+         sd_blk_cnt_i         => reverse_vd_vec_array(iec_sd_blk_cnt),
          sd_rd_i              => iec_sd_rd,
          sd_wr_i              => iec_sd_wr,
          sd_ack_o             => iec_sd_ack,
@@ -734,7 +755,9 @@ begin
          -- to determine, which RAM buffer actually needs to be written to (using the clk_qnice_i clock domain)
          sd_buff_addr_o       => iec_sd_buf_addr,
          sd_buff_dout_o       => iec_sd_buf_data_in,
-         sd_buff_din_i        => iec_sd_buf_data_out,
+	 -- Both drives inside a unit share the same track buffer, so with
+	 -- only 1 unit you can't see if iec_sd_buf_data_out needs to be swapped.
+         sd_buff_din_i        => reverse_vd_vec_array(iec_sd_buf_data_out),
          sd_buff_wr_o         => iec_sd_buf_wr,
 
          -- QNICE interface (MMIO, 4k-segmented)

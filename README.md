@@ -26,6 +26,7 @@ This prerelease adds/changes, compared to v0.00010:
 
 - Starts up as model 8032: with CRTC, 80 columns, B keyboard, 8032b.rom. Some people preferred this.
 - Updated ColourPET editor ROM to [cpet-c0-40-n-mega-wedge (2025-01-31).bin](https://github.com/sjgray/cbm-edit-rom/blob/269e4fb2f405f558f6d94e1a3dfefce39e28b60b/binaries/ColourPET/Test/cpet-c0-40-n-mega-wedge%20(2025-01-31).bin)
+- Imported 4040 dual disk drive from [CBM-II_MiSTer core](https://github.com/eriks5/CBM-II_MiSTer/tree/e011b6586fce3deaf1a7e5ce361e8cd2ff80420e/rtl/ieee_drive) by Erik Scheffers
 
 v0.00010
 --------
@@ -230,7 +231,7 @@ This project is based on, and would have been impossible without, the following 
 * [MiSTer2MEGA65](https://github.com/sy2002/MiSTer2MEGA65) by MJoergen and sy2002 is a framework to simplify porting MiSTer cores to the MEGA65.
 * [PET2001_MiSTer](https://github.com/MiSTer-devel/PET2001_MiSTer) from sorgelig. This was the starting point of the PET core.
 * [C64_MiSTerMEGA65](https://github.com/MJoergen/C64_MiSTerMEGA65) by MJoergen and sy2002 and contributors. I used the 1541 from this, and converted it to a 2031 drive (replaced the serial IEC bus with a parallel IEEE-488 bus) so it can connect to a PET.
-* The work-in-progress [CBM-II_MiSTer](https://github.com/eriks5/CBM-II_MiSTer) from which I first used the 6845 CRTC.
+* The work-in-progress [CBM-II_MiSTer](https://github.com/eriks5/CBM-II_MiSTer) from which I first used the 6845 CRTC and the 4040 / 8250 dual disk drive.
 * The BBC micro implementation [BeebFpga](https://github.com/hoglet67/BeebFpga) from which I used the updates to the CRTC.
 * Steve Gray's [ColourPET](http://cbmsteve.ca/colourpet/index.html) and [Edit ROM](http://cbmsteve.ca/editrom/index.html) projects. 
 
