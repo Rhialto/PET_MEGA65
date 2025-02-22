@@ -249,6 +249,8 @@ signal qnice_pet_mount2_buf_addr     : std_logic_vector(17 downto 0);
 signal qnice_pet_mount2_buf_ram_we   : std_logic;
 signal qnice_pet_mount2_buf_ram_data : std_logic_vector(7 downto 0);  -- Disk mount buffer
 
+signal main_drive_cache_dirty        : std_logic;
+
 attribute mark_debug : string;
 attribute mark_debug of qnice_pet_mount1_buf_ram_we       : signal is "false";
 attribute mark_debug of qnice_pet_mount2_buf_ram_we       : signal is "false";
@@ -351,8 +353,11 @@ begin
 
    -- MEGA65's power led: By default, it is on and glows green when the MEGA65 is powered on.
    -- We switch it to blue when a long reset is detected and as long as the user keeps pressing the preset button
+   -- Yellow indicates a dirty floppy disk cache.
    main_power_led_o     <= '1';
-   main_power_led_col_o <= x"0000FF" when main_reset_m2m_i else x"00FF00";
+   main_power_led_col_o <= x"0000FF" when main_reset_m2m_i else
+                           x"FFFF00" when main_drive_cache_dirty else
+                           x"00FF00";
 
    -- main.vhd contains the actual MiSTer core
    i_main : entity work.main
@@ -419,6 +424,7 @@ begin
          -- PET drive led
          drive_led_o          => main_drive_led_o,
          drive_led_col_o      => main_drive_led_col_o,
+         drive_cache_dirty    => main_drive_cache_dirty,
 
          -- Custom Kernal: PET ROM (in QNICE clock domain via pet_clk_sd_i)
          petrom_we_i            => qnice_petrom_we,

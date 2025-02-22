@@ -26,10 +26,12 @@ use work.globals.C_MENU_MODEL_32_KB;
 use work.globals.C_MENU_MODEL_8096_MEM;
 use work.globals.C_MENU_MODEL_8296_MEM;
 
+use work.globals.C_VD_SUBDRIVES;
+
 
 entity main is
    generic (
-      G_VDNUM                 : natural         -- amount of virtual drives
+      G_VDNUM                 : natural         -- amount of virtual drives: C_VD_UNITS * C_VD_SUBDRIVES
    );
    port (
       clk_main_i              : in  std_logic;  -- 32 MHz
@@ -59,9 +61,10 @@ entity main is
       audio_left_o            : out signed(15 downto 0);
       audio_right_o           : out signed(15 downto 0);
 
-      -- 2031 drive led (color is RGB)
+      -- floppy drive led (color is RGB)
       drive_led_o            : out std_logic;
       drive_led_col_o        : out std_logic_vector(23 downto 0);
+      drive_cache_dirty      : out std_logic;
 
       -- M2M Keyboard interface
       kb_key_num_i            : in  integer range 0 to 79;    -- cycles through all MEGA65 keys
@@ -111,8 +114,9 @@ end entity main;
 architecture synthesis of main is
 
    -- Generic MiSTer PET signals
-   --signal pet_pause            : std_logic;
-    signal pet_drive_led        : std_logic_vector(G_VDNUM/2-1 downto 0);       -- FIXME number of LEDs
+   --signal pet_pause          : std_logic;
+    signal pet_drive_act_led   : vd_vec_array(G_VDNUM/C_VD_SUBDRIVES - 1 downto 0)(C_VD_SUBDRIVES-1 downto 0);
+    signal pet_drive_err_led   : std_logic_vector(G_VDNUM/C_VD_SUBDRIVES-1 downto 0);
 
     signal cnt31 : INTEGER range 0 to 31 := 0;        -- 5 bits
     signal ce_1m : STD_LOGIC;
@@ -270,15 +274,22 @@ begin
    prevent_reset <= '0' when unsigned(cache_dirty) = 0 else
                     '1';
 
-   -- the color of the drive led is green normally, but it turns yellow
-   -- when the cache is dirty and/or currently being flushed
-   drive_led_col_o <= x"00FF00" when unsigned(cache_dirty) = 0 else
-                      x"FFFF00";
+   -- the color of the power led is red normally, but it turns yellow
+   -- when the cache is dirty and/or currently being flushed.
+   drive_cache_dirty <= '0' when unsigned(cache_dirty) = 0 else
+                        '1';
+   -- The red component is active if the error LED is active
+   -- The green component is active if drive 0 is active
+   -- The blue component is active if drive 1 is active
+   -- FIXME: activity leds for more than 1 drive.
+   drive_led_col_o(23 downto 16) <= x"80" when unsigned(pet_drive_err_led) /= 0 else x"00";
+   drive_led_col_o(15 downto  8) <= x"FF" when pet_drive_act_led(0)(0) = '1' else x"00";
+   drive_led_col_o( 7 downto  0) <= x"FF" when pet_drive_act_led(0)(1) = '1' else x"00";
 
-   -- the drive led is on if either the C64 is writing to the virtual disk (cached in RAM)
-   -- or if the dirty cache is dirty and/orcurrently being flushed to the SD card
-   drive_led_o <= pet_drive_led(0) when unsigned(cache_dirty) = 0 else
-                  '1';
+   -- the drive led is on if either drive is active, or the error LED.
+   drive_led_o <=      '1' when (or pet_drive_act_led(0)) = '1' or
+                                unsigned(pet_drive_err_led) /= 0
+                  else '0';
    --------------------------------------------------------------------------------------------------
    -- Hard reset
    --------------------------------------------------------------------------------------------------
@@ -644,8 +655,8 @@ begin
 
    ieee_drive_inst : entity work.ieee_drive
       generic map (
-         DRIVES         => G_VDNUM / 2,         -- FIXME: 2 is drives per unit
-         SUBDRV         => 2
+         DRIVES         => G_VDNUM / C_VD_SUBDRIVES,
+         SUBDRV         => C_VD_SUBDRIVES
       )
       port map (
          --clk            => clk_main_speed_i,
@@ -653,11 +664,12 @@ begin
          clk            => QNICE_CLK_SPEED,
          clk_sys        => pet_clk_sd_i,
          clk_main       => clk_main_i,
-         reset          => iec_drives_reset(0), -- FIXME for >1 dual drive
+         reset          => iec_drives_reset,
          pause          => pause_i,
 
          -- drive led
-         led            => pet_drive_led,
+         led_act        => pet_drive_act_led,
+         led_err        => pet_drive_err_led,
 
          -- Device connected to IEEE-488 bus
 
@@ -694,7 +706,7 @@ begin
          -- FIXME Should I have 2 clocks, clk_sys (for QNICE) and clk_main (for the core) and carefully
          -- decide which parts of the drives get clocked by which clock?
          -- Or alternatively run everything on the QNICE clock and supply the correct frequency?
-	 -- For now we do the second.
+         -- For now we do the second.
 
          sd_lba         => iec_sd_lba,
          sd_blk_cnt     => iec_sd_blk_cnt,
@@ -755,8 +767,8 @@ begin
          -- to determine, which RAM buffer actually needs to be written to (using the clk_qnice_i clock domain)
          sd_buff_addr_o       => iec_sd_buf_addr,
          sd_buff_dout_o       => iec_sd_buf_data_in,
-	 -- Both drives inside a unit share the same track buffer, so with
-	 -- only 1 unit you can't see if iec_sd_buf_data_out needs to be swapped.
+         -- Both drives inside a unit share the same track buffer, so with
+         -- only 1 unit you can't see if iec_sd_buf_data_out needs to be swapped.
          sd_buff_din_i        => reverse_vd_vec_array(iec_sd_buf_data_out),
          sd_buff_wr_o         => iec_sd_buf_wr,
 

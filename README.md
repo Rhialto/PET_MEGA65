@@ -26,7 +26,7 @@ This prerelease adds/changes, compared to v0.00010:
 
 - Starts up as model 8032: with CRTC, 80 columns, B keyboard, 8032b.rom. Some people preferred this.
 - Updated ColourPET editor ROM to [cpet-c0-40-n-mega-wedge (2025-01-31).bin](https://github.com/sjgray/cbm-edit-rom/blob/269e4fb2f405f558f6d94e1a3dfefce39e28b60b/binaries/ColourPET/Test/cpet-c0-40-n-mega-wedge%20(2025-01-31).bin)
-- Imported 4040 dual disk drive from [CBM-II_MiSTer core](https://github.com/eriks5/CBM-II_MiSTer/tree/e011b6586fce3deaf1a7e5ce361e8cd2ff80420e/rtl/ieee_drive) by Erik Scheffers
+- Imported 4040 dual disk drive from [CBM-II_MiSTer core](https://github.com/eriks5/CBM-II_MiSTer/tree/e011b6586fce3deaf1a7e5ce361e8cd2ff80420e/rtl/ieee_drive) by Erik Scheffers. This drive is not considered final yet so there may be updates in the future. There are 3 LEDs to show (2 drive activity LEDs and the error LED). I tried to map them to the 2 halves of the M65's drive LED but you could not really see a difference between left and right in most cases. So I mapped them to colours: red = error, greeen = drive 0, blue = drive 1. The Power LED is yellow when the drive cache is dirty and/or being flushed. This previously was the task of the drive LED.
 
 v0.00010
 --------
