@@ -536,37 +536,6 @@ begin
          diag_sense_o         => diag_sense
       ); -- i_keyboard
 
-
-   -- 16 MHz chip enable for the IEC drives, so that ph2_r and ph2_f can be 1 MHz (C1541's CPU runs with 1 MHz)
-   -- Uses a counter to compensate for clock drift, because the input clock is not exactly at 32 MHz
-   --
-   -- It is important that also in the HDMI-Flicker-Free-mode we are using the vanilla clock speed given by
-   -- CORE_CLK_SPEED_PAL (or CORE_CLK_SPEED_NTSC) and not a speed-adjusted version of this speed. Reason:
-   -- Otherwise the drift-compensation in generate_drive_ce will compensate for the slower clock speed and
-   -- ensure an exact 32 MHz frequency even though the system has been slowed down by the HDMI-Flicker-Free.
-   -- This leads to a different frequency ratio C64 vs 1541 and therefore to incompatibilities such as the
-   -- one described in this GitHub issue:
-   -- https://github.com/MJoergen/C64MEGA65/issues/2
---    iec_drive_ce_proc : process (all)
---       variable msum, nextsum: integer;
---    begin
---       msum    := clk_main_speed_i;
---       nextsum := iec_dce_sum + 16000000;
--- 
---       if rising_edge(clk_main_i) then
---          iec_drive_ce <= '0';
---          if reset_core_n = '0' then
---             iec_dce_sum <= 0;
---          else
---             iec_dce_sum <= nextsum;
---             if nextsum >= msum then
---                iec_dce_sum <= nextsum - msum;
---                iec_drive_ce <= '1';
---             end if;
---          end if;
---       end if;
---    end process iec_drive_ce_proc;
-
    -- Drive is held to reset if the core is held to reset or if the drive is not mounted, yet
    -- @TODO: MiSTer also allows these options when it comes to drive-enable:
    --        "P2oPQ,Enable Drive #8,If Mounted,Always,Never;"
@@ -580,78 +549,6 @@ begin
 ------------------------------------------
 -- Let's connect some drives!
 ------------------------------------------
---    iec_drive_inst : entity work.iec_drive
---       generic map (
---          IEEE           => 1,                -- PETs only have an IEEE-488 bus, not IEC.
---          PARPORT        => 0,                -- which implies there is no custom parallel cable needed or possible
---          DUALROM        => 0,                -- and there is just one DOS as well.
---          DRIVES         => G_VDNUM
---       )
---       port map (
---          clk            => clk_main_i,
---          ce             => iec_drive_ce,
---          reset          => iec_drives_reset,
---          pause          => pause_i,
--- 
---          -- IEC interface to the C64 core
---          iec_clk_i      => 'H',
---          iec_clk_o      => open,
---          iec_atn_i      => 'H',
---          iec_data_i     => 'H',
---          iec_data_o     => open,
--- 
---          -- Device connected to IEEE-488 bus
--- 
---         ieee_data_i     => ieee488_d01_data_i,
---         ieee_data_o     => ieee488_d01_data_o,
---         ieee_atn_o      => ieee488_d01_atn_o ,
---         ieee_atn_i      => ieee488_d01_atn_i ,
---         ieee_ifc_i      => ieee488_d01_ifc_i ,
---         ieee_srq_o      => ieee488_d01_srq_o ,
---         ieee_dav_i      => ieee488_d01_dav_i ,
---         ieee_dav_o      => ieee488_d01_dav_o ,
---         ieee_eoi_i      => ieee488_d01_eoi_i ,
---         ieee_eoi_o      => ieee488_d01_eoi_o ,
---         ieee_nrfd_i     => ieee488_d01_nrfd_i,
---         ieee_nrfd_o     => ieee488_d01_nrfd_o,
---         ieee_ndac_i     => ieee488_d01_ndac_i,
---         ieee_ndac_o     => ieee488_d01_ndac_o,
--- 
---          -- disk image status
---          img_mounted    => iec_img_mounted,
---          img_readonly   => iec_img_readonly,
---          img_size       => iec_img_size,
---          img_type       => iec_img_type,         -- 00=1541 emulated GCR(D64), 01=1541 real GCR mode (G64,D64), 10=1581 (D81)
--- 
---          -- QNICE SD-Card/FAT32 interface
---          clk_sys        => pet_clk_sd_i,         -- "SD card" clock for writing to the drives' internal data buffers
--- 
---          sd_lba         => iec_sd_lba,
---          sd_blk_cnt     => iec_sd_blk_cnt,
---          sd_rd          => iec_sd_rd,
---          sd_wr          => iec_sd_wr,
---          sd_ack         => iec_sd_ack,
---          sd_buff_addr   => iec_sd_buf_addr,
---          sd_buff_dout   => iec_sd_buf_data_in,   -- data from SD card to the buffer RAM within the drive ("dout" is a strange name)
---          sd_buff_din    => iec_sd_buf_data_out,  -- read the buffer RAM within the drive
---          sd_buff_wr     => iec_sd_buf_wr,
--- 
---          -- drive led
---          led            => pet_drive_led,
--- 
---          -- Parallel C1541 port, not connected on a 2031, at least not in this way
---          par_stb_i      => 'H',
---          par_stb_o      => open,
---          par_data_i     => (others => 'H'),
---          par_data_o     => open,
--- 
---          -- Access custom rom (DOS): All in QNICE clock domain but rom_std_i is in main clock domain
---          rom_std_i      => '1',  -- pet_rom_i(0) or pet_rom_i(1), -- 1=use the factory default ROM
---          rom_addr_i     => c2031rom_addr_i,
---          rom_data_i     => c2031rom_data_i,
---          rom_wr_i       => c2031rom_we_i,
---          rom_data_o     => c2031rom_data_o
---       ); -- iec_drive_inst
 
    ieee_drive_inst : entity work.ieee_drive
       generic map (
@@ -699,14 +596,8 @@ begin
          img_mounted    => iec_img_mounted,
          img_size       => iec_img_size,
          img_readonly   => iec_img_readonly,
-         --img_type       => iec_img_type,         -- 00=1541 emulated GCR(D64), 01=1541 real GCR mode (G64,D64), 10=1581 (D81)
 
          -- QNICE SD-Card/FAT32 interface
-         --clk_sys        => pet_clk_sd_i,         -- "SD card" clock for writing to the drives' internal data buffers
-         -- FIXME Should I have 2 clocks, clk_sys (for QNICE) and clk_main (for the core) and carefully
-         -- decide which parts of the drives get clocked by which clock?
-         -- Or alternatively run everything on the QNICE clock and supply the correct frequency?
-         -- For now we do the second.
 
          sd_lba         => iec_sd_lba,
          sd_blk_cnt     => iec_sd_blk_cnt,
