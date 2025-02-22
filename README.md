@@ -225,6 +225,23 @@ There's more: you're not yet out of the woods. Type a semicolon followed by RETU
 
 Source: Jim Butterfield in [Compute! Magazine, issue #1, page 89](https://archive.org/details/compute_0001_fal79/page/88/mode/2up) I would recommend reading all early issues of Compute! for interesting information about your MegaPET.
 
+### The LEDs
+
+The LEDs are RGB-type LEDs and can take any colour. The colours are used to indicate some states of the PET.
+The drive LED has to take the daunting task to represent 3 distinct LEDs on the disk drive. These are mapped to the 3 basic colours:
+
+- the red component is lit if the disk's error LED is on
+- the green component is lit if drive 0 is active
+- the blue component is lit if drive 0 is active
+
+This means you can get mix colours if several of the disk's LEDs are on.
+
+The Power LED can take 3 different colours:
+
+- blue when the core is in reset state
+- yellow when the disk cache is dirty and/or is being written to the sdcard
+- green at other times when the Mega-65 is on.
+
 
 CREDITS
 -------
