@@ -20,6 +20,16 @@ There are currently no releases.
 
 From time to time there is a pre-release, when there seems to be some useful addition to the code base. There is absolutely no guarantee when those happen.
 
+v0.00012
+--------
+This prerelease adds/changes, compared to v0.00011:
+
+- Uses the MiSTer2MEGA65 framework version 2.0.1
+- Made the presence of the disk drive optional
+- Added 8250 disk drive type (when switching, go via "disabled" as an intermediate step).
+  You can use `.D80` (533 248 bytes) and `.D82` (1 066 496 bytes) disk images for the 8250.
+  When using a D80 disk image, the first disk access will result in an error.  This is normal behaviour of the 8250 drive.
+
 v0.00011
 --------
 This prerelease adds/changes, compared to v0.00010:

@@ -76,14 +76,13 @@ constant VRAM_ADDR_WIDTH      : natural := f_log2(CHAR_MEM_SIZE);
 
 --nstant C_DEV_PET_RAM           : std_logic_vector(15 downto 0) := x"0100";     -- PET's main RAM
 constant C_DEV_PET_VDRIVES       : std_logic_vector(15 downto 0) := x"0101";     -- Virtual Device Management System
-constant C_DEV_PET_MOUNT1        : std_logic_vector(15 downto 0) := x"0102";     -- RAM 1 to buffer disk images
-constant C_DEV_PET_MOUNT2        : std_logic_vector(15 downto 0) := x"0103";     -- RAM 2 to buffer disk images
+constant C_DEV_PET_MOUNT0        : std_logic_vector(15 downto 0) := x"0102";     -- RAM 0 to buffer disk images
+constant C_DEV_PET_MOUNT1        : std_logic_vector(15 downto 0) := x"0103";     -- RAM 1 to buffer disk images
 --nstant C_DEV_PET_CRT           : std_logic_vector(15 downto 0) := x"0104";     -- SW cartridges (*.CRT)
 --nstant C_DEV_PET_PRG           : std_logic_vector(15 downto 0) := x"0105";     -- PRG loader
 constant C_DEV_PET_KERNAL_PET    : std_logic_vector(15 downto 0) := x"0106";     -- Custom Kernal: PET
 constant C_DEV_PET_CHARS_PET     : std_logic_vector(15 downto 0) := x"0107";     -- Custom character set: PET
--- skip 0108
-constant C_DEV_PET_KERNAL_C2031  : std_logic_vector(15 downto 0) := x"0109";     -- Custom Kernal: C2031
+constant C_DEV_PET_KERNAL_C2031  : std_logic_vector(15 downto 0) := x"0108";     -- Custom Kernal: C2031
 
 ----------------------------------------------------------------------------------------------------------
 -- HyperRAM memory map (in units of 4kW)
@@ -91,6 +90,13 @@ constant C_DEV_PET_KERNAL_C2031  : std_logic_vector(15 downto 0) := x"0109";    
 
 constant C_HMAP_M2M           : std_logic_vector(15 downto 0) := x"0000";     -- Reserved for the M2M framework
 --constant C_HMAP_DEMO          : std_logic_vector(15 downto 0) := x"0200";     -- Start address reserved for core
+constant C_HMAP_BUF0          : std_logic_vector(15 downto 0) := x"0180";
+constant C_HMAP_BUF1          : std_logic_vector(15 downto 0) := x"0286";
+constant C_HMAP_BUF_NEXT      : std_logic_vector(15 downto 0) := x"038C";
+-- 1 .d82 file is 1066496 bytes: 4166 blocks or 131 * 8KB or 0x83 * 4 KW
+-- if we use double the memory then each disk image uses 0x106 units.
+-- with 8 MB we have 1024 = 0x400 * 8 KB in total. With 0x200 reserved, we do not have enough space!
+
 
 ----------------------------------------------------------------------------------------------------------
 -- Virtual Drive Management System
@@ -108,8 +114,8 @@ constant C_VD_UNITS           : natural := 1;
 constant C_VD_SUBDRIVES       : natural := 2;
 constant C_VDNUM              : natural := 2; -- C_VD_UNITS * C_VD_SUBDRIVES; -- amount of virtual drives; maximum is 15
 constant C_VD_DEVICE          : std_logic_vector(15 downto 0) := C_DEV_PET_VDRIVES;    -- device number of vdrives.vhd device
-constant C_VD_BUFFER          : vd_buf_array := (  C_DEV_PET_MOUNT1,
-                                                   C_DEV_PET_MOUNT2,
+constant C_VD_BUFFER          : vd_buf_array := (  C_DEV_PET_MOUNT0,
+                                                   C_DEV_PET_MOUNT1,
                                                    x"EEEE");                           -- Always finish the array using x"EEEE"
 
 ----------------------------------------------------------------------------------------------------------
@@ -205,17 +211,21 @@ constant C_MENU_MODEL_32_KB      : natural := 11;
 constant C_MENU_MODEL_8096_MEM   : natural := 12;
 constant C_MENU_MODEL_8296_MEM   : natural := 13;
 
-constant C_MENU_HDMI_16_9_50     : natural := 30;
-constant C_MENU_HDMI_16_9_60     : natural := 31;
-constant C_MENU_HDMI_4_3_50      : natural := 32;
-constant C_MENU_HDMI_5_4_50      : natural := 33;
-constant C_MENU_HDMI_640_60      : natural := 34;
-constant C_MENU_HDMI_720_5994    : natural := 35;
-constant C_MENU_SVGA_800_60      : natural := 36;
+constant C_MENU_UNIT_8_DISABLED  : natural := 22;
+constant C_MENU_UNIT_8_4040      : natural := 23;
+constant C_MENU_UNIT_8_8250      : natural := 24;
 
-constant C_MENU_CRT_EMULATION    : natural := 39;
-constant C_MENU_HDMI_ZOOM        : natural := 40;
-constant C_MENU_IMPROVE_AUDIO    : natural := 41;
+constant C_MENU_HDMI_16_9_50     : natural := 34;
+constant C_MENU_HDMI_16_9_60     : natural := 35;
+constant C_MENU_HDMI_4_3_50      : natural := 36;
+constant C_MENU_HDMI_5_4_50      : natural := 37;
+constant C_MENU_HDMI_640_60      : natural := 38;
+constant C_MENU_HDMI_720_5994    : natural := 39;
+constant C_MENU_SVGA_800_60      : natural := 40;
+
+constant C_MENU_CRT_EMULATION    : natural := 43;
+constant C_MENU_HDMI_ZOOM        : natural := 44;
+constant C_MENU_IMPROVE_AUDIO    : natural := 45;
 
 end package globals;
 

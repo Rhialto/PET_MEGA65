@@ -232,6 +232,30 @@ signal main_rst               : std_logic;
 ---------------------------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------------------------
+-- hr_clk
+---------------------------------------------------------------------------------------------
+
+signal hr_disk0_write               : std_logic;
+signal hr_disk0_read                : std_logic;
+signal hr_disk0_address             : std_logic_vector(31 downto 0);
+signal hr_disk0_writedata           : std_logic_vector(15 downto 0);
+signal hr_disk0_byteenable          : std_logic_vector( 1 downto 0);
+signal hr_disk0_burstcount          : std_logic_vector( 7 downto 0);
+signal hr_disk0_readdata            : std_logic_vector(15 downto 0);
+signal hr_disk0_readdatavalid       : std_logic;
+signal hr_disk0_waitrequest         : std_logic;
+
+signal hr_disk1_write               : std_logic;
+signal hr_disk1_read                : std_logic;
+signal hr_disk1_address             : std_logic_vector(31 downto 0);
+signal hr_disk1_writedata           : std_logic_vector(15 downto 0);
+signal hr_disk1_byteenable          : std_logic_vector( 1 downto 0);
+signal hr_disk1_burstcount          : std_logic_vector( 7 downto 0);
+signal hr_disk1_readdata            : std_logic_vector(15 downto 0);
+signal hr_disk1_readdatavalid       : std_logic;
+signal hr_disk1_waitrequest         : std_logic;
+
+---------------------------------------------------------------------------------------------
 -- qnice_clk
 ---------------------------------------------------------------------------------------------
 
@@ -242,18 +266,21 @@ signal main_rst               : std_logic;
 -- RAMs for the PET
 --signal qnice_c64_ram_we             : std_logic;
 --signal qnice_c64_ram_data           : std_logic_vector(7 downto 0);  -- The actual RAM of the C64
-signal qnice_pet_mount1_buf_addr     : std_logic_vector(17 downto 0);
+signal qnice_pet_mount0_buf_addr     : std_logic_vector(20 downto 0);
+signal qnice_pet_mount0_buf_ram_wait : std_logic;
+signal qnice_pet_mount0_buf_ram_we   : std_logic;
+signal qnice_pet_mount0_buf_ram_ce   : std_logic;
+signal qnice_pet_mount0_buf_ram_data : std_logic_vector(15 downto 0);  -- Disk mount buffer
+signal qnice_pet_mount1_buf_addr     : std_logic_vector(20 downto 0);
+signal qnice_pet_mount1_buf_ram_wait : std_logic;
 signal qnice_pet_mount1_buf_ram_we   : std_logic;
-signal qnice_pet_mount1_buf_ram_data : std_logic_vector(7 downto 0);  -- Disk mount buffer
-signal qnice_pet_mount2_buf_addr     : std_logic_vector(17 downto 0);
-signal qnice_pet_mount2_buf_ram_we   : std_logic;
-signal qnice_pet_mount2_buf_ram_data : std_logic_vector(7 downto 0);  -- Disk mount buffer
+signal qnice_pet_mount1_buf_ram_ce   : std_logic;
+signal qnice_pet_mount1_buf_ram_data : std_logic_vector(15 downto 0);  -- Disk mount buffer
 
 signal main_drive_cache_dirty        : std_logic;
 
 attribute mark_debug : string;
-attribute mark_debug of qnice_pet_mount1_buf_ram_we       : signal is "false";
-attribute mark_debug of qnice_pet_mount2_buf_ram_we       : signal is "false";
+attribute mark_debug of qnice_pet_mount0_buf_ram_we       : signal is "false";
 
 -- Custom Kernal access: PET ROM or PET CHAR ROM (if qnice_petchars_ce)
 signal qnice_petrom_we              : std_logic;
@@ -268,26 +295,39 @@ signal qnice_c2031rom_addr          : std_logic_vector(15 downto 0);
 signal qnice_c2031rom_data_to       : std_logic_vector(7 downto 0);
 signal qnice_c2031rom_data_from     : std_logic_vector(7 downto 0);
 
-attribute mark_debug of qnice_c2031rom_we       : signal is "false";
-attribute mark_debug of qnice_dev_we_i          : signal is "false";
-attribute mark_debug of qnice_dev_id_i          : signal is "false";
-attribute mark_debug of qnice_dev_addr_i        : signal is "false";
-attribute mark_debug of qnice_dev_data_i        : signal is "false";
-attribute mark_debug of qnice_dev_data_o        : signal is "false";
-
 -- QNICE signals passed down to main.vhd to handle IEC drives using vdrives.vhd
 signal qnice_pet_qnice_ce           : std_logic;
 signal qnice_pet_qnice_we           : std_logic;
 signal qnice_pet_qnice_data         : std_logic_vector(15 downto 0);
 
+signal qnice_disk0_write              : std_logic;
+signal qnice_disk0_read               : std_logic;
+signal qnice_disk0_address            : std_logic_vector(31 downto 0);
+signal qnice_disk0_writedata          : std_logic_vector(15 downto 0);
+signal qnice_disk0_byteenable         : std_logic_vector( 1 downto 0);
+signal qnice_disk0_burstcount         : std_logic_vector( 7 downto 0);
+signal qnice_disk0_readdata           : std_logic_vector(15 downto 0);
+signal qnice_disk0_readdatavalid      : std_logic;
+signal qnice_disk0_waitrequest        : std_logic;
+
+signal qnice_disk1_write              : std_logic;
+signal qnice_disk1_read               : std_logic;
+signal qnice_disk1_address            : std_logic_vector(31 downto 0);
+signal qnice_disk1_writedata          : std_logic_vector(15 downto 0);
+signal qnice_disk1_byteenable         : std_logic_vector( 1 downto 0);
+signal qnice_disk1_burstcount         : std_logic_vector( 7 downto 0);
+signal qnice_disk1_readdata           : std_logic_vector(15 downto 0);
+signal qnice_disk1_readdatavalid      : std_logic;
+signal qnice_disk1_waitrequest        : std_logic;
+
 begin
 
-   hr_core_write_o      <= '0';
-   hr_core_read_o       <= '0';
-   hr_core_address_o    <= (others => '0');
-   hr_core_writedata_o  <= (others => '0');
-   hr_core_byteenable_o <= (others => '0');
-   hr_core_burstcount_o <= (others => '0');
+   --hr_core_write_o      <= '0';
+   --hr_core_read_o       <= '0';
+   --hr_core_address_o    <= (others => '0');
+   --hr_core_writedata_o  <= (others => '0');
+   --hr_core_byteenable_o <= (others => '0');
+   --hr_core_burstcount_o <= (others => '0');
 
    -- Tristate all expansion port drivers that we can directly control
    -- @TODO: As soon as we support modules that can act as busmaster, we need to become more flexible here
@@ -348,6 +388,47 @@ begin
    main_rst_o  <= main_rst;
    video_clk_o <= main_clk;
    video_rst_o <= main_rst;
+
+   ---------------------------------------------------------------------------------------------
+   -- hr_clk (HyperRAM clock)
+   ---------------------------------------------------------------------------------------------
+   i_avm_arbit : entity work.avm_arbit
+      generic map (
+         G_PREFER_SWAP  => true,
+         G_ADDRESS_SIZE => 32,
+         G_DATA_SIZE    => 16 
+      )
+      port map (
+         clk_i                  => hr_clk_i,
+         rst_i                  => hr_rst_i,
+         s0_avm_write_i         => hr_disk0_write,
+         s0_avm_read_i          => hr_disk0_read,
+         s0_avm_address_i       => hr_disk0_address,
+         s0_avm_writedata_i     => hr_disk0_writedata,
+         s0_avm_byteenable_i    => hr_disk0_byteenable,
+         s0_avm_burstcount_i    => hr_disk0_burstcount,
+         s0_avm_readdata_o      => hr_disk0_readdata,
+         s0_avm_readdatavalid_o => hr_disk0_readdatavalid,
+         s0_avm_waitrequest_o   => hr_disk0_waitrequest,
+         s1_avm_write_i         => hr_disk1_write,
+         s1_avm_read_i          => hr_disk1_read,
+         s1_avm_address_i       => hr_disk1_address,
+         s1_avm_writedata_i     => hr_disk1_writedata,
+         s1_avm_byteenable_i    => hr_disk1_byteenable,
+         s1_avm_burstcount_i    => hr_disk1_burstcount,
+         s1_avm_readdata_o      => hr_disk1_readdata,
+         s1_avm_readdatavalid_o => hr_disk1_readdatavalid,
+         s1_avm_waitrequest_o   => hr_disk1_waitrequest,
+         m_avm_write_o          => hr_core_write_o,
+         m_avm_read_o           => hr_core_read_o,
+         m_avm_address_o        => hr_core_address_o,
+         m_avm_writedata_o      => hr_core_writedata_o,
+         m_avm_byteenable_o     => hr_core_byteenable_o,
+         m_avm_burstcount_o     => hr_core_burstcount_o,
+         m_avm_readdata_i       => hr_core_readdata_i,
+         m_avm_readdatavalid_i  => hr_core_readdatavalid_i,
+         m_avm_waitrequest_i    => hr_core_waitrequest_i
+      ); -- i_avm_arbit
 
    ---------------------------------------------------------------------------------------------
    -- main_clk (MiSTer core's clock)
@@ -481,11 +562,11 @@ begin
    qnice_osm_cfg_scaling_o    <= (others => '1');
 
    -- ascal filters that are applied while processing the input
-   -- 00 : Nearest Neighbour
-   -- 01 : Bilinear
+   -- 00 : Nearest Neighbour: uneven character scaling
+   -- 01 : Bilinear: seems a bit unsharp
    -- 10 : Sharp Bilinear
    -- 11 : Bicubic
-   qnice_ascal_mode_o         <= "01";
+   qnice_ascal_mode_o         <= "10";
 
    -- If polyphase is '1' then the ascal filter mode is ignored and polyphase filters are used instead
    -- @TODO: Right now, the filters are hardcoded in the M2M framework, we need to make them changeable inside m2m-rom.asm
@@ -515,10 +596,12 @@ begin
       --qnice_pet_ram_we           <= '0';
       qnice_pet_qnice_ce         <= '0';
       qnice_pet_qnice_we         <= '0';
-      qnice_pet_mount1_buf_addr   <= (others => '0');
+      qnice_pet_mount0_buf_addr   <= (others => '0');
+      qnice_pet_mount0_buf_ram_ce <= '0';
+      qnice_pet_mount0_buf_ram_we <= '0';
+      qnice_pet_mount1_buf_addr  <= (others => '0');
+      qnice_pet_mount1_buf_ram_ce <= '0';
       qnice_pet_mount1_buf_ram_we <= '0';
-      qnice_pet_mount2_buf_addr  <= (others => '0');
-      qnice_pet_mount2_buf_ram_we <= '0';
       --qnice_prg_qnice_ce         <= '0';
       --qnice_prg_qnice_we         <= '0';
       --qnice_prg_petram_d_frm     <= (others => '0');
@@ -549,17 +632,21 @@ begin
             qnice_pet_qnice_we         <= qnice_dev_we_i;
             qnice_dev_data_o           <= qnice_pet_qnice_data;
 
-         -- Disk mount buffer RAM 1 (drive 0: or unit 8)
-         when C_DEV_PET_MOUNT1 =>
-            qnice_pet_mount1_buf_addr  <= qnice_dev_addr_i(17 downto 0);
-            qnice_pet_mount1_buf_ram_we <= qnice_dev_we_i and not qnice_csr_window;
-            qnice_dev_data_o           <= x"00" & qnice_pet_mount1_buf_ram_data;
+         -- Disk mount buffer RAM 0 (drive 0:)
+         when C_DEV_PET_MOUNT0 =>
+            qnice_pet_mount0_buf_addr  <= qnice_dev_addr_i(20 downto 0);
+            qnice_pet_mount0_buf_ram_ce <= qnice_dev_ce_i;
+            qnice_pet_mount0_buf_ram_we <= qnice_dev_we_i and not qnice_csr_window;
+            qnice_dev_data_o           <= x"00" & qnice_pet_mount0_buf_ram_data(7 downto 0); -- TBD
+            qnice_dev_wait_o           <= qnice_pet_mount0_buf_ram_wait;
 
-         -- Disk mount buffer RAM 2 (drive 1: or unit 9)
-         when C_DEV_PET_MOUNT2 =>
-            qnice_pet_mount2_buf_addr  <= qnice_dev_addr_i(17 downto 0);
-            qnice_pet_mount2_buf_ram_we <= qnice_dev_we_i and not qnice_csr_window;
-            qnice_dev_data_o           <= x"00" & qnice_pet_mount2_buf_ram_data;
+         -- Disk mount buffer RAM 1 (drive 1:)
+         when C_DEV_PET_MOUNT1 =>
+            qnice_pet_mount1_buf_addr  <= qnice_dev_addr_i(20 downto 0);
+            qnice_pet_mount1_buf_ram_ce <= qnice_dev_ce_i;
+            qnice_pet_mount1_buf_ram_we <= qnice_dev_we_i and not qnice_csr_window;
+            qnice_dev_data_o           <= x"00" & qnice_pet_mount1_buf_ram_data(7 downto 0); -- TBD
+            qnice_dev_wait_o           <= qnice_pet_mount1_buf_ram_wait;
 
          -- Custom Kernal Access: PET main ROMs
          when C_DEV_PET_KERNAL_PET =>
@@ -579,7 +666,7 @@ begin
             qnice_petrom_data_to       <= qnice_dev_data_i(7 downto 0);
             qnice_petchars_ce          <= '1';
 
-         -- Custom Kernal Access: C2031 ROM
+         -- Custom Kernal Access: Disk drive ROM
          when C_DEV_PET_KERNAL_C2031 =>
             qnice_c2031rom_addr        <= "00" & qnice_dev_addr_i(13 downto 0);
             qnice_c2031rom_we          <= qnice_dev_we_i and not qnice_csr_window;
@@ -591,40 +678,96 @@ begin
       end case;
    end process core_specific_devices;
 
-   -- For now: Let's use a simple BRAM (using only 1 port will make a BRAM) for buffering
-   -- the disks that we are mounting. This will work for D64 only.
-   -- @TODO: Switch to HyperRAM at a later stage
-   mount_buf_ram : entity work.dualport_2clk_ram
-      generic map (
-         ADDR_WIDTH        => 18,
-         DATA_WIDTH        => 8,
-         MAXIMUM_SIZE      => 197376,        -- maximum size of any D64 image: non-standard 40-track incl. 768 error bytes
-         FALLING_A         => true
-      )
+   -- Disk images are stored in HyperRAM due to their size.
+   i_qnice2hyperram_d0 : entity work.qnice2hyperram
       port map (
-         -- QNICE only
-         clock_a           => qnice_clk_i,
-         address_a         => qnice_pet_mount1_buf_addr, --  qnice_dev_addr_i(17 downto 0),
-         data_a            => qnice_dev_data_i(7 downto 0),
-         wren_a            => qnice_pet_mount1_buf_ram_we,
-         q_a               => qnice_pet_mount1_buf_ram_data
-      ); -- mount_buf_ram
+         clk_i                 => qnice_clk_i,
+         rst_i                 => qnice_rst_i,
+         s_qnice_wait_o        => qnice_pet_mount0_buf_ram_wait,
+-- for >1MB we need 21 address bits, 20 downto 0
+         --s_qnice_address_i     => "0000000000" & C_HMAP_BUF0(9 downto 6) & qnice_dev_addr_i(17 downto 0),
+         s_qnice_address_i     => ( 24 downto 13 => std_logic_vector(unsigned(C_HMAP_BUF0(11 downto 0)) +
+                                                                     unsigned(qnice_dev_addr_i(24 downto 13))),
+                                    12 downto 0  => qnice_dev_addr_i(12 downto 0),
+                                    others => '0'),
+         s_qnice_cs_i          => qnice_pet_mount0_buf_ram_ce,
+         s_qnice_write_i       => qnice_pet_mount0_buf_ram_we,
+         s_qnice_writedata_i   => qnice_dev_data_i,
+         s_qnice_byteenable_i  => "01", -- TBD: Rewrite to make use of the entire HyperRAM word.
+         s_qnice_readdata_o    => qnice_pet_mount0_buf_ram_data,
+         m_avm_write_o         => qnice_disk0_write,
+         m_avm_read_o          => qnice_disk0_read,
+         m_avm_address_o       => qnice_disk0_address,
+         m_avm_writedata_o     => qnice_disk0_writedata,
+         m_avm_byteenable_o    => qnice_disk0_byteenable,
+         m_avm_burstcount_o    => qnice_disk0_burstcount,
+         m_avm_readdata_i      => qnice_disk0_readdata,
+         m_avm_readdatavalid_i => qnice_disk0_readdatavalid,
+         m_avm_waitrequest_i   => qnice_disk0_waitrequest
+      ); -- i_qnice2hyperram
 
-   mount2_buf_ram : entity work.dualport_2clk_ram
-      generic map (
-         ADDR_WIDTH        => 18,
-         DATA_WIDTH        => 8,
-         MAXIMUM_SIZE      => 197376,        -- maximum size of any D64 image: non-standard 40-track incl. 768 error bytes
-         FALLING_A         => true
-      )
+   -- And we even have two of them.
+   i_qnice2hyperram_d1 : entity work.qnice2hyperram
       port map (
-         -- QNICE only
-         clock_a           => qnice_clk_i,
-         address_a         => qnice_pet_mount2_buf_addr, --  qnice_dev_addr_i(17 downto 0),
-         data_a            => qnice_dev_data_i(7 downto 0),
-         wren_a            => qnice_pet_mount2_buf_ram_we,
-         q_a               => qnice_pet_mount2_buf_ram_data
-      ); -- mount2_buf_ram
+         clk_i                 => qnice_clk_i,
+         rst_i                 => qnice_rst_i,
+         s_qnice_wait_o        => qnice_pet_mount1_buf_ram_wait,
+-- for >1MB we need 21 address bits, 20 downto 0
+         --s_qnice_address_i     => "0000000000" & C_HMAP_BUF1(9 downto 6) & qnice_dev_addr_i(17 downto 0),
+         s_qnice_address_i     => ( 24 downto 13 => std_logic_vector(unsigned(C_HMAP_BUF1(11 downto 0)) +
+                                                                     unsigned(qnice_dev_addr_i(24 downto 13))),
+                                    12 downto 0  => qnice_dev_addr_i(12 downto 0),
+                                    others => '0'),
+         s_qnice_cs_i          => qnice_pet_mount1_buf_ram_ce,
+         s_qnice_write_i       => qnice_pet_mount1_buf_ram_we,
+         s_qnice_writedata_i   => qnice_dev_data_i,
+         s_qnice_byteenable_i  => "01", -- TBD: Rewrite to make use of the entire HyperRAM word.
+         s_qnice_readdata_o    => qnice_pet_mount1_buf_ram_data,
+         m_avm_write_o         => qnice_disk1_write,
+         m_avm_read_o          => qnice_disk1_read,
+         m_avm_address_o       => qnice_disk1_address,
+         m_avm_writedata_o     => qnice_disk1_writedata,
+         m_avm_byteenable_o    => qnice_disk1_byteenable,
+         m_avm_burstcount_o    => qnice_disk1_burstcount,
+         m_avm_readdata_i      => qnice_disk1_readdata,
+         m_avm_readdatavalid_i => qnice_disk1_readdatavalid,
+         m_avm_waitrequest_i   => qnice_disk1_waitrequest
+      ); -- i_qnice2hyperram
+
+--   -- For now: Let's use a simple BRAM (using only 1 port will make a BRAM) for buffering
+--   -- the disks that we are mounting. This will work for D64 only.
+--   -- @TODO: Switch to HyperRAM at a later stage
+--   mount_buf_ram : entity work.dualport_2clk_ram
+--      generic map (
+--         ADDR_WIDTH        => 18,
+--         DATA_WIDTH        => 8,
+--         MAXIMUM_SIZE      => 197376,        -- maximum size of any D64 image: non-standard 40-track incl. 768 error bytes
+--         FALLING_A         => true
+--      )
+--      port map (
+--         -- QNICE only
+--         clock_a           => qnice_clk_i,
+--         address_a         => qnice_pet_mount1_buf_addr, --  qnice_dev_addr_i(17 downto 0),
+--         data_a            => qnice_dev_data_i(7 downto 0),
+--         wren_a            => qnice_pet_mount1_buf_ram_we,
+--         q_a               => qnice_pet_mount1_buf_ram_data
+--      ); -- mount_buf_ram
+--
+--   mount2_buf_ram : entity work.dualport_2clk_ram
+--      generic map (
+--         ADDR_WIDTH        => 18,
+--         DATA_WIDTH        => 8,
+--         MAXIMUM_SIZE      => 197376,        -- maximum size of any D64 image: non-standard 40-track incl. 768 error bytes
+--         FALLING_A         => true
+--      )
+--      port map (
+--         -- QNICE only
+--         clock_a           => qnice_clk_i,
+--         address_a         => qnice_pet_mount2_buf_addr, --  qnice_dev_addr_i(17 downto 0),
+--         data_a            => qnice_dev_data_i(7 downto 0),
+--         wren_a            => qnice_pet_mount2_buf_ram_we,
+--         q_a               => qnice_pet_mount2_buf_ram_data
+--      ); -- mount2_buf_ram
 
    ---------------------------------------------------------------------------------------------
    -- Dual Clocks
@@ -635,6 +778,72 @@ begin
    -- Use the M2M framework's official RAM/ROM: dualport_2clk_ram
    -- and make sure that the you configure the port that works with QNICE as a falling edge
    -- by setting G_FALLING_A or G_FALLING_B (depending on which port you use) to true.
+
+   qnice2hr_d0_avm_fifo : entity work.avm_fifo
+      generic map (
+         G_WR_DEPTH     => 16,
+         G_RD_DEPTH     => 16,
+         G_FILL_SIZE    => 1,
+         G_ADDRESS_SIZE => 32,
+         G_DATA_SIZE    => 16
+      )
+      port map (
+         s_clk_i               => qnice_clk_i,
+         s_rst_i               => qnice_rst_i,
+         s_avm_waitrequest_o   => qnice_disk0_waitrequest,
+         s_avm_write_i         => qnice_disk0_write,
+         s_avm_read_i          => qnice_disk0_read,
+         s_avm_address_i       => qnice_disk0_address,
+         s_avm_writedata_i     => qnice_disk0_writedata,
+         s_avm_byteenable_i    => qnice_disk0_byteenable,
+         s_avm_burstcount_i    => qnice_disk0_burstcount,
+         s_avm_readdata_o      => qnice_disk0_readdata,
+         s_avm_readdatavalid_o => qnice_disk0_readdatavalid,
+         m_clk_i               => hr_clk_i,
+         m_rst_i               => hr_rst_i,
+         m_avm_waitrequest_i   => hr_disk0_waitrequest,
+         m_avm_write_o         => hr_disk0_write,
+         m_avm_read_o          => hr_disk0_read,
+         m_avm_address_o       => hr_disk0_address,
+         m_avm_writedata_o     => hr_disk0_writedata,
+         m_avm_byteenable_o    => hr_disk0_byteenable,
+         m_avm_burstcount_o    => hr_disk0_burstcount,
+         m_avm_readdata_i      => hr_disk0_readdata,
+         m_avm_readdatavalid_i => hr_disk0_readdatavalid
+      ); -- qnice2hr_d0_avm_fifo
+
+   qnice2hr_d1_avm_fifo : entity work.avm_fifo
+      generic map (
+         G_WR_DEPTH     => 16,
+         G_RD_DEPTH     => 16,
+         G_FILL_SIZE    => 1,
+         G_ADDRESS_SIZE => 32,
+         G_DATA_SIZE    => 16
+      )
+      port map (
+         s_clk_i               => qnice_clk_i,
+         s_rst_i               => qnice_rst_i,
+         s_avm_waitrequest_o   => qnice_disk1_waitrequest,
+         s_avm_write_i         => qnice_disk1_write,
+         s_avm_read_i          => qnice_disk1_read,
+         s_avm_address_i       => qnice_disk1_address,
+         s_avm_writedata_i     => qnice_disk1_writedata,
+         s_avm_byteenable_i    => qnice_disk1_byteenable,
+         s_avm_burstcount_i    => qnice_disk1_burstcount,
+         s_avm_readdata_o      => qnice_disk1_readdata,
+         s_avm_readdatavalid_o => qnice_disk1_readdatavalid,
+         m_clk_i               => hr_clk_i,
+         m_rst_i               => hr_rst_i,
+         m_avm_waitrequest_i   => hr_disk1_waitrequest,
+         m_avm_write_o         => hr_disk1_write,
+         m_avm_read_o          => hr_disk1_read,
+         m_avm_address_o       => hr_disk1_address,
+         m_avm_writedata_o     => hr_disk1_writedata,
+         m_avm_byteenable_o    => hr_disk1_byteenable,
+         m_avm_burstcount_o    => hr_disk1_burstcount,
+         m_avm_readdata_i      => hr_disk1_readdata,
+         m_avm_readdatavalid_i => hr_disk1_readdatavalid
+      ); -- qnice2hr_d1_avm_fifo
 
 end architecture synthesis;
 

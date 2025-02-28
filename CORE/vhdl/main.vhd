@@ -25,6 +25,9 @@ use work.globals.C_MENU_MODEL_16_KB;
 use work.globals.C_MENU_MODEL_32_KB;
 use work.globals.C_MENU_MODEL_8096_MEM;
 use work.globals.C_MENU_MODEL_8296_MEM;
+use work.globals.C_MENU_UNIT_8_DISABLED;
+use work.globals.C_MENU_UNIT_8_4040;
+use work.globals.C_MENU_UNIT_8_8250;
 
 use work.globals.C_VD_SUBDRIVES;
 
@@ -172,8 +175,6 @@ architecture synthesis of main is
     signal ieee488_d01_ndac_o  : std_logic;
 
    -- Simulated IEEE-488 drives
-   signal iec_drive_ce         : std_logic;      -- chip enable for iec_drive (clock divider, see generate_drive_ce below)
-   signal iec_dce_sum          : integer := 0;   -- caution: we expect 32-bit integers here and we expect the initialization to 0
 
    signal iec_img_mounted      : std_logic_vector(G_VDNUM - 1 downto 0);
    signal iec_img_readonly     : std_logic;
@@ -194,10 +195,6 @@ architecture synthesis of main is
    signal iec_sd_buf_data_in   : std_logic_vector( 7 downto 0);
    signal iec_sd_buf_data_out  : vd_vec_array(G_VDNUM - 1 downto 0)(7 downto 0);
    signal iec_sd_buf_wr        : std_logic;
-   --signal iec_par_stb_in       : std_logic;
-   --signal iec_par_stb_out      : std_logic;
-   --signal iec_par_data_in      : std_logic_vector(7 downto 0);
-   --signal iec_par_data_out     : std_logic_vector(7 downto 0);
 
    -- RESET SEMANTICS
    --
@@ -543,7 +540,7 @@ begin
    --        This code currently only implements the "Always" option
    iec_drv_reset_gen : for i in 0 to G_VDNUM - 1 generate
       -- iec_drives_reset(i) <= (not reset_core_n) or (not vdrives_mounted(i));
-       iec_drives_reset(i) <= (not reset_core_n); -- for now allow empty drives...
+       iec_drives_reset(i) <= (not reset_core_n) or osm_i(C_MENU_UNIT_8_DISABLED); -- for now allow empty drives...
    end generate iec_drv_reset_gen;
 
 ------------------------------------------
@@ -590,7 +587,7 @@ begin
          bus_o_nrfd     => ieee488_d01_nrfd_o,
          bus_o_data     => ieee488_d01_data_o,
 
-         drv_type       => "1",                    -- 0=8250, 1=4040 FIXME "1" for just one drive!
+         drv_type       => osm_i(C_MENU_UNIT_8_4040), -- "1", -- 0=8250, 1=4040 FIXME "1" for just one drive!
 
          -- disk image status
          img_mounted    => iec_img_mounted,
