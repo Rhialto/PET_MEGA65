@@ -83,7 +83,7 @@ constant SCR_WELCOME : string :=
    "Olaf 'Rhialto' Seibert in 2025\n\n" &
 
    -- We are not insisting. But it would be nice if you gave us credit for MiSTer2MEGA65 by leaving these lines in
-   "Powered by MiSTer2MEGA65 Version [WIP],\n" &
+   "Powered by MiSTer2MEGA65 Version 2.0.1,\n" &
    "done by sy2002 and MJoergen in 2022\n" &
    "\n" &
 
@@ -302,7 +302,7 @@ constant OPTM_ITEMS        : string :=
 
    " Model options...\n"    &	-- 0
    " Model options\n"       &	-- 1  Model options submenu
-   "\n"                     &   
+   "\n"                     &
    " 2001 screen blank etc\n" &
    " 2001 white\n"          &
    " B keyboard\n"          & -- 5
@@ -313,7 +313,7 @@ constant OPTM_ITEMS        : string :=
    " 16 KB memory\n"        & -- 10
    " 32 KB memory\n"        &
    " 8096 memory expansion\n"  &
-   " 8296 memory exp(TODO)\n"  & 
+   " 8296 memory exp(TODO)\n"  &
    " PET ROM: %s\n"         &
    " Charset: %s\n"         & -- 15
    " Drive ROM: %s (TODO)\n"  &
@@ -323,13 +323,13 @@ constant OPTM_ITEMS        : string :=
    " Disk Drive, Unit 8\n"  & -- 20
    "\n"                     &
    " disabled\n"            &
-   " 4040\n"                &
-   " 8250\n"                &
+   " 4040\n"                &	-- (.d64)
+   " 8250\n"                &	-- (.d80,.d82)
    "\n"                     & -- 25
-   " 0:%s\n"                &      
+   " 0:%s\n"                &
    " 1:%s\n"                &
    "\n"                     &
-   " HDMI settings...\n"    &
+   " HDMI settings\n"       &
    "\n"                     & -- 30
    " HDMI: %s\n"            &
    " HDMI Settings\n"       &
@@ -343,7 +343,7 @@ constant OPTM_ITEMS        : string :=
    " 800x600 60 Hz\n"       & -- 40
    "\n"                     &
    " Back to main menu\n"   &
-   " HDMI: CRT emulation\n" & 
+   " HDMI: CRT emulation\n" &
    " HDMI: Zoom-in\n"       &
    " Audio improvements\n"  & -- 45
    "\n"                     &

@@ -26,9 +26,11 @@ This prerelease adds/changes, compared to v0.00011:
 
 - Uses the MiSTer2MEGA65 framework version 2.0.1
 - Made the presence of the disk drive optional
-- Added 8250 disk drive type (when switching, go via "disabled" as an intermediate step).
-  You can use `.D80` (533 248 bytes) and `.D82` (1 066 496 bytes) disk images for the 8250.
+- Added 8250 disk drive type.
+- When switching, go via "disabled" as an intermediate step.
+- You can use `.D80` (533 248 bytes) and `.D82` (1 066 496 bytes) disk images for the 8250.
   When using a D80 disk image, the first disk access will result in an error.  This is normal behaviour of the 8250 drive.
+- Use the correct disk image for the disk unit type.
 
 v0.00011
 --------
@@ -224,6 +226,8 @@ The B keyboard has 2 sets of number keys (and `.`): once on the numeric keypad, 
 * `CTRL`: works as the `OFF/RVS` key
 
 The ROMs slow down scrolling if you press the `<-` key (arrow left, not the cursor key). `:` works as a no-scroll key.
+
+Because the B keyboard was designed for "Business" use, the keyboard shows none of the graphics characters. In fact you cannot type any graphics characters, other than the ones that are on the letter keys.
 
 ### Diagnostic Sense
 

@@ -280,7 +280,8 @@ signal qnice_pet_mount1_buf_ram_data : std_logic_vector(15 downto 0);  -- Disk m
 signal main_drive_cache_dirty        : std_logic;
 
 attribute mark_debug : string;
-attribute mark_debug of qnice_pet_mount0_buf_ram_we       : signal is "false";
+attribute mark_debug of qnice_pet_mount0_buf_ram_we       : signal is "true";
+attribute mark_debug of qnice_pet_mount0_buf_ram_ce       : signal is "true";
 
 -- Custom Kernal access: PET ROM or PET CHAR ROM (if qnice_petchars_ce)
 signal qnice_petrom_we              : std_logic;

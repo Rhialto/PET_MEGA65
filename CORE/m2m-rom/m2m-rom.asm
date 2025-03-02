@@ -1,12 +1,11 @@
 ; ****************************************************************************
-; YOUR-PROJECT-NAME (GITHUB-REPO-SHORTNAME) QNICE ROM
+; MegaPET (github.com/Rhialto/PET_MEGA65) QNICE ROM
 ;
 ; Main program that is used to build m2m-rom.rom by make-rom.sh.
-; The ROM is loaded by TODO-ADD-NAME-OF-VHDL-FILE-HERE.
 ;
 ; The execution starts at the label START_FIRMWARE.
 ;
-; done by YOURNAME in YEAR and licensed under GPL v3
+; done by Olaf "Rhialto Seibert in 2025 and licensed under GPL v3
 ; ****************************************************************************
 
 ; If the define RELEASE is defined, then the ROM will be a self-contained and
@@ -212,7 +211,7 @@ END_OF_ROM      .DW 0
 ; You need to deduct MENU_HEAP_SIZE from the actual heap size below.
 ; Example: If your HEAP_SIZE would be 29696, then you write 29696-1024=28672
 ; instead, but when doing the sanity check calculations, you use 29696
-MENU_HEAP_SIZE  .EQU 1024
+MENU_HEAP_SIZE  .EQU 1200
 
 #ifndef RELEASE
 
@@ -227,7 +226,7 @@ HEAP            .BLOCK 1
 ; it comes to folders with a lot of files
 #else
 
-HEAP_SIZE       .EQU 28672                      ; 29696 - 1024 = 28672
+HEAP_SIZE       .EQU 28496                      ; 29696 - 1200 = 28496
 HEAP            .BLOCK 1
 
 ; The monitor variables use 22 words, round to 32 for being safe and subtract
