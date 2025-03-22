@@ -5,7 +5,7 @@
 ;
 ; The execution starts at the label START_FIRMWARE.
 ;
-; done by Olaf "Rhialto Seibert in 2025 and licensed under GPL v3
+; done by Olaf "Rhialto" Seibert in 2025 and licensed under GPL v3
 ; ****************************************************************************
 
 ; If the define RELEASE is defined, then the ROM will be a self-contained and

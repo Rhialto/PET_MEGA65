@@ -288,7 +288,7 @@ constant OPTM_S_SAVING     : string := "<Saving>";          -- the internal writ
 --             Do use a lower case \n. If you forget one of them or if you use upper case, you will run into undefined behavior.
 --          2. Start each line that contains an actual menu item (multi- or single-select) with a Space character,
 --             otherwise you will experience visual glitches.
-constant OPTM_SIZE         : natural := 48;  -- amount of items including empty lines:
+constant OPTM_SIZE         : natural := 51;  -- amount of items including empty lines:
                                              -- needs to be equal to the number of lines in OPTM_ITEMS and amount of items in OPTM_GROUPS
                                              -- IMPORTANT: If SAVE_SETTINGS is true and OPTM_SIZE changes: Make sure to re-generate and
                                              -- and re-distribute the config file. You can make a new one using M2M/tools/make_config.sh
@@ -300,54 +300,57 @@ constant OPTM_DY           : natural := 24;
 
 constant OPTM_ITEMS        : string :=
 
-   " Model options...\n"    &	-- 0
-   " Model options\n"       &	-- 1  Model options submenu
-   "\n"                     &
-   " 2001 screen blank etc\n" &
-   " 2001 white\n"          &
-   " B keyboard\n"          & -- 5
-   " 6545 CRT Controller\n" &
-   " 80 columns\n"          &
-   " ColourPET rgbi\n"      &
-   "  8 KB memory\n"        &
-   " 16 KB memory\n"        & -- 10
-   " 32 KB memory\n"        &
-   " 8096 memory expansion\n"  &
-   " 8296 memory exp(TODO)\n"  &
-   " PET ROM: %s\n"         &
-   " Charset: %s\n"         & -- 15
-   " Drive ROM: %s (TODO)\n"  &
-   "\n"                     &
-   " Back to main menu\n"   &
-   "\n"                     &
-   " Disk Drive, Unit 8\n"  & -- 20
-   "\n"                     &
-   " disabled\n"            &
-   " 4040\n"                &	-- (.d64)
-   " 8250\n"                &	-- (.d80,.d82)
-   "\n"                     & -- 25
-   " 0:%s\n"                &
-   " 1:%s\n"                &
-   "\n"                     &
-   " HDMI settings\n"       &
-   "\n"                     & -- 30
-   " HDMI: %s\n"            &
-   " HDMI Settings\n"       &
-   "\n"                     &
-   " 720p 50 Hz 16:9\n"     &       -- HDMI submenu
-   " 720p 60 Hz 16:9\n"     & -- 35
-   " 576p 50 Hz 4:3\n"      &
-   " 576p 50 Hz 5:4\n"      &
-   " 640x480 60 Hz\n"       &
-   " 720x480 59.94 Hz\n"    &
-   " 800x600 60 Hz\n"       & -- 40
-   "\n"                     &
-   " Back to main menu\n"   &
-   " HDMI: CRT emulation\n" &
-   " HDMI: Zoom-in\n"       &
-   " Audio improvements\n"  & -- 45
-   "\n"                     &
-   " Close Menu\n";           -- 47
+   " Model options...\n"     &	-- 0
+   " Model options\n"        &	-- 1  Model options submenu
+   "\n"                      &
+   " 2001 screen blank etc\n"&
+   " 2001 white\n"           &
+   " B keyboard\n"           & -- 5
+   " 6545 CRT Controller\n"  &
+   " 80 columns\n"           &
+   " ColourPET rgbi\n"       &
+   "  8 KB memory\n"         &
+   " 16 KB memory\n"         & -- 10
+   " 32 KB memory\n"         &
+   " 8096 memory expansion\n"&
+   " 8296 memory expansion\n"&
+   "   9xxx RAM\n"           &
+   "   Axxx RAM\n"           & -- 15
+   "   User Port control\n"  &      
+   " PET ROM: %s\n"          &      
+   " Charset: %s\n"          &      
+   " Drive ROM: %s (TODO)\n" &      
+   "\n"                      & -- 20
+   " Back to main menu\n"    &      
+   "\n"                      &      
+   " Disk Drive, Unit 8\n"   &      
+   "\n"                      &      
+   " disabled\n"             & -- 25
+   " 4040 (.d64)\n"          &      
+   " 8250 (.d80,.d82) R/O\n" &      
+   "\n"                      &      
+   " 0:%s\n"                 &      
+   " 1:%s\n"                 & -- 30
+   "\n"                      &      
+   " HDMI settings\n"        &      
+   "\n"                      &      
+   " HDMI: %s\n"             &       -- HDMI submenu      
+   " HDMI Settings\n"        & -- 35
+   "\n"                      &      
+   " 720p 50 Hz 16:9\n"      &
+   " 720p 60 Hz 16:9\n"      &      
+   " 576p 50 Hz 4:3\n"       &      
+   " 576p 50 Hz 5:4\n"       & -- 40
+   " 640x480 60 Hz\n"        &      
+   " 720x480 59.94 Hz\n"     &      
+   " 800x600 60 Hz\n"        &      
+   "\n"                      &      
+   " Back to main menu\n"    & -- 45
+   " HDMI: CRT emulation\n"  &      
+   " HDMI: Zoom-in\n"        & -- 47
+   " Audio improvements\n"   & 
+   "\n"                      &
+   " Close Menu\n";            -- 50
 
 -- define your own constants here and choose meaningful names
 -- make sure that your first group uses the value 1 (0 means "no menu item", such as text and line),
@@ -363,16 +366,19 @@ constant OPTM_G_Colour     : integer :=  6;
 constant OPTM_G_BaseMem    : integer :=  7;
 constant OPTM_G_8096       : integer :=  8;
 constant OPTM_G_8296       : integer :=  9;
-constant OPTM_G_Unit8Type  : integer := 10;
-constant OPTM_G_LD_ROMs    : integer := 11;
-constant OPTM_G_LD_CHAR    : integer := 12;
-constant OPTM_G_LD_Drive   : integer := 13;
-constant OPTM_G_HDMI       : integer := 14;
-constant OPTM_G_Drive_0    : integer := 15;
-constant OPTM_G_Drive_1    : integer := 16;
-constant OPTM_G_CRT        : integer := 17;
-constant OPTM_G_Zoom       : integer := 18;
-constant OPTM_G_Audio      : integer := 19;
+constant OPTM_G_RAMSEL9    : integer := 10;
+constant OPTM_G_RAMSELA    : integer := 11;
+constant OPTM_G_RAMSELUSERPORT : integer :=  12;
+constant OPTM_G_Unit8Type  : integer := 13;
+constant OPTM_G_LD_ROMs    : integer := 14;
+constant OPTM_G_LD_CHAR    : integer := 15;
+constant OPTM_G_LD_Drive   : integer := 16;
+constant OPTM_G_HDMI       : integer := 17;
+constant OPTM_G_Drive_0    : integer := 18;
+constant OPTM_G_Drive_1    : integer := 19;
+constant OPTM_G_CRT        : integer := 20;
+constant OPTM_G_Zoom       : integer := 21;
+constant OPTM_G_Audio      : integer := 22;
 
 -- !!! DO NOT TOUCH !!!
 type OPTM_GTYPE is array (0 to OPTM_SIZE - 1) of integer range 0 to 2**OPTM_GTC- 1;
@@ -395,6 +401,9 @@ constant OPTM_GROUPS       : OPTM_GTYPE := (
 	 OPTM_G_BaseMem + OPTM_G_STDSEL,           -- Item 32 KB memory
 	 OPTM_G_8096 + OPTM_G_SINGLESEL,           -- Item 8096 memory expansion
 	 OPTM_G_8296 + OPTM_G_SINGLESEL,           -- Item 8296 memory expansion
+	 OPTM_G_RAMSEL9 + OPTM_G_SINGLESEL,        -- Item $9xxx RAM
+	 OPTM_G_RAMSELA + OPTM_G_SINGLESEL,        -- Item $Axxx RAM
+	 OPTM_G_RAMSELUSERPORT + OPTM_G_SINGLESEL, -- Item User port control
 	 OPTM_G_LD_ROMs + OPTM_G_LOAD_ROM,         -- Load ROMs
 	 OPTM_G_LD_CHAR + OPTM_G_LOAD_ROM,         -- Load characters
 	 OPTM_G_LD_Drive + OPTM_G_LOAD_ROM,        -- Load drive ROMs

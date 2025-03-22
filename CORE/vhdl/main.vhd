@@ -25,6 +25,9 @@ use work.globals.C_MENU_MODEL_16_KB;
 use work.globals.C_MENU_MODEL_32_KB;
 use work.globals.C_MENU_MODEL_8096_MEM;
 use work.globals.C_MENU_MODEL_8296_MEM;
+use work.globals.C_MENU_MODEL_RAMSEL9;
+use work.globals.C_MENU_MODEL_RAMSELA;
+use work.globals.C_MENU_MODEL_RAMSELUSERPORT;
 use work.globals.C_MENU_UNIT_8_DISABLED;
 use work.globals.C_MENU_UNIT_8_4040;
 use work.globals.C_MENU_UNIT_8_8250;
@@ -413,6 +416,9 @@ begin
         pref_have_32k         => osm_i(C_MENU_MODEL_32_KB),
         pref_have_8096        => osm_i(C_MENU_MODEL_8096_MEM),
         pref_have_8296        => osm_i(C_MENU_MODEL_8296_MEM),
+	pref_ramsel9          => osm_i(C_MENU_MODEL_RAMSEL9),
+	pref_ramselA          => osm_i(C_MENU_MODEL_RAMSELA),
+	pref_ramselUserPort   => osm_i(C_MENU_MODEL_RAMSELUSERPORT),
 
         keyrow      => keyb_row_select,       -- keyboard scanning (row select)
         keyin       => keyb_column_selected,  -- keyboard scanning (pressed keys)

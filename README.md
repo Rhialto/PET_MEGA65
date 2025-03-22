@@ -24,13 +24,18 @@ v0.00012
 --------
 This prerelease adds/changes, compared to v0.00011:
 
-- Uses the MiSTer2MEGA65 framework version 2.0.1
-- Made the presence of the disk drive optional
-- Added 8250 disk drive type.
-- When switching, go via "disabled" as an intermediate step.
-- You can use `.D80` (533 248 bytes) and `.D82` (1 066 496 bytes) disk images for the 8250.
-  When using a D80 disk image, the first disk access will result in an error.  This is normal behaviour of the 8250 drive.
-- Use the correct disk image for the disk unit type.
+- Uses the MiSTer2MEGA65 framework version 2.0.1.
+- Fixes the bug where the keyboard becomes unresponsive after leaving the menu.
+- Adds 8296-style memory extension (extra 32 KB of RAM "under" the ROMs).
+- The presence of the disk drive is now optional.
+- New 8250 floppy disk drive type. Unfortunately there is an upstream bug, and this type is effectively Read Only for now.
+  - When switching types, go via "disabled" as an intermediate step (this resets the drive).
+  - You can still use disk images of type `.D64` (174 848 bytes) for the 4040.
+  - You can use disk images of types `.D80` (533 248 bytes) and `.D82` (1 066 496 bytes) for the 8250.
+    When using a D80 disk image (single sided, for 8050 drives), the first disk access will result in an error.  This is normal behaviour of the 8250 drive.
+  - Use the correct disk image for the disk unit type.
+  - Disk images are stored in Attic RAM.
+- Together this makes the MegaPET a 8296-D. Although that actual model had a different CRT and so required a different Editor ROM.
 
 v0.00011
 --------
@@ -170,6 +175,27 @@ Without a supporting Editor ROM, the colour memory ($8800...) will be initialize
 
 A group of 3 options. Choose one for the amount of "normal" memory (available to Basic).
 
+### 8096 memory expansion
+
+This enables the optional expansion board with 64 KB of RAM, controlled by a write-only register at $FFF0. For details, see the [8296 Supplement](https://www.zimmers.net/anonftp/pub/cbm/pet/manuals/8296supplement/8296supplement.html) sections 2.1 and 2.2.
+
+### 8296 memory expansion (TODO)
+
+This enables the memory configuration of the 8296. This maps an additional 32 KB of RAM at $8000-$FFFF "behind" the ROMs and I/O space. For details, see the [8296 Supplement](https://www.zimmers.net/anonftp/pub/cbm/pet/manuals/8296supplement/8296supplement.html) sections 2.3 though 3.
+If you select this option then normally you would also select the 8096 memory. In theory you could have an 8296 and remove the 8096 style extra 64 KB RAM chips, so it's a separate option. But in practice I estimate that nobody would do such a silly thing.
+
+#### $9000 RAM, $A000 RAM
+
+Activates (pulls down) the `/RAM SEL 9` and `/RAM SEL A` signals (see the Supplement section 2.4: JU1, JU2). 
+This makes it for example possible to LOAD ROM images into the EPROM socket address spaces $9xxx and $Axxx, if you have them as PRG files (with start address) on a floppy disk image.
+
+#### Userport controls RAM
+
+Let the user port bits 0, 1, and 2 control `/RAM SEL A`, `/RAM SEL 9` and `/RAM ON` (see the Supplement section 2.4: JU3, JU4, JU5). This overrides the other 2 options.
+This offers yet another way to replace the ROMs by RAM and run with dynamically modified ROMs.
+
+Note: there may be a bug somewhere that manifests when you press the RESET button while the 8296 memory is under user port control. The keyboard becomes unresponsive very soon after the RESET. Sometimes not even a "long reset" gets out of this state. The QNice PC is stuck at $1EFE (in code to transfer data to a QNice device), but I have not been able to debug this yet.
+
 ### PET ROM: \<Load>
 
 Load a ROM file. See below in the ROMMAKER section for how these are put together.
@@ -246,7 +272,7 @@ The drive LED has to take the daunting task to represent 3 distinct LEDs on the 
 
 - the red component is lit if the disk's error LED is on
 - the green component is lit if drive 0 is active
-- the blue component is lit if drive 0 is active
+- the blue component is lit if drive 1 is active
 
 This means you can get mix colours if several of the disk's LEDs are on.
 
