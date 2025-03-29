@@ -121,7 +121,7 @@ architecture synthesis of main is
 
    -- Generic MiSTer PET signals
    --signal pet_pause          : std_logic;
-    signal pet_drive_act_led   : vd_vec_array(G_VDNUM/C_VD_SUBDRIVES - 1 downto 0)(C_VD_SUBDRIVES-1 downto 0);
+    signal pet_drive_act_led   : vd_vec_array(0 to G_VDNUM/C_VD_SUBDRIVES - 1)(C_VD_SUBDRIVES-1 downto 0);
     signal pet_drive_err_led   : std_logic_vector(G_VDNUM/C_VD_SUBDRIVES-1 downto 0);
 
     signal cnt31 : INTEGER range 0 to 31 := 0;        -- 5 bits
@@ -184,7 +184,7 @@ architecture synthesis of main is
    signal iec_img_size         : std_logic_vector(31 downto 0);
    signal iec_img_type         : std_logic_vector( 1 downto 0);
 
-   signal iec_drives_reset     : std_logic_vector(G_VDNUM - 1 downto 0);
+   signal iec_drives_reset     : std_logic_vector(G_VDNUM/C_VD_SUBDRIVES - 1 downto 0);
    signal vdrives_mounted      : std_logic_vector(G_VDNUM - 1 downto 0);
    signal cache_dirty          : std_logic_vector(G_VDNUM - 1 downto 0);
    signal prevent_reset        : std_logic;
@@ -234,13 +234,18 @@ architecture synthesis of main is
    -- hard_reset_n IS NOT MEANT TO BE USED IN MAIN.VHD
    -- with the exception of the "cpu_data_in" the reset input of "i_cartridge".
    signal reset_core_n         : std_logic := '1';
-   signal reset_core_int_n     : std_logic := '1';
-   signal hard_reset_n         : std_logic := '1';
+   --signal reset_core_int_n     : std_logic := '1';
+   --signal hard_reset_n         : std_logic := '1';
+   signal reset_drive_n        : std_logic := '1';
 
-   constant C_HARD_RST_DELAY   : natural   := 100_000; -- roundabout 1/30 of a second
-   signal hard_rst_counter     : natural   := 0;
-   signal hard_reset_n_d       : std_logic := '1';
-   signal cold_start_done      : std_logic := '0';
+   --constant C_HARD_RST_DELAY   : natural   := 100_000; -- roundabout 1/30 of a second
+   --signal hard_rst_counter     : natural   := 0;
+   --signal hard_reset_n_d       : std_logic := '1';
+   --signal cold_start_done      : std_logic := '0';
+   constant C_DRIVE_RST_DELAY  : natural   := 1_000_000; -- 1 second at ce_1m speed
+   signal drive_reset_counter  : natural   := 0;
+   signal drive_was_4040       : std_logic := '0';
+   signal drive_was_8250       : std_logic := '0';
 
    signal sound_sample         : signed(15 downto 0);	-- low-passed sound
 
@@ -300,55 +305,84 @@ begin
          if reset_soft_i = '1' or reset_hard_i = '1'  then
             -- Due to sw_cartridge_wrapper's logic, reset_soft_i stays high longer than reset_hard_i.
             -- We need to make sure that this is not interfering with hard_reset_n
-            if reset_hard_i = '1' then
-               hard_rst_counter  <= C_HARD_RST_DELAY;
-               hard_reset_n      <= '0';
-            end if;
+            --if reset_hard_i = '1' then
+            --   hard_rst_counter  <= C_HARD_RST_DELAY;
+            --   hard_reset_n      <= '0';
+            --end if;
 
             -- reset_core_n is low-active, so prevent_reset = 0 means execute reset
             -- but a hard reset can override
-            reset_core_int_n     <= prevent_reset and (not reset_hard_i);
+            reset_core_n     <= prevent_reset and (not reset_hard_i);
          else
             -- The idea of the hard reset is, that while reset_core_n is back at '1' and therefore the core is
             -- running (not being reset any more), hard_reset_n stays low for C_HARD_RST_DELAY clock cycles.
             -- Reason: We need to give the KERNAL time to execute the routine $FD02 where it checks for the
             -- cartridge signature "CBM80" in $8003 onwards. In case reset_n = '0' during these tests (i.e. hard
             -- reset active) we will return zero instead of "CBM80" and therefore perform a hard reset.
-            reset_core_int_n <= '1';
-            if hard_rst_counter = 0 then
-               hard_reset_n <= '1';
-            else
-               hard_rst_counter <= hard_rst_counter - 1;
-            end if;
+            reset_core_n <= '1';
+            --if hard_rst_counter = 0 then
+            --   hard_reset_n <= '1';
+            --else
+            --   hard_rst_counter <= hard_rst_counter - 1;
+            --end if;
          end if;
       end if;
    end process hard_reset_proc;
 
    -- Combined reset signal to be used throughout main.vhd: reset triggered by the MEGA65's reset button (reset_core_int_n)
    -- and reset triggered by an external cartridge.
-   combined_reset_proc : process (all)
-   begin
-      reset_core_n <= '1';
-
-      -- cart_reset_i becomes cart_reset_o as soon as cart_reset_oe_o = '1', and the latter one becomes '1' as soon
-      -- as reset_core_int_n = '0' so we need to ignore cart_reset_i in this case
-      if reset_core_int_n = '0' then
-         reset_core_n <= '0';
-      end if;
-   end process combined_reset_proc;
+--   combined_reset_proc : process (all)
+--   begin
+--      reset_core_n <= '1';
+--
+--      -- cart_reset_i becomes cart_reset_o as soon as cart_reset_oe_o = '1', and the latter one becomes '1' as soon
+--      -- as reset_core_int_n = '0' so we need to ignore cart_reset_i in this case
+--      if reset_core_int_n = '0' then
+--         reset_core_n <= '0';
+--      end if;
+--   end process combined_reset_proc;
 
    -- To make sure that cartridges in the Expansion Port start properly, we must not do a hard reset and mask the $8000 memory area,
    -- when the core is launched for the first time (cold start).
-   handle_cold_start_proc : process (clk_main_i)
-   begin
-      if rising_edge(clk_main_i) then
-         hard_reset_n_d <= hard_reset_n;
-         -- detect the rising edge of hard_reset_n_d
-         if hard_reset_n = '1' and hard_reset_n_d = '0' and cold_start_done = '0' then
-            cold_start_done <= '1';
-         end if;
-      end if;
-   end process handle_cold_start_proc;
+--   handle_cold_start_proc : process (clk_main_i)
+--   begin
+--      if rising_edge(clk_main_i) then
+--         hard_reset_n_d <= hard_reset_n;
+--         -- detect the rising edge of hard_reset_n_d
+--         if hard_reset_n = '1' and hard_reset_n_d = '0' and cold_start_done = '0' then
+--            cold_start_done <= '1';
+--         end if;
+--      end if;
+--   end process handle_cold_start_proc;
+
+    -- Force the disk drive to be in reset state for two occasions:
+    -- 1. after a core reset
+    -- 2. after the drive model changes.
+    -- Case 1. is because this appears to help with resets that don't complete cleanly.
+    drive_reset_proc : process (clk_main_i)
+    begin
+        if rising_edge(clk_main_i) then
+           drive_was_4040 <= osm_i(C_MENU_UNIT_8_4040);
+           drive_was_8250 <= osm_i(C_MENU_UNIT_8_8250);
+
+           -- Prepare to keep the drives in reset for a bit longer than the CPU.
+            if reset_core_n = '0' or
+                    drive_was_4040 /= osm_i(C_MENU_UNIT_8_4040) or
+                    drive_was_8250 /= osm_i(C_MENU_UNIT_8_8250) then
+                reset_drive_n <= '0';
+                drive_reset_counter <= C_DRIVE_RST_DELAY;
+            else
+                -- Count slowly, when the normal reset has ceased but the drive reset is still active.
+                if ce_1m = '1' and reset_drive_n = '0' then
+                    if drive_reset_counter = 0 then
+                        reset_drive_n <= '1';
+                    else
+                        drive_reset_counter <= drive_reset_counter - 1;
+                    end if;
+                end if;
+            end if;
+        end if;
+    end process drive_reset_proc;
 
      -- Clock enable signals process
      process(clk_main_i)
@@ -362,8 +396,6 @@ begin
              ce_1m <= '1' when cnt31 = 0 else '0';
          end if;
      end process;
--- 
--- end Behavioral;
 
 ----------------------------------------------------
 -- RAM
@@ -416,9 +448,9 @@ begin
         pref_have_32k         => osm_i(C_MENU_MODEL_32_KB),
         pref_have_8096        => osm_i(C_MENU_MODEL_8096_MEM),
         pref_have_8296        => osm_i(C_MENU_MODEL_8296_MEM),
-	pref_ramsel9          => osm_i(C_MENU_MODEL_RAMSEL9),
-	pref_ramselA          => osm_i(C_MENU_MODEL_RAMSELA),
-	pref_ramselUserPort   => osm_i(C_MENU_MODEL_RAMSELUSERPORT),
+        pref_ramsel9          => osm_i(C_MENU_MODEL_RAMSEL9),
+        pref_ramselA          => osm_i(C_MENU_MODEL_RAMSELA),
+        pref_ramselUserPort   => osm_i(C_MENU_MODEL_RAMSELUSERPORT),
 
         keyrow      => keyb_row_select,       -- keyboard scanning (row select)
         keyin       => keyb_column_selected,  -- keyboard scanning (pressed keys)
@@ -539,14 +571,13 @@ begin
          diag_sense_o         => diag_sense
       ); -- i_keyboard
 
-   -- Drive is held to reset if the core is held to reset or if the drive is not mounted, yet
+   -- Drive is held to reset if the core is held to reset or if the drive is disabled.
    -- @TODO: MiSTer also allows these options when it comes to drive-enable:
    --        "P2oPQ,Enable Drive #8,If Mounted,Always,Never;"
    --        "P2oNO,Enable Drive #9,If Mounted,Always,Never;"
-   --        This code currently only implements the "Always" option
-   iec_drv_reset_gen : for i in 0 to G_VDNUM - 1 generate
-      -- iec_drives_reset(i) <= (not reset_core_n) or (not vdrives_mounted(i));
-       iec_drives_reset(i) <= (not reset_core_n) or osm_i(C_MENU_UNIT_8_DISABLED); -- for now allow empty drives...
+   iec_drv_reset_gen : for i in 0 to G_VDNUM/C_VD_SUBDRIVES - 1 generate
+       iec_drives_reset(i) <= (not reset_core_n) or (not reset_drive_n) or
+                              osm_i(C_MENU_UNIT_8_DISABLED);
    end generate iec_drv_reset_gen;
 
 ------------------------------------------
@@ -559,13 +590,11 @@ begin
          SUBDRV         => C_VD_SUBDRIVES
       )
       port map (
-         --clk            => clk_main_speed_i,
-         --clk_sys        => clk_main_i,
          clk            => QNICE_CLK_SPEED,
          clk_sys        => pet_clk_sd_i,
          clk_main       => clk_main_i,
          reset          => iec_drives_reset,
-         pause          => pause_i,
+         pause          => '0', -- we don't support pause_i,
 
          -- drive led
          led_act        => pet_drive_act_led,
@@ -593,7 +622,7 @@ begin
          bus_o_nrfd     => ieee488_d01_nrfd_o,
          bus_o_data     => ieee488_d01_data_o,
 
-         drv_type       => osm_i(C_MENU_UNIT_8_4040), -- "1", -- 0=8250, 1=4040 FIXME "1" for just one drive!
+         drv_type       => drive_was_4040, -- "1", -- 0=8250, 1=4040 FIXME "1" for just one drive!
 
          -- disk image status
          img_mounted    => iec_img_mounted,
