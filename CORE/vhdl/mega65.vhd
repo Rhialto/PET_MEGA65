@@ -279,9 +279,6 @@ signal qnice_pet_mount1_buf_ram_data : std_logic_vector(15 downto 0);  -- Disk m
 
 signal main_drive_cache_dirty        : std_logic;
 
-attribute mark_debug : string;
-attribute mark_debug of qnice_pet_mount0_buf_ram_we       : signal is "false";
-
 -- Custom Kernal access: PET ROM or PET CHAR ROM (if qnice_petchars_ce)
 signal qnice_petrom_we              : std_logic;
 signal qnice_petchars_ce            : std_logic;
@@ -319,6 +316,31 @@ signal qnice_disk1_burstcount         : std_logic_vector( 7 downto 0);
 signal qnice_disk1_readdata           : std_logic_vector(15 downto 0);
 signal qnice_disk1_readdatavalid      : std_logic;
 signal qnice_disk1_waitrequest        : std_logic;
+
+attribute mark_debug : string;
+attribute mark_debug of qnice_pet_mount0_buf_ram_we       : signal is "true";
+attribute mark_debug of qnice_pet_mount0_buf_ram_ce       : signal is "true";
+attribute mark_debug of qnice_disk0_waitrequest           : signal is "true";
+--attribute mark_debug of qnice_disk1_waitrequest           : signal is "true";
+attribute mark_debug of qnice_pet_mount0_buf_ram_wait     : signal is "true";
+--attribute mark_debug of qnice_pet_mount1_buf_ram_wait     : signal is "true";
+attribute mark_debug of qnice_dev_wait_o                  : signal is "true";
+attribute mark_debug of qnice_disk0_write                 : signal is "true";
+attribute mark_debug of qnice_disk0_read                  : signal is "true";
+--attribute mark_debug of qnice_disk1_write                 : signal is "true";
+--attribute mark_debug of qnice_disk1_read                  : signal is "true";
+attribute mark_debug of qnice_dev_addr_i                  : signal is "true";
+attribute mark_debug of qnice_dev_ce_i                    : signal is "true";
+attribute mark_debug of qnice_dev_we_i                    : signal is "true";
+attribute mark_debug of qnice_dev_id_i                    : signal is "true";
+attribute mark_debug of qnice_disk0_readdatavalid         : signal is "true";
+attribute mark_debug of hr_disk0_readdatavalid            : signal is "true";
+attribute mark_debug of hr_disk0_waitrequest              : signal is "true";
+--attribute mark_debug of hr_disk1_waitrequest              : signal is "true";
+attribute mark_debug of hr_core_waitrequest_i             : signal is "true";
+attribute mark_debug of hr_core_readdatavalid_i           : signal is "true";
+attribute mark_debug of hr_core_read_o                    : signal is "true";
+attribute mark_debug of hr_core_write_o                   : signal is "true";
 
 begin
 
@@ -788,7 +810,7 @@ begin
          G_DATA_SIZE    => 16
       )
       port map (
-         s_clk_i               => qnice_clk_i,
+         s_clk_i               => qnice_clk_i,	-- invert clock since qnice acts on falling edge?
          s_rst_i               => qnice_rst_i,
          s_avm_waitrequest_o   => qnice_disk0_waitrequest,
          s_avm_write_i         => qnice_disk0_write,
@@ -821,7 +843,7 @@ begin
          G_DATA_SIZE    => 16
       )
       port map (
-         s_clk_i               => qnice_clk_i,
+         s_clk_i               => qnice_clk_i,	-- invert clock since qnice acts on falling edge?
          s_rst_i               => qnice_rst_i,
          s_avm_waitrequest_o   => qnice_disk1_waitrequest,
          s_avm_write_i         => qnice_disk1_write,

@@ -90,6 +90,12 @@ architecture synthesis of hyperram_ctrl is
    signal   count_long  : unsigned(31 downto 0);
    signal   count_short : unsigned(31 downto 0);
 
+   attribute mark_debug : string;
+   attribute mark_debug of avm_read_i          : signal is "true";
+   attribute mark_debug of avm_waitrequest_o   : signal is "true";
+   attribute mark_debug of hb_read_o           : signal is "true";
+   attribute mark_debug of hb_dq_ie_i          : signal is "true";
+   attribute mark_debug of state               : signal is "true";
 begin
 
    fsm_proc : process (clk_i)

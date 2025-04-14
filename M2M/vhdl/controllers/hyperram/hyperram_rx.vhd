@@ -41,6 +41,8 @@ architecture synthesis of hyperram_rx is
    signal ctrl_dq_ie_d  : std_logic;
    signal ctrl_dq_ie_d2 : std_logic;
 
+   attribute mark_debug : string;
+   attribute mark_debug of ctrl_dq_ie          : signal is "true";
 begin
 
    -- This is needed in order to make use of the IDELAYE2 primitive.

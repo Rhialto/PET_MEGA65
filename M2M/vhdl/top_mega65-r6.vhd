@@ -405,6 +405,8 @@ architecture synthesis of mega65_r6 is
    signal hr_core_waitrequest    : std_logic;
    signal hr_low                 : std_logic;
    signal hr_high                : std_logic;
+attribute mark_debug : string;
+attribute mark_debug of hr_core_waitrequest             : signal is "true";
 
    ---------------------------------------------------------------------------------------------
    -- qnice_clk

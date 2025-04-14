@@ -431,6 +431,50 @@ signal hr_dq_oe_n             : std_logic_vector(7 downto 0);   -- Output enable
 signal scl_out                : std_logic_vector(7 downto 0);
 signal sda_out                : std_logic_vector(7 downto 0);
 
+attribute mark_debug : string;
+
+    attribute mark_debug of hr_rst_o                   : signal is "true";
+    attribute mark_debug of hr_write                   : signal is "true";
+    attribute mark_debug of hr_read                    : signal is "true";
+    attribute mark_debug of hr_address                 : signal is "true";
+    attribute mark_debug of hr_writedata               : signal is "true";
+    attribute mark_debug of hr_byteenable              : signal is "true";
+    attribute mark_debug of hr_burstcount              : signal is "true";
+    attribute mark_debug of hr_readdata                : signal is "true";
+    attribute mark_debug of hr_readdatavalid           : signal is "true";
+    attribute mark_debug of hr_waitrequest             : signal is "true";
+
+    attribute mark_debug of main_reset_core_o               : signal is "true";
+    attribute mark_debug of hr_core_write_i                 : signal is "true";
+    attribute mark_debug of hr_core_read_i                  : signal is "true";
+    attribute mark_debug of hr_core_address_i               : signal is "true";
+    attribute mark_debug of hr_core_writedata_i             : signal is "true";
+    attribute mark_debug of hr_core_byteenable_i            : signal is "true";
+    attribute mark_debug of hr_core_burstcount_i            : signal is "true";
+    attribute mark_debug of hr_core_readdata_o              : signal is "true";
+    attribute mark_debug of hr_core_readdatavalid_o         : signal is "true";
+    attribute mark_debug of hr_core_waitrequest_o           : signal is "true";
+
+    attribute mark_debug of hr_dig_write                   : signal is "true";
+    attribute mark_debug of hr_dig_read                    : signal is "true";
+--  attribute mark_debug of hr_dig_address                 : signal is "true";
+--  attribute mark_debug of hr_dig_writedata               : signal is "true";
+--  attribute mark_debug of hr_dig_byteenable              : signal is "true";
+--  attribute mark_debug of hr_dig_burstcount              : signal is "true";
+--  attribute mark_debug of hr_dig_readdata                : signal is "true";
+    attribute mark_debug of hr_dig_readdatavalid           : signal is "true";
+    attribute mark_debug of hr_dig_waitrequest             : signal is "true";
+
+    attribute mark_debug of hr_qnice_write                   : signal is "true";
+    attribute mark_debug of hr_qnice_read                    : signal is "true";
+--  attribute mark_debug of hr_qnice_address                 : signal is "true";
+--  attribute mark_debug of hr_qnice_writedata               : signal is "true";
+--  attribute mark_debug of hr_qnice_byteenable              : signal is "true";
+--  attribute mark_debug of hr_qnice_burstcount              : signal is "true";
+--  attribute mark_debug of hr_qnice_readdata                : signal is "true";
+    attribute mark_debug of hr_qnice_readdatavalid           : signal is "true";
+    attribute mark_debug of hr_qnice_waitrequest             : signal is "true";
+
 begin
 
    ---------------------------------------------------------------------------------------------------------------
@@ -716,7 +760,6 @@ begin
          m_avm_readdatavalid_i => hr_readdatavalid,
          m_avm_waitrequest_i   => hr_waitrequest
       ); -- i_avm_arbit_general
-
 
    ---------------------------------------------------------------------------------------------------------------
    -- Clock Domain Crossing
