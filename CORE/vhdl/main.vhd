@@ -10,6 +10,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+library xpm;
+use xpm.vcomponents.xpm_cdc_array_single;
+
 library work;
 use work.video_modes_pkg.all;
 use work.vdrives_pkg.all;
@@ -70,6 +73,8 @@ entity main is
       -- floppy drive led (color is RGB)
       drive_led_o            : out std_logic;
       drive_led_col_o        : out std_logic_vector(23 downto 0);
+      drive_led              : out std_logic;
+      drive_led_col          : out std_logic_vector(23 downto 0);
       drive_cache_dirty      : out std_logic;
 
       -- M2M Keyboard interface
@@ -185,6 +190,10 @@ architecture synthesis of main is
    signal iec_img_type         : std_logic_vector( 1 downto 0);
 
    signal iec_drives_reset     : std_logic_vector(G_VDNUM/C_VD_SUBDRIVES - 1 downto 0);
+   signal sd_iec_drives_reset  : std_logic_vector(G_VDNUM/C_VD_SUBDRIVES - 1 downto 0);
+
+   -- up to here.
+
    signal vdrives_mounted      : std_logic_vector(G_VDNUM - 1 downto 0);
    signal cache_dirty          : std_logic_vector(G_VDNUM - 1 downto 0);
    signal prevent_reset        : std_logic;
@@ -246,6 +255,7 @@ architecture synthesis of main is
    signal drive_reset_counter  : natural   := 0;
    signal drive_was_4040       : std_logic := '0';
    signal drive_was_8250       : std_logic := '0';
+   signal sd_drive_was_4040    : std_logic := '0';
 
    signal sound_sample         : signed(15 downto 0);	-- low-passed sound
 
@@ -283,18 +293,35 @@ begin
    -- when the cache is dirty and/or currently being flushed.
    drive_cache_dirty <= '0' when unsigned(cache_dirty) = 0 else
                         '1';
-   -- The red component is active if the error LED is active
-   -- The green component is active if drive 0 is active
-   -- The blue component is active if drive 1 is active
+   -- The red component is active if the error LED is active (qnice clock domain)
+   -- The green component is active if drive 0 is active (qnice clock domain)
+   -- The blue component is active if drive 1 is active (qnice clock domain)
    -- FIXME: activity leds for more than 1 drive.
-   drive_led_col_o(23 downto 16) <= x"80" when unsigned(pet_drive_err_led) /= 0 else x"00";
-   drive_led_col_o(15 downto  8) <= x"FF" when pet_drive_act_led(0)(0) = '1' else x"00";
-   drive_led_col_o( 7 downto  0) <= x"FF" when pet_drive_act_led(0)(1) = '1' else x"00";
+   drive_led_col(23 downto 16) <= x"80" when unsigned(pet_drive_err_led) /= 0 else x"00";
+   drive_led_col(15 downto  8) <= x"FF" when pet_drive_act_led(0)(0) = '1' else x"00";
+   drive_led_col( 7 downto  0) <= x"FF" when pet_drive_act_led(0)(1) = '1' else x"00";
 
    -- the drive led is on if either drive is active, or the error LED.
-   drive_led_o <=      '1' when (or pet_drive_act_led(0)) = '1' or
-                                unsigned(pet_drive_err_led) /= 0
-                  else '0';
+   drive_led <=      '1' when (or pet_drive_act_led(0)) = '1' or
+                              unsigned(pet_drive_err_led) /= 0
+                else '0';
+
+   -- Clock domain crossing for the LED signals from sd-card (qnice) to core (main)
+
+   i_cdc_leds : xpm_cdc_array_single
+   generic map (
+      WIDTH => 25
+   )
+   port map (
+      src_clk               => pet_clk_sd_i,
+      src_in(23 downto 0)   => drive_led_col,
+      src_in(24)            => drive_led,
+
+      dest_clk              => clk_main_i,
+      dest_out(23 downto 0) => drive_led_col_o,
+      dest_out(24)          => drive_led_o
+   );
+
    --------------------------------------------------------------------------------------------------
    -- Hard reset
    --------------------------------------------------------------------------------------------------
@@ -584,6 +611,20 @@ begin
 -- Let's connect some drives!
 ------------------------------------------
 
+   -- We need some wires to cross clock domain for the drive.
+
+   i_cdc_drive : xpm_cdc_array_single
+   generic map (
+      WIDTH => G_VDNUM/C_VD_SUBDRIVES
+   )
+   port map (
+      src_clk    => clk_main_i,
+      src_in     => iec_drives_reset,
+
+      dest_clk   => pet_clk_sd_i,
+      dest_out   => sd_iec_drives_reset
+   );
+
    ieee_drive_inst : entity work.ieee_drive
       generic map (
          DRIVES         => G_VDNUM / C_VD_SUBDRIVES,
@@ -593,12 +634,12 @@ begin
          clk            => QNICE_CLK_SPEED,
          clk_sys        => pet_clk_sd_i,
          clk_main       => clk_main_i,
-         reset          => iec_drives_reset,
+         reset          => sd_iec_drives_reset,
          pause          => '0', -- we don't support pause_i,
 
          -- drive led
-         led_act        => pet_drive_act_led,
-         led_err        => pet_drive_err_led,
+	 led_act        => pet_drive_act_led,	-- qnice clock domain
+	 led_err        => pet_drive_err_led,	-- qnice clock domain
 
          -- Device connected to IEEE-488 bus
 
