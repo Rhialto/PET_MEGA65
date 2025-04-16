@@ -20,13 +20,20 @@ There are currently no releases.
 
 From time to time there is a pre-release, when there seems to be some useful addition to the code base. There is absolutely no guarantee when those happen.
 
+v0.00013
+--------
+This prerelease adds/changes, compared to v0.00012:
+
+- Automatically resets the disk unit for a second when you change its model.
+- Resets the drive a second longer when the core resets. This was meant to help a bit against the bug where QNice gets stuck while interacting with the drive just after the core resets.
+
 v0.00012
 --------
 This prerelease adds/changes, compared to v0.00011:
 
 - Uses the MiSTer2MEGA65 framework version 2.0.1.
 - Fixes the bug where the keyboard becomes unresponsive after leaving the menu.
-- Adds 8296-style memory extension (extra 32 KB of RAM "under" the ROMs).
+- Adds 8296-style memory extension (extra 32 KB of RAM "under" the ROMs) for a total of 128 KB.
 - The presence of the disk drive is now optional.
 - New 8250 floppy disk drive type. Unfortunately there is an upstream bug, and this type is effectively Read Only for now.
   - When switching types, go via "disabled" as an intermediate step (this resets the drive).
@@ -54,9 +61,9 @@ This prerelease adds, compared to v0.00009:
 
 - Steve Gray's [ColourPET](http://cbmsteve.ca/colourpet/index.html) board. Try it with [GridRunner](https://milasoft64.itch.io/gridrunner). I have included a test version of an editor ROM set for 40 columns `4032n+colour.rom`, specially created by Steve Gray for the MegaPET. Keep an eye on [github](https://github.com/sjgray/cbm-edit-rom/tree/master/binaries/ColourPET) for updates.
 - You can now select 8, 16 or 32 KB as the basic memory size.
-- 64 KB memory extension board, 8096-style. Not so well-tested but it seems ok.
-- The optional second half of the character ROM can now be used (if it is 4 KB), by setting MA13 (`poke 59520,12: poke 59521,3\*16`). The MegaPET comes loaded with the character ROM from the SuperPET, which has ASCII and APL characters in the extra part. To go back to normal use `poke 59520,12: 59521,1\*16`.
-- Similarly the screen as a whole can be inverted by unsetting MA12 (use `poke 59521,0\*16` or `2\*16`).
+- 64 KB memory extension board, 8096-style. Not so well-tested but it seems ok. This brings the total amount of RAM to 32 + 64 = 96 KB.
+- The optional second half of the character ROM can now be used (if it is 4 KB), by setting MA13 (`poke 59520,12: poke 59521,3*16`). The MegaPET comes loaded with the character ROM from the SuperPET, which has ASCII and APL characters in the extra part. To go back to normal use `poke 59520,12: 59521,1*16`.
+- Similarly the screen as a whole can be inverted by unsetting MA12 (use `poke 59521,0*16` or `2*16`).
   These features only work with the CRTC, and these address bits may be repurposed in later PET models: for example, the HRE uses MA12.
 - Incorporated upstream fixes from the to-be-released next version of the M2M framework, fixing the "barcode" issue that affects a small number of Mega65 revision 6 machines.
 
@@ -133,8 +140,37 @@ Later models are all variants of the 8032 model. These include a 64 KB memory ex
 A different and incompatible expansion is the SuperPET a.k.a. MicroMainFrame 9000 (an 8032 with an additional 6809 CPU and a *different* 64 KB memory expansion).
 This is all not implemented at this time.
 
-SETTINGS
---------
+PROGRAMMING INFO
+----------------
+
+Two very good resources for programming PETs are "Programming the PET/CBM" by Raeto West (lots of text), and "The Complete Commodore Inner Space Anthology" by Karl J. H. Hildon (lots of lists and tables).
+
+MENU
+----
+
+If you press the HELP key, the main menu opens. Some of the options are inherited from the Mister2Mega framework and have not yet been given a fitting meaning for this core.
+
+### Model options...
+
+goes to the submenu for model options (see below).
+
+### Disk Drive, Unit 8
+
+#### disabled, 4040 or 8250
+
+This chooses if you want the disk drive and if so which type.
+If you switch from one drive type to the other, the drive is reset so that its tiny little minds can adjust to the changed hardware around them.
+
+You can use disk images of type `.D64` (174 848 bytes) with the 4040.
+You can use disk images of types `.D80` (1-sided, 533 248 bytes) and `.D82` (2-sided, 1 066 496 bytes) with the 8250.
+When using a D80 disk image (single sided, for 8050 drives), the first disk access will result in an error.  This is normal behaviour of the 8250 drive.
+
+#### 0:\<Mount Drive>, 1:\<Mount Drive>
+
+The dual drive units have 2 drives and here you can insert a disk image into either one.  Use the correct disk image for the disk unit type.
+
+MODEL OPTIONS
+-------------
 
 These are the settings in the "Model options..." submenu.
 
@@ -177,11 +213,12 @@ A group of 3 options. Choose one for the amount of "normal" memory (available to
 
 ### 8096 memory expansion
 
-This enables the optional expansion board with 64 KB of RAM, controlled by a write-only register at $FFF0. For details, see the [8296 Supplement](https://www.zimmers.net/anonftp/pub/cbm/pet/manuals/8296supplement/8296supplement.html) sections 2.1 and 2.2.
+This enables the optional expansion board with 64 KB of RAM, controlled by a write-only Control Register at $FFF0. This brings the amount of RAM to 96 KB, hence the model name 8096. For programming details, see the [8296 Supplement](https://www.zimmers.net/anonftp/pub/cbm/pet/manuals/8296supplement/8296supplement.html) sections 2.1 and 2.2.
 
-### 8296 memory expansion (TODO)
+### 8296 memory expansion
 
-This enables the memory configuration of the 8296. This maps an additional 32 KB of RAM at $8000-$FFFF "behind" the ROMs and I/O space. For details, see the [8296 Supplement](https://www.zimmers.net/anonftp/pub/cbm/pet/manuals/8296supplement/8296supplement.html) sections 2.3 though 3.
+This enables the memory configuration of the 8296. This maps an additional 32 KB of RAM at $8000-$FFFF "behind" the ROMs and I/O space. This brings the total amount of RAM to 128 KB. For details, see the [8296 Supplement](https://www.zimmers.net/anonftp/pub/cbm/pet/manuals/8296supplement/8296supplement.html) sections 2.3 though 3.
+
 If you select this option then normally you would also select the 8096 memory. In theory you could have an 8296 and remove the 8096 style extra 64 KB RAM chips, so it's a separate option. But in practice I estimate that nobody would do such a silly thing.
 
 #### $9000 RAM, $A000 RAM
@@ -192,9 +229,11 @@ This makes it for example possible to LOAD ROM images into the EPROM socket addr
 #### Userport controls RAM
 
 Let the user port bits 0, 1, and 2 control `/RAM SEL A`, `/RAM SEL 9` and `/RAM ON` (see the Supplement section 2.4: JU3, JU4, JU5). This overrides the other 2 options.
-This offers yet another way to replace the ROMs by RAM and run with dynamically modified ROMs.
 
-Note: there may be a bug somewhere that manifests when you press the RESET button while the 8296 memory is under user port control. The keyboard becomes unresponsive very soon after the RESET. Sometimes not even a "long reset" gets out of this state. The QNice PC is stuck at $1EFE (in code to transfer data to a QNice device), but I have not been able to debug this yet.
+Since the memory mapping sometimes depends on bit 6 of the $FFF0 Control Register, it is recommended to enable the 8096 memory expansion as well when you use this option.
+
+This offers yet another way to replace the ROMs by RAM and run with dynamically modified ROMs. Just copy addresses $B000-$FFFF (skipping $FFF0 and $E800-$E8FF) to themselves, which copies the ROMs into RAM. Set $FFF0 to $40 (I/O peek though). Then enable this option, write some values to the user port, and finally set the 3 user port bits to output.
+
 
 ### PET ROM: \<Load>
 
@@ -204,8 +243,8 @@ Load a ROM file. See below in the ROMMAKER section for how these are put togethe
 
 Load a character generator ROM. These can be 2 KB or 4 KB. Only the non-reversed characters are present. Inverting them is done in hardware.
 
-The optional second half of the character ROM can be used (if it is 4 KB), by setting MA13 (poke 59520,12: poke 59521,3\*16). The MegaPET comes loaded with the character ROM from the SuperPET, which has ASCII and APL characters in the extra part.
-Similarly the screen as a whole can be inverted by unsetting MA12 (use poke 59521,0\*16 or 2\*16).
+The optional second half of the character ROM can be used (if it is 4 KB), by setting MA13 (`poke 59520,12: poke 59521,3*16`). The MegaPET comes loaded with the character ROM from the SuperPET, which has ASCII and APL characters in the extra part.
+Similarly the screen as a whole can be inverted by unsetting MA12 (use `poke 59521,0*16` or `2*16`).
 These features only work with the CRTC, and these address bits may be repurposed in later PET models: the HRE uses MA12.
 
 ### Drive ROM: \<Load>
