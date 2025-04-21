@@ -44,14 +44,14 @@ architecture synthesis of qnice2hyperram is
 
 attribute mark_debug : string;
 attribute mark_debug of reading                           : signal is "true";
-attribute mark_debug of m_avm_readdatavalid_d             : signal is "true";
-attribute mark_debug of m_avm_write_o                     : signal is "true";
-attribute mark_debug of m_avm_read_o                      : signal is "true";
-attribute mark_debug of m_avm_readdatavalid_i             : signal is "true";
-attribute mark_debug of m_avm_waitrequest_i               : signal is "true";
-attribute mark_debug of s_qnice_wait_o                    : signal is "true";
-attribute mark_debug of s_qnice_cs_i                      : signal is "true";
-attribute mark_debug of s_qnice_write_i                   : signal is "true";
+--attribute mark_debug of m_avm_readdatavalid_d             : signal is "true";
+--attribute mark_debug of m_avm_write_o                     : signal is "true";
+--attribute mark_debug of m_avm_read_o                      : signal is "true";
+--attribute mark_debug of m_avm_readdatavalid_i             : signal is "true";
+--attribute mark_debug of m_avm_waitrequest_i               : signal is "true";
+--attribute mark_debug of s_qnice_wait_o                    : signal is "true";
+--attribute mark_debug of s_qnice_cs_i                      : signal is "true";
+--attribute mark_debug of s_qnice_write_i                   : signal is "true";
 
 begin
 

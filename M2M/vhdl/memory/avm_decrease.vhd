@@ -58,6 +58,27 @@ architecture synthesis of avm_decrease is
    signal s_write_pos : integer range 0 to C_RATIO-1 := 0;
    signal s_read_pos  : integer range 0 to C_RATIO-1 := 0;
 
+   attribute mark_debug : string;
+   attribute mark_debug of s_avm_write_i        : signal is "true";
+   attribute mark_debug of s_avm_read_i         : signal is "true";
+   attribute mark_debug of s_avm_byteenable_i   : signal is "true";
+   attribute mark_debug of s_avm_burstcount_i   : signal is "true";
+   attribute mark_debug of s_avm_readdatavalid_o: signal is "true";
+   attribute mark_debug of s_avm_waitrequest_o  : signal is "true";
+   attribute mark_debug of m_avm_write_o        : signal is "true";
+   attribute mark_debug of m_avm_read_o         : signal is "true";
+   attribute mark_debug of m_avm_byteenable_o   : signal is "true";
+   attribute mark_debug of m_avm_burstcount_o   : signal is "true";
+   attribute mark_debug of m_avm_readdatavalid_i: signal is "true";
+   attribute mark_debug of m_avm_waitrequest_i  : signal is "true";
+
+   attribute mark_debug of s_avm_write          : signal is "true";
+   attribute mark_debug of s_avm_read           : signal is "true";
+   attribute mark_debug of s_avm_byteenable     : signal is "true";
+   attribute mark_debug of s_avm_burstcount     : signal is "true";
+   attribute mark_debug of state                : signal is "true";
+   attribute mark_debug of s_write_pos          : signal is "true";
+   attribute mark_debug of s_read_pos           : signal is "true";
 begin
 
    assert C_RATIO > 1 severity failure;

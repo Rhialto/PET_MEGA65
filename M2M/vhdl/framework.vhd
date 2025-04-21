@@ -433,6 +433,8 @@ signal sda_out                : std_logic_vector(7 downto 0);
 
 attribute mark_debug : string;
 
+    attribute mark_debug of main_qnice_reset_o         : signal is "true";
+
     attribute mark_debug of hr_rst_o                   : signal is "true";
     attribute mark_debug of hr_write                   : signal is "true";
     attribute mark_debug of hr_read                    : signal is "true";
