@@ -11,7 +11,7 @@
 ## Important: Using them in subsequent statements, e.g. clock dividers requires that they
 ## have been named/defined here before
 ## otherwise Vivado does not find the pins)
-create_generated_clock -name main_clk      [get_pins CORE/clk_gen/i_clk_main/CLKOUT0]
+create_generated_clock -name main_clk [get_pins CORE/clk_gen/i_clk_main/CLKOUT0]
 # Add more clocks here, if needed
 
 # These are meant to solve clock domain crossings
@@ -21,17 +21,18 @@ set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/bus_sync_o/s1_reg[*]/D
 set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/bus_sync/s1_reg[*]/D}]
 set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/bus_sync/s1_reg[*][*]/D}]
 
-set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/drv_type_sync/s1_reg[*][*]/D }]
-set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/drv_type_sync/s1_reg[*]/D }]
+# set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/drv_type_sync/s1_reg[*][*]/D }]
+set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/drv_type_sync/s1_reg[*]/D}]
 
-set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_mounted_sync/s1_reg[*][*]/D }]
+# set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_mounted_sync/s1_reg[*][*]/D }]
 set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_mounted_sync/s1_reg[*]/D }]
 
-set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_sync/s1a_reg[*][*]/D}]
+# set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_sync/s1a_reg[*][*]/D}]
 set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_sync/s1a_reg[*]/D}]
-set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_sync/s2a_reg[*][*]/D}]
+# set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_sync/s2a_reg[*][*]/D}]
 set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_sync/s2a_reg[*]/D}]
 set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_sync/s3a_reg[*][*]/D}]
 set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_sync/s3a_reg[*]/D}]
 
 # set_false_path -to [get_pins { }]
+
