@@ -11,6 +11,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 library xpm;
+use xpm.vcomponents.xpm_cdc_single;
 use xpm.vcomponents.xpm_cdc_array_single;
 
 library work;
@@ -613,7 +614,7 @@ begin
 
    -- We need some wires to cross clock domain for the drive.
 
-   i_cdc_drive : xpm_cdc_array_single
+   i_cdc_drive1 : xpm_cdc_array_single
    generic map (
       WIDTH => G_VDNUM/C_VD_SUBDRIVES
    )
@@ -623,6 +624,15 @@ begin
 
       dest_clk   => pet_clk_sd_i,
       dest_out   => sd_iec_drives_reset
+   );
+
+   i_cdc_drive2 : xpm_cdc_single
+   port map (
+      src_clk    => clk_main_i,
+      src_in     => drive_was_4040,
+
+      dest_clk   => pet_clk_sd_i,
+      dest_out   => sd_drive_was_4040
    );
 
    ieee_drive_inst : entity work.ieee_drive
@@ -680,13 +690,14 @@ begin
          sd_buff_addr   => iec_sd_buf_addr,
          sd_buff_dout   => iec_sd_buf_data_in,   -- data from SD card to the buffer RAM within the drive ("dout" is a strange name)
          sd_buff_din    => iec_sd_buf_data_out,  -- read the buffer RAM within the drive
-         sd_buff_wr     => iec_sd_buf_wr
+         sd_buff_wr     => iec_sd_buf_wr,
 
          -- Access custom rom (DOS): All in QNICE clock domain but rom_std_i is in main clock domain
          --rom_std_i      => '1',  -- pet_rom_i(0) or pet_rom_i(1), -- 1=use the factory default ROM
-         --rom_addr_i     => c2031rom_addr_i,
-         --rom_data_i     => c2031rom_data_i,
-         --rom_wr_i       => c2031rom_we_i,
+         rom_wr         => c2031rom_we_i,
+         rom_sel        => sd_drive_was_4040,
+         rom_addr       => c2031rom_addr_i,
+         rom_data       => c2031rom_data_i
          --rom_data_o     => c2031rom_data_o
       ); -- ieee_drive_inst
 

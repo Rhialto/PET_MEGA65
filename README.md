@@ -26,6 +26,7 @@ This prerelease adds/changes, compared to v0.00012:
 
 - Automatically resets the disk unit for a second when you change its model.
 - Resets the drive a second longer when the core resets. This was meant to help a bit against the bug where QNice gets stuck while interacting with the drive just after the core resets.
+- Loadable disk drive ROMs.
 
 v0.00012
 --------
@@ -249,7 +250,15 @@ These features only work with the CRTC, and these address bits may be repurposed
 
 ### Drive ROM: \<Load>
 
-Actually I didn't test this yet. There aren't so many alternative ROM sets for a 2031 drive.
+Actually I didn't test this yet. There aren't so many alternative ROM sets for 4040 or 8250 drives, but they do exist.
+
+The layout of these ROMs is as follows:
+* `0000`-`3FFF` DOS ROM *(16 KiB)*
+* `4000`-`47FF` Controller ROM *(2 KiB)*
+The DOS ROM can be up to 16 KiB, however the standard 4040 DOS ROM is only 12 KiB.
+In that case, the first 4 KiB of the ROM should be padded with `FF` bytes to align the ROM properly.
+When the Controller ROM is only 1 KiB, the first 1 KiB should be padded with `FF` bytes to align the
+ROM properly.
 
 ROMMAKER
 --------
