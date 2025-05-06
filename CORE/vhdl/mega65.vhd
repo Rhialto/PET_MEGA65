@@ -291,7 +291,7 @@ signal qnice_petrom_data_from       : std_logic_vector(7 downto 0);
 
 -- Custom DOS access: Simulated C2031
 signal qnice_c2031rom_we            : std_logic;
-signal qnice_c2031rom_addr          : std_logic_vector(15 downto 0);
+signal qnice_c2031rom_addr          : std_logic_vector(14 downto 0);
 signal qnice_c2031rom_data_to       : std_logic_vector(7 downto 0);
 signal qnice_c2031rom_data_from     : std_logic_vector(7 downto 0);
 
@@ -668,7 +668,7 @@ begin
 
          -- Custom Kernal Access: Disk drive ROM
          when C_DEV_PET_KERNAL_C2031 =>
-            qnice_c2031rom_addr        <= "00" & qnice_dev_addr_i(13 downto 0);
+            qnice_c2031rom_addr        <= qnice_dev_addr_i(14 downto 0);
             qnice_c2031rom_we          <= qnice_dev_we_i and not qnice_csr_window;
             qnice_dev_data_o           <= CRTROM_CSR_PT_OK when qnice_csr_window else
                                           x"00" & qnice_c2031rom_data_from;

@@ -117,7 +117,7 @@ entity main is
 
       -- Access custom DOS for the simulated C2031 (in QNICE clock domain via pet_clk_sd_i)
       c2031rom_we_i          : in  std_logic;
-      c2031rom_addr_i        : in  std_logic_vector(15 downto 0);
+      c2031rom_addr_i        : in  std_logic_vector(14 downto 0);
       c2031rom_data_i        : in  std_logic_vector(7 downto 0);
       c2031rom_data_o        : out std_logic_vector(7 downto 0)
    );
@@ -673,7 +673,7 @@ begin
          bus_o_nrfd     => ieee488_d01_nrfd_o,
          bus_o_data     => ieee488_d01_data_o,
 
-         drv_type       => drive_was_4040, -- "1", -- 0=8250, 1=4040 FIXME "1" for just one drive!
+         drv_type       => sd_drive_was_4040, -- "1", -- 0=8250, 1=4040 FIXME "1" for just one drive!
 
          -- disk image status
          img_mounted    => iec_img_mounted,
@@ -692,14 +692,15 @@ begin
          sd_buff_din    => iec_sd_buf_data_out,  -- read the buffer RAM within the drive
          sd_buff_wr     => iec_sd_buf_wr,
 
-         -- Access custom rom (DOS): All in QNICE clock domain but rom_std_i is in main clock domain
-         --rom_std_i      => '1',  -- pet_rom_i(0) or pet_rom_i(1), -- 1=use the factory default ROM
+         -- Access custom rom (DOS): All in QNICE clock domain
          rom_wr         => c2031rom_we_i,
          rom_sel        => sd_drive_was_4040,
          rom_addr       => c2031rom_addr_i,
          rom_data       => c2031rom_data_i
          --rom_data_o     => c2031rom_data_o
       ); -- ieee_drive_inst
+
+   c2031rom_data_o <= ( others => '1' );              -- drive does not support reading ROMs
 
    -- and the virtual counterpart...
 
