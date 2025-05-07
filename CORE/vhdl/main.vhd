@@ -673,7 +673,7 @@ begin
          bus_o_nrfd     => ieee488_d01_nrfd_o,
          bus_o_data     => ieee488_d01_data_o,
 
-         drv_type       => sd_drive_was_4040, -- "1", -- 0=8250, 1=4040 FIXME "1" for just one drive!
+         drv_type       => drive_was_4040, -- "1", -- 0=8250, 1=4040 FIXME "1" for just one drive!
 
          -- disk image status
          img_mounted    => iec_img_mounted,
