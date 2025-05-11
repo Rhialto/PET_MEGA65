@@ -246,7 +246,6 @@ architecture synthesis of main is
    signal reset_core_n         : std_logic := '1';
    --signal reset_core_int_n     : std_logic := '1';
    --signal hard_reset_n         : std_logic := '1';
-   signal reset_drive_n        : std_logic := '1';
 
    --constant C_HARD_RST_DELAY   : natural   := 100_000; -- roundabout 1/30 of a second
    --signal hard_rst_counter     : natural   := 0;
@@ -254,9 +253,9 @@ architecture synthesis of main is
    --signal cold_start_done      : std_logic := '0';
    constant C_DRIVE_RST_DELAY  : natural   := 1_000_000; -- 1 second at ce_1m speed
    signal drive_reset_counter  : natural   := 0;
-   signal drive_was_4040       : std_logic := '0';
-   signal drive_was_8250       : std_logic := '0';
-   signal sd_drive_was_4040    : std_logic := '0';
+   signal drive_is_4040        : std_logic := '0';
+   signal drive_is_8250        : std_logic := '0';
+   signal sd_drive_is_4040     : std_logic := '0';
 
    signal sound_sample         : signed(15 downto 0);	-- low-passed sound
 
@@ -382,35 +381,6 @@ begin
 --         end if;
 --      end if;
 --   end process handle_cold_start_proc;
-
-    -- Force the disk drive to be in reset state for two occasions:
-    -- 1. after a core reset
-    -- 2. after the drive model changes.
-    -- Case 1. is because this appears to help with resets that don't complete cleanly.
-    drive_reset_proc : process (clk_main_i)
-    begin
-        if rising_edge(clk_main_i) then
-           drive_was_4040 <= osm_i(C_MENU_UNIT_8_4040);
-           drive_was_8250 <= osm_i(C_MENU_UNIT_8_8250);
-
-           -- Prepare to keep the drives in reset for a bit longer than the CPU.
-            if reset_core_n = '0' or
-                    drive_was_4040 /= osm_i(C_MENU_UNIT_8_4040) or
-                    drive_was_8250 /= osm_i(C_MENU_UNIT_8_8250) then
-                reset_drive_n <= '0';
-                drive_reset_counter <= C_DRIVE_RST_DELAY;
-            else
-                -- Count slowly, when the normal reset has ceased but the drive reset is still active.
-                if ce_1m = '1' and reset_drive_n = '0' then
-                    if drive_reset_counter = 0 then
-                        reset_drive_n <= '1';
-                    else
-                        drive_reset_counter <= drive_reset_counter - 1;
-                    end if;
-                end if;
-            end if;
-        end if;
-    end process drive_reset_proc;
 
      -- Clock enable signals process
      process(clk_main_i)
@@ -604,13 +574,16 @@ begin
    --        "P2oPQ,Enable Drive #8,If Mounted,Always,Never;"
    --        "P2oNO,Enable Drive #9,If Mounted,Always,Never;"
    iec_drv_reset_gen : for i in 0 to G_VDNUM/C_VD_SUBDRIVES - 1 generate
-       iec_drives_reset(i) <= (not reset_core_n) or (not reset_drive_n) or
+       iec_drives_reset(i) <= (not reset_core_n) or
                               osm_i(C_MENU_UNIT_8_DISABLED);
    end generate iec_drv_reset_gen;
 
 ------------------------------------------
 -- Let's connect some drives!
 ------------------------------------------
+
+   drive_is_4040 <= osm_i(C_MENU_UNIT_8_4040);
+   drive_is_8250 <= osm_i(C_MENU_UNIT_8_8250);
 
    -- We need some wires to cross clock domain for the drive.
 
@@ -629,10 +602,10 @@ begin
    i_cdc_drive2 : xpm_cdc_single
    port map (
       src_clk    => clk_main_i,
-      src_in     => drive_was_4040,
+      src_in     => drive_is_4040,
 
       dest_clk   => pet_clk_sd_i,
-      dest_out   => sd_drive_was_4040
+      dest_out   => sd_drive_is_4040
    );
 
    ieee_drive_inst : entity work.ieee_drive
@@ -673,7 +646,7 @@ begin
          bus_o_nrfd     => ieee488_d01_nrfd_o,
          bus_o_data     => ieee488_d01_data_o,
 
-         drv_type       => drive_was_4040, -- "1", -- 0=8250, 1=4040 FIXME "1" for just one drive!
+         drv_type       => drive_is_4040, -- "1", -- 0=8250, 1=4040 FIXME "1" for just one drive!
 
          -- disk image status
          img_mounted    => iec_img_mounted,
@@ -694,7 +667,7 @@ begin
 
          -- Access custom rom (DOS): All in QNICE clock domain
          rom_wr         => c2031rom_we_i,
-         rom_sel        => sd_drive_was_4040,
+         rom_sel        => sd_drive_is_4040,
          rom_addr       => c2031rom_addr_i,
          rom_data       => c2031rom_data_i
          --rom_data_o     => c2031rom_data_o

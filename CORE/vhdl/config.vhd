@@ -327,7 +327,7 @@ constant OPTM_ITEMS        : string :=
    "\n"                      &      
    " disabled\n"             & -- 25
    " 4040 (.d64)\n"          &      
-   " 8250 (.d80,.d82) R/O\n" &      
+   " 8250 (.d80,.d82)\n"     &      
    "\n"                      &      
    " 0:%s\n"                 &      
    " 1:%s\n"                 & -- 30

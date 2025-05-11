@@ -25,7 +25,7 @@ set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/bus_sync/s1_reg[*][*]/
 set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/drv_type_sync/s1_reg[*]/D}]
 
 # set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_mounted_sync/s1_reg[*][*]/D }]
-# set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_mounted_sync/s1_reg[*]/D }]
+set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_mounted_sync/s1_reg[*]/D }]
 
 # set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_sync/s1a_reg[*][*]/D}]
 set_false_path -to [get_pins {CORE/i_main/ieee_drive_inst/img_sync/s1a_reg[*]/D}]

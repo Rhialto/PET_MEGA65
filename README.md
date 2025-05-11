@@ -24,9 +24,10 @@ v0.00013
 --------
 This prerelease adds/changes, compared to v0.00012:
 
-- Automatically resets the disk unit for a second when you change its model.
-- Resets the drive a second longer when the core resets. This was meant to help a bit against the bug where QNice gets stuck while interacting with the drive just after the core resets.
-- Loadable disk drive ROMs.
+- Fixed the reset bug with the symptom that, after a reset, there was a chance that the HELP key did not work any more. (This was because the QNICE CPU was waiting forever on a hyperram bus transaction).
+- Worked around the disk drive issues with write errors. The 8250 is no longer Read Only (and the 4040 also works better again).
+- You can switch the disk drive type directly (it always reset automatically).
+- Loadable disk drive ROMs since upstream supports this now.
 
 v0.00012
 --------
@@ -330,6 +331,12 @@ The Power LED can take 3 different colours:
 - yellow when the disk cache is dirty and/or is being written to the sdcard
 - green at other times when the Mega-65 is on.
 
+
+POSSIBLE FUTURE WORK
+--------------------
+- The method that QNice uses to copy data to and from the disk drive's internal track buffer should be made faster. Currently it can take more than 20 ms which causes time-outs in the FDC. This has a workaround but it slows down the drive.
+- Supply the disk unit with a track buffer for each drive, instead of a shared one.
+- Turbo mode, with 2x, 4x CPU speed. Probably won't speed up the disk unit.
 
 CREDITS
 -------
