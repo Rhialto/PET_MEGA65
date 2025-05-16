@@ -367,16 +367,17 @@ set_property -dict {PULLUP FALSE  SLEW FAST  DRIVE 16}    [get_ports {sdram_*}];
 
 # Place Keyboard close to I/O pins
 create_pblock pblock_m65driver
-add_cells_to_pblock pblock_m65driver [get_cells [list i_framework/i_m2m_keyb/m65driver]]
-resize_pblock pblock_m65driver -add {SLICE_X0Y225:SLICE_X7Y243}
+add_cells_to_pblock [get_pblocks pblock_m65driver] [get_cells -quiet [list i_framework/i_m2m_keyb/m65driver]]
+resize_pblock [get_pblocks pblock_m65driver] -add {SLICE_X0Y225:SLICE_X7Y243}
 
 # Place SD card controller in the middle between the left and right FPGA boundary because the output ports are at the opposide edges
 create_pblock pblock_sdcard
-add_cells_to_pblock pblock_sdcard [get_cells [list i_framework/i_qnice_wrapper/QNICE_SOC/sd_card]]
-resize_pblock pblock_sdcard -add {SLICE_X66Y178:SLICE_X99Y193}
+add_cells_to_pblock [get_pblocks pblock_sdcard] [get_cells -quiet [list i_framework/i_qnice_wrapper/QNICE_SOC/sd_card]]
+resize_pblock [get_pblocks pblock_sdcard] -add {SLICE_X66Y178:SLICE_X99Y193}
 
 # Place phase-shifted VGA output registers near the actual output buffers
 create_pblock pblock_vga
-add_cells_to_pblock pblock_vga [get_cells [list i_framework/i_av_pipeline/i_analog_pipeline/VGA_OUT_PHASE_SHIFTED.*]]
-resize_pblock pblock_vga -add SLICE_X0Y75:SLICE_X5Y99
+add_cells_to_pblock [get_pblocks pblock_vga] [get_cells i_framework/i_av_pipeline/i_analog_pipeline/VGA_OUT_PHASE_SHIFTED.*]
+resize_pblock [get_pblocks pblock_vga] -add {SLICE_X0Y75:SLICE_X5Y99}
+
 

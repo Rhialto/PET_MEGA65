@@ -22,7 +22,7 @@ From time to time there is a pre-release, when there seems to be some useful add
 
 v0.00013
 --------
-This prerelease adds/changes, compared to v0.00012:
+This prerelease is mostly a bugfix edition. Finding (hopefully good!) fixes for two problems took some time.
 
 - Fixed the reset bug with the symptom that, after a reset, there was a chance that the HELP key did not work any more. (This was because the QNICE CPU was waiting forever on a hyperram bus transaction).
 - Worked around the disk drive issues with write errors. The 8250 is no longer Read Only (and the 4040 also works better again).

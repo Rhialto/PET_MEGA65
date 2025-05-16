@@ -29,8 +29,9 @@ set_false_path -from [get_pins i_framework/i_reset_manager/reset_m2m_n_o_reg/C]
 set_false_path -from [get_pins i_framework/i_reset_manager/reset_core_n_o_reg/C]
 
 ## Generic CDC
-set_max_delay 8 -datapath_only -from [get_generated_clocks] -to [get_pins -hierarchical "*cdc_stable_gen.dst_*_d_reg[*]/D"]
-set_max_delay 8 -datapath_only -from [get_clocks clk] -to [get_pins -hierarchical "*cdc_stable_gen.dst_*_d_reg[*]/D"]
+set _xlnx_shared_i0 [get_pins -hierarchical {*cdc_stable_gen.dst_*_d_reg[*]/D}]
+set_max_delay -datapath_only -from [get_generated_clocks] -to $_xlnx_shared_i0 8.000
+set_max_delay -datapath_only -from [get_clocks clk] -to $_xlnx_shared_i0 8.000
 
 
 ################################################################################
