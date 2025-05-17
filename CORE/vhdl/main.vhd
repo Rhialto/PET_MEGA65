@@ -456,7 +456,7 @@ begin
         cass_motor_n    => open,              -- output? not connected?
         cass_write      => open,              -- tape_write,
         audio           => audioDat,          -- sound from CB2: 1 MHz, 1 bit
-        cass_sense_n    => 0,
+        cass_sense_n    => 1,                 -- cassette buttons not pressed
         cass_read       => tape_audio,
 
         -- IEEE-488 bus
