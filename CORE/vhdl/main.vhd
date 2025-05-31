@@ -297,8 +297,8 @@ begin
    -- The green component is active if drive 0 is active (qnice clock domain)
    -- The blue component is active if drive 1 is active (qnice clock domain)
    -- FIXME: activity leds for more than 1 drive.
-   drive_led_col(23 downto 16) <= x"80" when unsigned(pet_drive_err_led) /= 0 else x"00";
-   drive_led_col(15 downto  8) <= x"FF" when pet_drive_act_led(0)(0) = '1' else x"00";
+   drive_led_col(23 downto 16) <= x"FF" when unsigned(pet_drive_err_led) /= 0 else x"00";
+   drive_led_col(15 downto  8) <= x"C0" when pet_drive_act_led(0)(0) = '1' else x"00";
    drive_led_col( 7 downto  0) <= x"FF" when pet_drive_act_led(0)(1) = '1' else x"00";
 
    -- the drive led is on if either drive is active, or the error LED.

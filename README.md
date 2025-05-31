@@ -20,6 +20,10 @@ There are currently no releases.
 
 From time to time there is a pre-release, when there seems to be some useful addition to the code base. There is absolutely no guarantee when those happen.
 
+v0.00014 not (pre)released
+--------
+- Make disk errors a bit more visible by using more red in the LED and less green.
+
 v0.00013
 --------
 This prerelease is mostly a bugfix edition. Finding (hopefully good!) fixes for two problems took some time.
