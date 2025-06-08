@@ -691,7 +691,7 @@ begin
          img_mounted_o        => iec_img_mounted,
          img_readonly_o       => iec_img_readonly,
          img_size_o           => iec_img_size,
-         img_type_o           => iec_img_type,      -- 00=1541 emulated GCR(D64), 01=1541 real GCR mode (G64,D64), 10=1581 (D81)
+         img_type_o           => open,      -- 00=1541 emulated GCR(D64), 01=1541 real GCR mode (G64,D64), 10=1581 (D81)
 
          -- While "img_mounted_o" needs to be strobed, "drive_mounted" latches the strobe in the core's clock domain,
          -- so that it can be used for resetting (and unresetting) the drive.
