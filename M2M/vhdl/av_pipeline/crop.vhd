@@ -4,6 +4,7 @@
 -- Optional crop/zoom feature used by the digital pipeline.
 --
 -- MiSTer2MEGA65 done by sy2002 and MJoergen in 2022 and licensed under GPL v3
+-- MODIFIED FOR MEGAPET BY OLAF SEIBERT.
 ----------------------------------------------------------------------------------
 
 library ieee;
@@ -40,15 +41,17 @@ end entity crop;
 
 architecture synthesis of crop is
 
-   -- These constants are properties of the input stream
-   constant LEFT_BORDER_IN    : natural := 33;
-   constant TOP_BORDER_IN     : natural := 35;
-   constant IMAGE_SIZE_X      : natural := 320;
-   constant IMAGE_SIZE_Y      : natural := 200;
+   -- These constants are properties of the input stream.
+   -- MODIFIED FOR MEGAPET BY OLAF SEIBERT.
+   -- They depend on video_blanker.sv for CRTC output and pet2001video8mhz without CRTC.
+   constant LEFT_BORDER_IN    : natural := 36;
+   constant TOP_BORDER_IN     : natural := 20;
+   constant IMAGE_SIZE_X      : natural := 736;
+   constant IMAGE_SIZE_Y      : natural := 250; -- CRTC lower case mode: 10 px vertical per text line
 
    -- These are the new desired borders
-   constant LEFT_BORDER_NEW   : natural := 14;
-   constant RIGHT_BORDER_NEW  : natural := 14;
+   constant LEFT_BORDER_NEW   : natural := 4;
+   constant RIGHT_BORDER_NEW  : natural := 4;
    constant TOP_BORDER_NEW    : natural := 4;
    constant BOTTOM_BORDER_NEW : natural := 4;
 

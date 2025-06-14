@@ -22,7 +22,9 @@ From time to time there is a pre-release, when there seems to be some useful add
 
 v0.00014 not (pre)released
 --------
+- Made the HDMI: Zoom-in option more useful.
 - Make disk errors a bit more visible by using more red in the LED and less green.
+- More improvements in the floppy disk drive regarding track buffer management.
 
 v0.00013
 --------
@@ -265,6 +267,10 @@ In that case, the first 4 KiB of the ROM should be padded with `FF` bytes to ali
 When the Controller ROM is only 1 KiB, the first 1 KiB should be padded with `FF` bytes to align the
 ROM properly.
 
+### HDMI: Zoom-in
+
+This crops a lot of the screen border and uses the full HDMI wide-screen width. This affects the aspect ratio of the characters. It works out the best for the 8032 lower-case screen. Unfortunately the non-crtc screens get unreasonably stretched wide.
+
 ROMMAKER
 --------
 MegaPET ROM files are 32 KB which cover addresses $8000-$FFFF. The first 4 KB, $8000-$8FFF aren't actually used (this is screen memory area) but this is simpler for the implementation. The range $E800-$E8FF also isn't used since this is where the I/O chips are addressed.
@@ -327,7 +333,7 @@ The drive LED has to take the daunting task to represent 3 distinct LEDs on the 
 - the green component is lit if drive 0 is active
 - the blue component is lit if drive 1 is active
 
-This means you can get mix colours if several of the disk's LEDs are on.
+This means you can get mix colours if several of the disk's LEDs are on. The red is deliberately brighter than green and blue so it is better visible.
 
 The Power LED can take 3 different colours:
 
@@ -338,7 +344,7 @@ The Power LED can take 3 different colours:
 
 POSSIBLE FUTURE WORK
 --------------------
-- The method that QNice uses to copy data to and from the disk drive's internal track buffer should be made faster. Currently it can take more than 20 ms which causes time-outs in the FDC. This has a workaround but it slows down the drive.
+- The method that QNice uses to copy data to and from the disk drive's internal track buffer should be made faster. Currently it can take more than 20 ms which caused time-outs in the FDC. This has a workaround but it slows down the drive.
 - Supply the disk unit with a track buffer for each drive, instead of a shared one.
 - Turbo mode, with 2x, 4x CPU speed. Probably won't speed up the disk unit.
 
@@ -348,9 +354,11 @@ CREDITS
 This project is based on, and would have been impossible without, the following other projects:
 
 * [MiSTer2MEGA65](https://github.com/sy2002/MiSTer2MEGA65) by MJoergen and sy2002 is a framework to simplify porting MiSTer cores to the MEGA65.
+* [Pet2001_Nexys3](http://www.skibo.net/projects/pet2001_arty/) which in turn evolved into
+* [Pet2001_Arty](https://github.com/skibo/Pet2001_Arty) [Project page](https://www.skibo.net/projects/pet2001fpga/), which was the starting point for
 * [PET2001_MiSTer](https://github.com/MiSTer-devel/PET2001_MiSTer) from sorgelig. This was the starting point of the PET core.
 * [C64_MiSTerMEGA65](https://github.com/MJoergen/C64_MiSTerMEGA65) by MJoergen and sy2002 and contributors. I used the 1541 from this, and converted it to a 2031 drive (replaced the serial IEC bus with a parallel IEEE-488 bus) so it can connect to a PET.
-* The work-in-progress [CBM-II_MiSTer](https://github.com/eriks5/CBM-II_MiSTer) from which I first used the 6845 CRTC and the 4040 / 8250 dual disk drive.
+* The work-in-progress [CBM-II_MiSTer](https://github.com/eriks5/CBM-II_MiSTer) from which I first used the 6845 CRTC and the 4040 / 8250 dual disk drive. Big thanks to Erik Scheffers for his improvements.
 * The BBC micro implementation [BeebFpga](https://github.com/hoglet67/BeebFpga) from which I used the updates to the CRTC.
 * Steve Gray's [ColourPET](http://cbmsteve.ca/colourpet/index.html) and [Edit ROM](http://cbmsteve.ca/editrom/index.html) projects. 
 
