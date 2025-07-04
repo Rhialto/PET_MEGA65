@@ -16,15 +16,18 @@ This project is organized in 3 git repositories. The top-level one is a snapshot
 
 Releases
 --------
-There are currently no releases.
+There are currently no real releases.
 
 From time to time there is a pre-release, when there seems to be some useful addition to the code base. There is absolutely no guarantee when those happen.
 
-v0.00014 not (pre)released
+v0.00014
 --------
-- Made the HDMI: Zoom-in option more useful.
-- Make disk errors a bit more visible by using more red in the LED and less green.
-- More improvements in the floppy disk drive regarding track buffer management.
+This prerelease is again mostly a floppy disk drive bugfix edition.
+
+- Made the "HDMI: Zoom-in" option more useful. It now zooms in to the maximum area of those used by the usual ROMs. It may need some further small adjustments to improve aspect ratios, if possible.
+- Switched to a more authentic editor ROM for the 8032. I noticed that the previous one only left one vertical pixel between text characters, instead of the 2 that it is supposed to do. You need to update the `/pet/8032b.rom` file on your sd-card to keep the rom file in sync with the builtin one.
+- Make disk errors a bit more visible by using more red in the LED and less green. The activity LEDs for both drive now also (usually) don't light up at the same time, which reduces confusing colour combinations.
+- More improvements/bug fixes in the floppy disk drive regarding track buffer management. One bug in the M2M framework contributed to this as well and was fixed (nr 52).
 
 v0.00013
 --------

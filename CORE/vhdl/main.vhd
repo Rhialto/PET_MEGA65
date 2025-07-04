@@ -611,7 +611,8 @@ begin
    ieee_drive_inst : entity work.ieee_drive
       generic map (
          DRIVES         => G_VDNUM / C_VD_SUBDRIVES,
-         SUBDRV         => C_VD_SUBDRIVES
+         SUBDRV         => C_VD_SUBDRIVES,
+         PAUSE_CTL      => '1'
       )
       port map (
          clk            => QNICE_CLK_SPEED,
