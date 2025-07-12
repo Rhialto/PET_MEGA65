@@ -45,9 +45,9 @@ architecture synthesis of crop is
    -- MODIFIED FOR MEGAPET BY OLAF SEIBERT.
    -- They depend on video_blanker.sv for CRTC output and pet2001video8mhz without CRTC.
    constant LEFT_BORDER_IN    : natural := 36;
-   constant TOP_BORDER_IN     : natural := 20;
+   constant TOP_BORDER_IN     : natural := 23;	-- just barely fits the top of the 2001 no-CRTC screen
    constant IMAGE_SIZE_X      : natural := 736;
-   constant IMAGE_SIZE_Y      : natural := 250; -- CRTC lower case mode: 10 px vertical per text line
+   constant IMAGE_SIZE_Y      : natural := 256; -- 32 text lines, or HRE; 250 = CRTC lower case mode: 10 px vertical per text line
 
    -- These are the new desired borders
    constant LEFT_BORDER_NEW   : natural := 4;

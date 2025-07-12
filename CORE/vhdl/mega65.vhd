@@ -564,9 +564,9 @@ begin
    -- ascal filters that are applied while processing the input
    -- 00 : Nearest Neighbour: uneven character scaling
    -- 01 : Bilinear: seems a bit unsharp
-   -- 10 : Sharp Bilinear
+   -- 10 : Sharp Bilinear: uneven / drops some pixels
    -- 11 : Bicubic
-   qnice_ascal_mode_o         <= "10";
+   qnice_ascal_mode_o         <= "11";
 
    -- If polyphase is '1' then the ascal filter mode is ignored and polyphase filters are used instead
    -- @TODO: Right now, the filters are hardcoded in the M2M framework, we need to make them changeable inside m2m-rom.asm

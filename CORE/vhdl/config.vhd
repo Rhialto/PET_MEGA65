@@ -313,7 +313,7 @@ constant OPTM_ITEMS        : string :=
    " 16 KB memory\n"         & -- 10
    " 32 KB memory\n"         &
    " 8096 memory expansion\n"&
-   " 8296 memory expansion\n"&
+   " 8296 memory exp +HRE\n" &
    "   9xxx RAM\n"           &
    "   Axxx RAM\n"           & -- 15
    "   User Port control\n"  &      

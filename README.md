@@ -20,6 +20,14 @@ There are currently no real releases.
 
 From time to time there is a pre-release, when there seems to be some useful addition to the code base. There is absolutely no guarantee when those happen.
 
+v0.00015
+--------
+We now have a PET 8296-GD!
+
+- Add HRE graphics (324890-01) to the 8296 (so it is enabled if 8296 is enabled). HRE stands for High-Res Emulator; the "emulator" part means that the drawing is done in software, so quite slow compared to the HSG (High Speed Graphics, 324402-01). The HRE ROMs are included in the 8032b set: `SYS 9*4096` to initialize the BASIC extension. They are pretty compatible with the [HSG](https://mikenaberezny.com/hardware/pet-cbm/cbm-hsg-graphics-board/) software; the [HSG demos](http://www.cbmsteve.ca/hsg/) also run. This makes the MegaPET an 8296-GD.
+- Tweaked "HDMI: Zoom-in" a bit more so it (just) shows the whole HRE image.
+- Set the ascal filter when CRT emulation is off to bicubic. This seems to be the least bad of the options, but it still seems to lose pixels here and there.
+
 v0.00014
 --------
 This prerelease is again mostly a floppy disk drive bugfix edition.
@@ -44,7 +52,7 @@ This prerelease adds/changes, compared to v0.00011:
 
 - Uses the MiSTer2MEGA65 framework version 2.0.1.
 - Fixes the bug where the keyboard becomes unresponsive after leaving the menu.
-- Adds 8296-style memory extension (extra 32 KB of RAM "under" the ROMs) for a total of 128 KB.
+- Adds [8296-style](https://www.zimmers.net/anonftp/pub/cbm/pet/manuals/8296supplement/index.html) memory extension (extra 32 KB of RAM "under" the ROMs) for a total of 128 KB.
 - The presence of the disk drive is now optional.
 - New 8250 floppy disk drive type. Unfortunately there is an upstream bug, and this type is effectively Read Only for now.
   - When switching types, go via "disabled" as an intermediate step (this resets the drive).
@@ -72,7 +80,7 @@ This prerelease adds, compared to v0.00009:
 
 - Steve Gray's [ColourPET](http://cbmsteve.ca/colourpet/index.html) board. Try it with [GridRunner](https://milasoft64.itch.io/gridrunner). I have included a test version of an editor ROM set for 40 columns `4032n+colour.rom`, specially created by Steve Gray for the MegaPET. Keep an eye on [github](https://github.com/sjgray/cbm-edit-rom/tree/master/binaries/ColourPET) for updates.
 - You can now select 8, 16 or 32 KB as the basic memory size.
-- 64 KB memory extension board, 8096-style. Not so well-tested but it seems ok. This brings the total amount of RAM to 32 + 64 = 96 KB.
+- 64 KB memory extension board, [8096-style](https://mikenaberezny.com/hardware/pet-cbm/cbm-64k-ram-expansion/). Not so well-tested but it seems ok. This brings the total amount of RAM to 32 + 64 = 96 KB.
 - The optional second half of the character ROM can now be used (if it is 4 KB), by setting MA13 (`poke 59520,12: poke 59521,3*16`). The MegaPET comes loaded with the character ROM from the SuperPET, which has ASCII and APL characters in the extra part. To go back to normal use `poke 59520,12: 59521,1*16`.
 - Similarly the screen as a whole can be inverted by unsetting MA12 (use `poke 59521,0*16` or `2*16`).
   These features only work with the CRTC, and these address bits may be repurposed in later PET models: for example, the HRE uses MA12.
@@ -245,6 +253,7 @@ Since the memory mapping sometimes depends on bit 6 of the $FFF0 Control Registe
 
 This offers yet another way to replace the ROMs by RAM and run with dynamically modified ROMs. Just copy addresses $B000-$FFFF (skipping $FFF0 and $E800-$E8FF) to themselves, which copies the ROMs into RAM. Set $FFF0 to $40 (I/O peek though). Then enable this option, write some values to the user port, and finally set the 3 user port bits to output.
 
+The HRE (HiRes Emulator) has a write-only memory mapping register at `$E888` which also controls these 3 signals. Bit 0 controls /ramSEL9, bit 1 /ramSELA, bit 2 /ramON, and bit 7 must be set to enable this. In the MegaPET, the Userport control preference overrides the E888 register. I don't know if this matches original hardware; if I have evidence that it does not then I will change it.
 
 ### PET ROM: \<Load>
 
