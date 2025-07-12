@@ -788,7 +788,7 @@ begin
          G_DATA_SIZE    => 16
       )
       port map (
-         s_clk_i               => qnice_clk_i,
+         s_clk_i               => qnice_clk_i,	-- Does the fifo know it should work on the falling edge?
          s_rst_i               => qnice_rst_i,
          s_avm_waitrequest_o   => qnice_disk0_waitrequest,
          s_avm_write_i         => qnice_disk0_write,
@@ -821,7 +821,7 @@ begin
          G_DATA_SIZE    => 16
       )
       port map (
-         s_clk_i               => qnice_clk_i,
+         s_clk_i               => qnice_clk_i,	-- Does the fifo know it should work on the falling edge?
          s_rst_i               => qnice_rst_i,
          s_avm_waitrequest_o   => qnice_disk1_waitrequest,
          s_avm_write_i         => qnice_disk1_write,
