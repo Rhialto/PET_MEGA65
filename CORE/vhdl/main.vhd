@@ -32,6 +32,8 @@ use work.globals.C_MENU_MODEL_8296_MEM;
 use work.globals.C_MENU_MODEL_RAMSEL9;
 use work.globals.C_MENU_MODEL_RAMSELA;
 use work.globals.C_MENU_MODEL_RAMSELUSERPORT;
+use work.globals.C_MENU_MODEL_SUPERPET;
+use work.globals.C_MENU_MODEL_6809;
 use work.globals.C_MENU_UNIT_8_DISABLED;
 use work.globals.C_MENU_UNIT_8_4040;
 use work.globals.C_MENU_UNIT_8_8250;
@@ -134,7 +136,8 @@ architecture synthesis of main is
     signal ce_1m : STD_LOGIC;
 
     signal addr : std_logic_vector(15 downto 0);
-    signal addr_unused : std_logic_vector(23 downto 16);
+    signal addr_spram_sel : std_logic;
+    signal addr_unused : std_logic_vector(23 downto 17);
     signal cpu_data_out : std_logic_vector(7 downto 0);
     signal cpu_data_in : std_logic_vector(7 downto 0);
     signal rnw : std_logic;
@@ -400,7 +403,28 @@ begin
 -- we don't need this, all RAM and ROM is included in pet2001hw.
 ----------------------------------------------------
 
-    cpu_inst : entity work.T65
+--    cpu_inst : entity work.T65
+--        port map (
+--            Mode => "00", -- Assuming Mode is a 2-bit signal
+--            Res_n => reset_core_n,
+--            Enable => ce_1m,
+--            Clk => clk_main_i,
+--            Rdy => '1',
+--            Abort_n => '1',
+--            IRQ_n => not irq,
+--            NMI_n => '1',
+--            SO_n => '1',
+--            R_W_n => rnw,
+--            A(23 downto 17) => addr_unused,
+--            A(15 downto 0) => addr,
+--            DIn => cpu_data_in,
+--            DOut => cpu_data_out,
+--        );
+    ----------------------------------------------------
+    --- Plug a SuperPET board into the CPU socket.
+    --- If the SuperPET preference is not enabled, it behaves like a normal 6502.
+    ----------------------------------------------------
+    superpet_inst : entity work.superpet
         port map (
             Mode => "00", -- Assuming Mode is a 2-bit signal
             Res_n => reset_core_n,
@@ -412,10 +436,14 @@ begin
             NMI_n => '1',
             SO_n => '1',
             R_W_n => rnw,
-            A(23 downto 16) => addr_unused,
+            A(23 downto 17) => addr_unused,
+            A(16) => addr_spram_sel,
             A(15 downto 0) => addr,
             DIn => cpu_data_in,
-            DOut => cpu_data_out
+            DOut => cpu_data_out,
+
+            pref_have_superpet    => osm_i(C_MENU_MODEL_SUPERPET) and not (osm_i(C_MENU_MODEL_8296_MEM) or osm_i(C_MENU_MODEL_8096_MEM)),
+            pref_enable_6809      => osm_i(C_MENU_MODEL_6809) -- and superpet_inst.pref_have_superpet
         );
 
     pet2001hw_inst : entity work.pet2001hw
@@ -424,6 +452,7 @@ begin
         data_out    => cpu_data_in,
         data_in     => cpu_data_out,
         we          => not rnw,
+        spram_sel   => addr_spram_sel,
         irq         => irq,
 
         ce_pixel_o  => ce_pixel,
@@ -444,11 +473,13 @@ begin
         pref_have_08k         => osm_i(C_MENU_MODEL_08_KB),
         pref_have_16k         => osm_i(C_MENU_MODEL_16_KB),
         pref_have_32k         => osm_i(C_MENU_MODEL_32_KB),
-        pref_have_8096        => osm_i(C_MENU_MODEL_8096_MEM),
-        pref_have_8296        => osm_i(C_MENU_MODEL_8296_MEM),
+        pref_have_8096        => osm_i(C_MENU_MODEL_8096_MEM) and not osm_i(C_MENU_MODEL_SUPERPET),
+        pref_have_8296        => osm_i(C_MENU_MODEL_8296_MEM) and not osm_i(C_MENU_MODEL_SUPERPET),
         pref_ramsel9          => osm_i(C_MENU_MODEL_RAMSEL9),
         pref_ramselA          => osm_i(C_MENU_MODEL_RAMSELA),
         pref_ramselUserPort   => osm_i(C_MENU_MODEL_RAMSELUSERPORT),
+        --pref_have_superpet    => osm_i(C_MENU_MODEL_SUPERPET),
+        --pref_enable_6809      => osm_i(C_MENU_MODEL_6809),
 
         keyrow      => keyb_row_select,       -- keyboard scanning (row select)
         keyin       => keyb_column_selected,  -- keyboard scanning (pressed keys)

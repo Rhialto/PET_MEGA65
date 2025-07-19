@@ -27,6 +27,7 @@ We now have a PET 8296-GD!
 - Add HRE graphics (324890-01) to the 8296 (so it is enabled if 8296 is enabled). HRE stands for High-Res Emulator; the "emulator" part means that the drawing is done in software, so quite slow compared to the HSG (High Speed Graphics, 324402-01). The HRE ROMs are included in the 8032b set: `SYS 9*4096` to initialize the BASIC extension. They are pretty compatible with the [HSG](https://mikenaberezny.com/hardware/pet-cbm/cbm-hsg-graphics-board/) software; the [HSG demos](http://www.cbmsteve.ca/hsg/) also run. This makes the MegaPET an 8296-GD.
 - Tweaked "HDMI: Zoom-in" a bit more so it (just) shows the whole HRE image.
 - Set the ascal filter when CRT emulation is off to bicubic. This seems to be the least bad of the options, but it still seems to lose pixels here and there.
+- First phase of adding a SuperPET: an extra board that plugs into the 6502 socket and just passes through the 6502.
 
 v0.00014
 --------
