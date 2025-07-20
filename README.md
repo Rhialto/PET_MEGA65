@@ -28,6 +28,8 @@ We now have a PET 8296-GD!
 - Tweaked "HDMI: Zoom-in" a bit more so it (just) shows the whole HRE image.
 - Set the ascal filter when CRT emulation is off to bicubic. This seems to be the least bad of the options, but it still seems to lose pixels here and there.
 - First phase of adding a SuperPET: an extra board that plugs into the 6502 socket and just passes through the 6502.
+- Second phase of SuperPET: adding the 64 KB memory expansion and the I/O registers which control it.
+- Third phase: add the 6702 dongle chip.
 
 v0.00014
 --------
@@ -233,7 +235,7 @@ A group of 3 options. Choose one for the amount of "normal" memory (available to
 
 ### 8096 memory expansion
 
-This enables the optional expansion board with 64 KB of RAM, controlled by a write-only Control Register at $FFF0. This brings the amount of RAM to 96 KB, hence the model name 8096. For programming details, see the [8296 Supplement](https://www.zimmers.net/anonftp/pub/cbm/pet/manuals/8296supplement/8296supplement.html) sections 2.1 and 2.2.
+Adding to a 8032, this enables the optional expansion board with 64 KB of RAM, controlled by a write-only Control Register at $FFF0. This brings the amount of RAM to 96 KB, hence the model name 8096. For programming details, see the [8296 Supplement](https://www.zimmers.net/anonftp/pub/cbm/pet/manuals/8296supplement/8296supplement.html) sections 2.1 and 2.2.
 
 ### 8296 memory expansion
 
@@ -255,6 +257,17 @@ Since the memory mapping sometimes depends on bit 6 of the $FFF0 Control Registe
 This offers yet another way to replace the ROMs by RAM and run with dynamically modified ROMs. Just copy addresses $B000-$FFFF (skipping $FFF0 and $E800-$E8FF) to themselves, which copies the ROMs into RAM. Set $FFF0 to $40 (I/O peek though). Then enable this option, write some values to the user port, and finally set the 3 user port bits to output.
 
 The HRE (HiRes Emulator) has a write-only memory mapping register at `$E888` which also controls these 3 signals. Bit 0 controls /ramSEL9, bit 1 /ramSELA, bit 2 /ramON, and bit 7 must be set to enable this. In the MegaPET, the Userport control preference overrides the E888 register. I don't know if this matches original hardware; if I have evidence that it does not then I will change it.
+
+#### SuperPET
+
+This enables the SuperPET expansion board. This is another expansion based on the 8032. It is not compatible with 8096 or 8296 expansions. If they are selected in combination, all of them will be disabled instead.
+
+The SuperPET has its own stype of memory expansion: RAM is mapped in blocks of 4 KB at a time at $9xxx. Which bank is mapped is selected by a bank switch register at $EFFC. Bits 0-3 select the bank number.
+
+#### Use 6502 / 6809 cpu
+
+The SuperPET has an extra cpu of type 6809 from Motorola. Only one can run at a time. Here you can choose which one.
+(There is also "program control" in the original hardware but this is not implemented. In fact, the whole 6809 is not implemented yet)
 
 ### PET ROM: \<Load>
 
@@ -282,7 +295,7 @@ ROM properly.
 
 ### HDMI: Zoom-in
 
-This crops a lot of the screen border and uses the full HDMI wide-screen width. This affects the aspect ratio of the characters. It works out the best for the 8032 lower-case screen. Unfortunately the non-crtc screens get unreasonably stretched wide.
+This crops a lot of the screen border and uses the full HDMI wide-screen width. This affects the aspect ratio of the characters. It works out the best for the 8032 lower-case screen. Unfortunately the non-crtc screens get stretched unreasonably wide.
 
 ROMMAKER
 --------
