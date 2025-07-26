@@ -132,8 +132,9 @@ architecture synthesis of main is
     signal pet_drive_act_led   : vd_vec_array(0 to G_VDNUM/C_VD_SUBDRIVES - 1)(C_VD_SUBDRIVES-1 downto 0);
     signal pet_drive_err_led   : std_logic_vector(G_VDNUM/C_VD_SUBDRIVES-1 downto 0);
 
-    signal cnt31 : INTEGER range 0 to 31 := 0;        -- 5 bits
-    signal ce_1m : STD_LOGIC;
+    signal cnt31 : INTEGER range 0 to 31 := 0;          -- 5 bits
+    signal ce_1m : STD_LOGIC;                           -- enable for cpu bus cycle
+    signal ce_1m_opp : STD_LOGIC;                       -- enable for opposite phase
 
     signal addr : std_logic_vector(15 downto 0);
     signal addr_spram_sel : std_logic;
@@ -394,7 +395,8 @@ begin
              if cnt31 = 31 then
                  cnt31 <= 0;
              end if;
-             ce_1m <= '1' when cnt31 = 0 else '0';
+             ce_1m     <= '1' when cnt31 =  0 else '0';
+             ce_1m_opp <= '1' when cnt31 = 16 else '0';
          end if;
      end process;
 
@@ -520,6 +522,7 @@ begin
         clk             => clk_main_i,
         cnt31_i         => cnt31,
         ce_1m           => ce_1m,
+        ce_1m_opp       => ce_1m_opp,
         reset           => not reset_core_n
      ); -- hw_inst
 
