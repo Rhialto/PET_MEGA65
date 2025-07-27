@@ -285,6 +285,8 @@ architecture synthesis of main is
        return result;
    end function;
 
+   signal pref_have_superpet   : std_logic;
+   signal pref_use_6809        : std_logic;
 begin
 
    -- prevent data corruption by not allowing a soft reset to happen while the cache is still dirty
@@ -426,6 +428,10 @@ begin
     --- Plug a SuperPET board into the CPU socket.
     --- If the SuperPET preference is not enabled, it behaves like a normal 6502.
     ----------------------------------------------------
+   -- Enforce some dependencies between preference settings, as long as the UI can't do it.
+   pref_have_superpet    <= osm_i(C_MENU_MODEL_SUPERPET) and not (osm_i(C_MENU_MODEL_8296_MEM) or osm_i(C_MENU_MODEL_8096_MEM));
+   pref_use_6809         <= osm_i(C_MENU_MODEL_6809) and pref_have_superpet;
+
     superpet_inst : entity work.superpet
         port map (
             Mode => "00", -- Assuming Mode is a 2-bit signal
@@ -444,8 +450,9 @@ begin
             DIn => cpu_data_in,
             DOut => cpu_data_out,
 
-            pref_have_superpet    => osm_i(C_MENU_MODEL_SUPERPET) and not (osm_i(C_MENU_MODEL_8296_MEM) or osm_i(C_MENU_MODEL_8096_MEM)),
-            pref_enable_6809      => osm_i(C_MENU_MODEL_6809) -- and superpet_inst.pref_have_superpet
+            pref_have_superpet    => pref_have_superpet,
+            pref_use_6809         => pref_use_6809,
+	    cnt31 => cnt31
         );
 
     pet2001hw_inst : entity work.pet2001hw
@@ -480,8 +487,6 @@ begin
         pref_ramsel9          => osm_i(C_MENU_MODEL_RAMSEL9),
         pref_ramselA          => osm_i(C_MENU_MODEL_RAMSELA),
         pref_ramselUserPort   => osm_i(C_MENU_MODEL_RAMSELUSERPORT),
-        --pref_have_superpet    => osm_i(C_MENU_MODEL_SUPERPET),
-        --pref_enable_6809      => osm_i(C_MENU_MODEL_6809),
 
         keyrow      => keyb_row_select,       -- keyboard scanning (row select)
         keyin       => keyb_column_selected,  -- keyboard scanning (pressed keys)
