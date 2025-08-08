@@ -219,19 +219,20 @@ constant C_MENU_MODEL_6809       : natural := 19;
 
 constant C_MENU_UNIT_8_DISABLED  : natural := 28;
 constant C_MENU_UNIT_8_4040      : natural := 29;
-constant C_MENU_UNIT_8_8250      : natural := 30;
+constant C_MENU_UNIT_8_8050      : natural := 30;
+constant C_MENU_UNIT_8_8250      : natural := 31;
 
-constant C_MENU_HDMI_16_9_50     : natural := 40;
-constant C_MENU_HDMI_16_9_60     : natural := 41;
-constant C_MENU_HDMI_4_3_50      : natural := 42;
-constant C_MENU_HDMI_5_4_50      : natural := 43;
-constant C_MENU_HDMI_640_60      : natural := 44;
-constant C_MENU_HDMI_720_5994    : natural := 45;
-constant C_MENU_SVGA_800_60      : natural := 46;
+constant C_MENU_HDMI_16_9_50     : natural := 41;
+constant C_MENU_HDMI_16_9_60     : natural := 42;
+constant C_MENU_HDMI_4_3_50      : natural := 43;
+constant C_MENU_HDMI_5_4_50      : natural := 44;
+constant C_MENU_HDMI_640_60      : natural := 45;
+constant C_MENU_HDMI_720_5994    : natural := 46;
+constant C_MENU_SVGA_800_60      : natural := 47;
 
-constant C_MENU_CRT_EMULATION    : natural := 49;
-constant C_MENU_HDMI_ZOOM        : natural := 50;
-constant C_MENU_IMPROVE_AUDIO    : natural := 51;
+constant C_MENU_CRT_EMULATION    : natural := 50;
+constant C_MENU_HDMI_ZOOM        : natural := 51;
+constant C_MENU_IMPROVE_AUDIO    : natural := 52;
 
 end package globals;
 

@@ -288,7 +288,7 @@ constant OPTM_S_SAVING     : string := "<Saving>";          -- the internal writ
 --             Do use a lower case \n. If you forget one of them or if you use upper case, you will run into undefined behavior.
 --          2. Start each line that contains an actual menu item (multi- or single-select) with a Space character,
 --             otherwise you will experience visual glitches.
-constant OPTM_SIZE         : natural := 54;  -- amount of items including empty lines:
+constant OPTM_SIZE         : natural := 55;  -- amount of items including empty lines:
                                              -- needs to be equal to the number of lines in OPTM_ITEMS and amount of items in OPTM_GROUPS
                                              -- IMPORTANT: If SAVE_SETTINGS is true and OPTM_SIZE changes: Make sure to re-generate and
                                              -- and re-distribute the config file. You can make a new one using M2M/tools/make_config.sh
@@ -330,30 +330,31 @@ constant OPTM_ITEMS        : string :=
    "\n"                      &      
    " disabled\n"             &      
    " 4040 (.d64)\n"          &      
-   " 8250 (.d80,.d82)\n"     & -- 30
+   " 8050 (.d80)\n"          & -- 30
+   " 8250 (.d80,.d82)\n"     & 
    "\n"                      &      
    " 0:%s\n"                 &      
    " 1:%s\n"                 &      
-   "\n"                      &
-   " HDMI settings\n"        & -- 35
+   "\n"                      & -- 35
+   " HDMI settings\n"        &
    "\n"                      &      
    " HDMI: %s\n"             &       -- HDMI submenu
    " HDMI Settings\n"        &      
-   "\n"                      &      
-   " 720p 50 Hz 16:9\n"      & -- 40
+   "\n"                      & -- 40      
+   " 720p 50 Hz 16:9\n"      &
    " 720p 60 Hz 16:9\n"      &      
    " 576p 50 Hz 4:3\n"       &      
    " 576p 50 Hz 5:4\n"       &      
-   " 640x480 60 Hz\n"        &      
-   " 720x480 59.94 Hz\n"     & -- 45
+   " 640x480 60 Hz\n"        & -- 45      
+   " 720x480 59.94 Hz\n"     &
    " 800x600 60 Hz\n"        &      
-   "\n"                      & -- 47
+   "\n"                      &
    " Back to main menu\n"    & 
-   " HDMI: CRT emulation\n"  &
-   " HDMI: Zoom-in\n"        & -- 50
+   " HDMI: CRT emulation\n"  & -- 50
+   " HDMI: Zoom-in\n"        &
    " Audio improvements\n"   &
    "\n"                      &
-   " Close Menu\n";            -- 53
+   " Close Menu\n";            -- 54
 
 -- define your own constants here and choose meaningful names
 -- make sure that your first group uses the value 1 (0 means "no menu item", such as text and line),
@@ -422,6 +423,7 @@ constant OPTM_GROUPS       : OPTM_GTYPE := (
 	 OPTM_G_LINE,                              -- Line
 	 OPTM_G_Unit8Type,                         -- Disabled
 	 OPTM_G_Unit8Type + OPTM_G_STDSEL,         -- 4040
+	 OPTM_G_Unit8Type,                         -- 8050
 	 OPTM_G_Unit8Type,                         -- 8250
 	 OPTM_G_LINE,                              -- Line
 	 OPTM_G_Drive_0 + OPTM_G_MOUNT_DRV,        -- Drive 0:

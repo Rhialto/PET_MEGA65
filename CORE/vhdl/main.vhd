@@ -36,6 +36,7 @@ use work.globals.C_MENU_MODEL_SUPERPET;
 use work.globals.C_MENU_MODEL_6809;
 use work.globals.C_MENU_UNIT_8_DISABLED;
 use work.globals.C_MENU_UNIT_8_4040;
+use work.globals.C_MENU_UNIT_8_8050;
 use work.globals.C_MENU_UNIT_8_8250;
 
 use work.globals.C_VD_SUBDRIVES;
@@ -138,7 +139,8 @@ architecture synthesis of main is
 
     signal addr : std_logic_vector(15 downto 0);
     signal addr_spram_sel : std_logic;
-    signal addr_unused : std_logic_vector(23 downto 17);
+    signal addr_unused16  : std_logic;
+    signal addr_unused    : std_logic_vector(23 downto 17);
     signal cpu_data_out : std_logic_vector(7 downto 0);
     signal cpu_data_in : std_logic_vector(7 downto 0);
     signal rnw : std_logic;
@@ -258,6 +260,7 @@ architecture synthesis of main is
    constant C_DRIVE_RST_DELAY  : natural   := 1_000_000; -- 1 second at ce_1m speed
    signal drive_reset_counter  : natural   := 0;
    signal drive_is_4040        : std_logic := '0';
+   signal drive_is_8050        : std_logic := '0';
    signal drive_is_8250        : std_logic := '0';
    signal sd_drive_is_4040     : std_logic := '0';
 
@@ -265,6 +268,8 @@ architecture synthesis of main is
 
    signal ce_pixel             : std_logic;
 
+   constant OMIT_SUPERPET      : boolean := false;
+   
    -- -- --
    -- -- --
    --
@@ -403,27 +408,31 @@ begin
      end process;
 
 ----------------------------------------------------
--- RAM
--- we don't need this, all RAM and ROM is included in pet2001hw.
+-- CPU or SuperPET board with CPU(s)
 ----------------------------------------------------
 
---    cpu_inst : entity work.T65
---        port map (
---            Mode => "00", -- Assuming Mode is a 2-bit signal
---            Res_n => reset_core_n,
---            Enable => ce_1m,
---            Clk => clk_main_i,
---            Rdy => '1',
---            Abort_n => '1',
---            IRQ_n => not irq,
---            NMI_n => '1',
---            SO_n => '1',
---            R_W_n => rnw,
---            A(23 downto 17) => addr_unused,
---            A(15 downto 0) => addr,
---            DIn => cpu_data_in,
---            DOut => cpu_data_out,
---        );
+Choose_SuperPET: if (OMIT_SUPERPET) generate
+   cpu_inst : entity work.T65
+       port map (
+           Mode => "00", -- Assuming Mode is a 2-bit signal
+           Res_n => reset_core_n,
+           Enable => ce_1m,
+           Clk => clk_main_i,
+           Rdy => '1',
+           Abort_n => '1',
+           IRQ_n => not irq,
+           NMI_n => '1',
+           SO_n => '1',
+           R_W_n => rnw,
+           A(23 downto 17) => addr_unused,
+           A(16) => addr_unused16,
+           A(15 downto 0) => addr,
+           DIn => cpu_data_in,
+           DOut => cpu_data_out
+       );
+
+   addr_spram_sel <= '0';
+else generate
     ----------------------------------------------------
     --- Plug a SuperPET board into the CPU socket.
     --- If the SuperPET preference is not enabled, it behaves like a normal 6502.
@@ -452,8 +461,9 @@ begin
 
             pref_have_superpet    => pref_have_superpet,
             pref_use_6809         => pref_use_6809,
-	    cnt31 => cnt31
+            cnt31 => cnt31
         );
+end generate;
 
     pet2001hw_inst : entity work.pet2001hw
     port map (
@@ -622,6 +632,7 @@ begin
 ------------------------------------------
 
    drive_is_4040 <= osm_i(C_MENU_UNIT_8_4040);
+   drive_is_8050 <= osm_i(C_MENU_UNIT_8_8050);
    drive_is_8250 <= osm_i(C_MENU_UNIT_8_8250);
 
    -- We need some wires to cross clock domain for the drive.
@@ -686,7 +697,8 @@ begin
          bus_o_nrfd     => ieee488_d01_nrfd_o,
          bus_o_data     => ieee488_d01_data_o,
 
-         drv_type       => drive_is_4040, -- "1", -- 0=8250, 1=4040 FIXME "1" for just one drive!
+         drv_type       => drive_is_4040,         -- 0=8x50, 1=4040 FIXME "1" for just one drive!
+         drv_type_sides => drive_is_8250,         -- 0=1 side, 1=2 sides
 
          -- disk image status
          img_mounted    => iec_img_mounted,
