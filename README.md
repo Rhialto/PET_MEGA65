@@ -22,14 +22,18 @@ From time to time there is a pre-release, when there seems to be some useful add
 
 v0.00015
 --------
-We now have a PET 8296-GD!
+We now have a PET 8296-GD *and* a SuperPET! (not at the same time)
 
 - Add HRE graphics (324890-01) to the 8296 (so it is enabled if 8296 is enabled). HRE stands for High-Res Emulator; the "emulator" part means that the drawing is done in software, so quite slow compared to the HSG (High Speed Graphics, 324402-01). The HRE ROMs are included in the 8032b set: `SYS 9*4096` to initialize the BASIC extension. They are pretty compatible with the [HSG](https://mikenaberezny.com/hardware/pet-cbm/cbm-hsg-graphics-board/) software; the [HSG demos](http://www.cbmsteve.ca/hsg/) also run. This makes the MegaPET an 8296-GD.
 - Tweaked "HDMI: Zoom-in" a bit more so it (just) shows the whole HRE image.
 - Set the ascal filter when CRT emulation is off to bicubic. This seems to be the least bad of the options, but it still seems to lose pixels here and there.
+- Added 8050 as a floppy disk drive model option, for `.d80` floppy images. Do not put `.d82` images into this drive!
 - First phase of adding a SuperPET: an extra board that plugs into the 6502 socket and just passes through the 6502.
 - Second phase of SuperPET: adding the 64 KB memory expansion and the I/O registers which control it.
 - Third phase: add the 6702 dongle chip.
+- Fourth phase: add the 6809 cpu and its ROMs.
+- Next: Fifth phase: add the SuperOS/9 MMU from Toronto PET Users Group (TPUG). Unfortunately, Super-OS/9 doesn't boot. This may be a bug in the MMU, or equally well in an earlier phase.
+- The menu system doesn't show it, but you can't have SuperPET and 8x96 expansions at the same time. Internally in the core it is enforced that if you select both at the same time, you get neither. You could simply not plug in all those boards at the same time. Furthermore, the same 64 KB of RAM in the MegaPET is used for both.
 
 v0.00014
 --------
@@ -241,7 +245,7 @@ Adding to a 8032, this enables the optional expansion board with 64 KB of RAM, c
 
 This enables the memory configuration of the 8296. This maps an additional 32 KB of RAM at $8000-$FFFF "behind" the ROMs and I/O space. This brings the total amount of RAM to 128 KB. For details, see the [8296 Supplement](https://www.zimmers.net/anonftp/pub/cbm/pet/manuals/8296supplement/8296supplement.html) sections 2.3 though 3.
 
-If you select this option then normally you would also select the 8096 memory. In theory you could have an 8296 and remove the 8096 style extra 64 KB RAM chips, so it's a separate option. But in practice I estimate that nobody would do such a silly thing.
+If you select this option then normally you would also select the 8096 memory and its Control Register. In theory you could have an 8296 and remove the 8096 style extra 64 KB RAM chips (and the Control Register), so it's a separate option. But in practice I estimate that nobody would do such a silly thing.
 
 #### $9000 RAM, $A000 RAM
 
@@ -252,7 +256,7 @@ This makes it for example possible to LOAD ROM images into the EPROM socket addr
 
 Let the user port bits 0, 1, and 2 control `/RAM SEL A`, `/RAM SEL 9` and `/RAM ON` (see the Supplement section 2.4: JU3, JU4, JU5). This overrides the other 2 options.
 
-Since the memory mapping sometimes depends on bit 6 of the $FFF0 Control Register, it is recommended to enable the 8096 memory expansion as well when you use this option.
+Since the memory mapping sometimes depends on bit 6 (I/O Peek Through) of the $FFF0 Control Register, it is recommended to enable the 8096 memory expansion as well when you use this option.
 
 This offers yet another way to replace the ROMs by RAM and run with dynamically modified ROMs. Just copy addresses $B000-$FFFF (skipping $FFF0 and $E800-$E8FF) to themselves, which copies the ROMs into RAM. Set $FFF0 to $40 (I/O peek though). Then enable this option, write some values to the user port, and finally set the 3 user port bits to output.
 
@@ -267,7 +271,11 @@ The SuperPET has its own stype of memory expansion: RAM is mapped in blocks of 4
 #### Use 6502 / 6809 cpu
 
 The SuperPET has an extra cpu of type 6809 from Motorola. Only one can run at a time. Here you can choose which one.
-(There is also "program control" in the original hardware but this is not implemented. In fact, the whole 6809 is not implemented yet)
+(There is also "program control" in the original hardware but this is not implemented.
+
+The Super-OS/9 MMU from TPUG is built-in and always enabled if the 6809 is active. It is meant for running OS-9. as adapted by TPUG.
+
+There is [software and documentation](https://www.zimmers.net/anonftp/pub/cbm/pet/SuperPET/os9/index.html) at the Zimmers site. The [TPUG cd](https://archive.org/details/tpugusersgroupcd) contains lots of SuperPET software. 
 
 ### PET ROM: \<Load>
 
@@ -372,7 +380,7 @@ POSSIBLE FUTURE WORK
 --------------------
 - The method that QNice uses to copy data to and from the disk drive's internal track buffer should be made faster. Currently it can take more than 20 ms which caused time-outs in the FDC. This has a workaround but it slows down the drive.
 - Supply the disk unit with a track buffer for each drive, instead of a shared one.
-- Turbo mode, with 2x, 4x CPU speed. Probably won't speed up the disk unit.
+- Turbo mode, with 2x, 4x CPU speed. Probably won't speed up VIA timers and the disk unit. May also be tricky for the 6809.
 
 CREDITS
 -------
@@ -387,5 +395,8 @@ This project is based on, and would have been impossible without, the following 
 * The work-in-progress [CBM-II_MiSTer](https://github.com/eriks5/CBM-II_MiSTer) from which I first used the 6845 CRTC and the 4040 / 8250 dual disk drive. Big thanks to Erik Scheffers for his improvements.
 * The BBC micro implementation [BeebFpga](https://github.com/hoglet67/BeebFpga) from which I used the updates to the CRTC.
 * Steve Gray's [ColourPET](http://cbmsteve.ca/colourpet/index.html) and [Edit ROM](http://cbmsteve.ca/editrom/index.html) projects. 
+* The [VIA 6522](https://github.com/GideonZ/1541ultimate) from Gideon Zweijtzer, commit 9be4339e19996249f33efed0fcd340b3fac0b2b3 dated Sun Jul 20 12:55:22 2025 +0200 ([cbf5d288](https://github.com/GideonZ/1541ultimate/blob/cbf5d2884d65a37c051e2d0c9a7a0ae41b9e2fb5/fpga/1541/vhdl_source/via6522.vhd) dated Fri Jun 25 07:23:20 2021 +0200 for the VIA itself).
+* The [6809 cpu core](https://github.com/cavnex/mc6809) from Greg Miller, commit [17e94a6e](https://github.com/cavnex/mc6809/tree/17e94a6ef163be8b79a9b15b2e814847b6062f0f) dated Thu Nov 26 13:54:48 2020 -0800.
+* The [MMU for Super-OS/9](https://mikenaberezny.com/hardware/superpet/super-os9-mmu/) from the [Toronto PET Users Group](https://www.tpug.ca/) (TPUG)
 
 /* vim:lbr
